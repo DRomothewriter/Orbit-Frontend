@@ -1,0 +1,134 @@
+/* Contenedor principal de la página */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem; // 16px
+}
+
+
+.login-card {
+  width: 100%;
+  max-width: 64rem; 
+  padding: 1rem; 
+}
+
+.card-content {
+  display: grid;
+  grid-template-columns: 1fr; 
+  gap: 1rem; 
+
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+
+.form-column {
+  padding: 2rem; 
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 2rem; 
+  
+  h1 {
+    font-size: 2.25rem; 
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  p {
+    margin-top: 0.5rem; 
+    color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; 
+}
+
+.form-actions {
+  text-align: right;
+  margin-top: -0.5rem; 
+}
+
+.login-button {
+  padding: 1.5rem 0 !important; 
+  font-size: 1.125rem !important;
+  border-radius: 0.5rem !important; 
+}
+
+
+.social-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem; 
+}
+
+.social-button {
+  padding: 1.5rem 0 !important; 
+  border-radius: 0.5rem !important; 
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white !important;
+  transition: all 0.3s ease;
+  
+  i {
+    margin-right: 0.5rem;
+  }
+}
+
+.social-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.register-link {
+  text-align: center;
+  font-size: 0.875rem; // 14px
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 2rem; // 32px
+  
+  a {
+    font-weight: 600;
+  }
+}
+
+
+
+.welcome-column {
+  display: none; 
+
+
+  @media (min-width: 768px) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 1rem; 
+    padding: 2rem; 
+    text-align: center;
+  }
+
+  .welcome-logo {
+    width: 12.5rem; 
+    height: 12.5rem; 
+    border-radius: 50%;
+    margin-bottom: 1.5rem; 
+  }
+
+  h2 {
+    font-size: 1.5rem; 
+    font-weight: 700;
+  }
+
+  p {
+    margin-top: 0.5rem; 
+    color: rgba(255, 255, 255, 0.8);
+  }
+}
+

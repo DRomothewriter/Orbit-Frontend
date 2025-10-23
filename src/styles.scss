@@ -1,1 +1,131 @@
-/* You can add global styles to this file, and also import other style files */
+/* --- Importaciones de Angular Material --- */
+@use '@angular/material' as mat;
+@include mat.core();
+
+/* --- TEMA PERSONALIZADO DE MATERIAL --- */
+// (Aquí iría la definición de paletas si no usamos CSS puro)
+
+/* --- ESTILOS GLOBALES DE LA APP (Reemplazan a Tailwind) --- */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: #111827;
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+}
+
+body::before, body::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(150px);
+  z-index: -1;
+}
+
+body::before {
+  width: 400px;
+  height: 400px;
+  background: rgba(83, 52, 131, 0.3);
+  top: -100px;
+  left: -100px;
+}
+
+body::after {
+  width: 500px;
+  height: 500px;
+  background: rgba(15, 52, 96, 0.4);
+  bottom: -150px;
+  right: -150px;
+}
+
+/* --- CLASES DE ESTILO GLOBALES --- */
+
+/* Clase de Tarjeta de Cristal */
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* Clase de Botón de Acento */
+.accent-button {
+  background-color: #533483 !important;
+  color: #ffffff !important;
+  transition: all 0.3s ease;
+}
+
+.accent-button:hover {
+  background-color: #6f42c1 !important;
+}
+
+/* Enlace de acento (ej. ¿Olvidaste tu contraseña?) */
+.accent-link {
+  font-size: 0.875rem; /* 14px */
+  color: #a78bfa; /* indigo-400 */
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+.accent-link:hover {
+  text-decoration: underline;
+}
+
+/* Separador "o" */
+.divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem; /* 8px */
+  margin: 1.5rem 0; /* 24px */
+  color: rgba(255, 255, 255, 0.6);
+}
+.divider::before, .divider::after {
+  content: '';
+  height: 1px;
+  flex-grow: 1;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* --- ANULACIÓN DE ESTILOS DE ANGULAR MATERIAL --- */
+
+/* Estilo para mat-form-field (como .form-input) */
+.mat-mdc-form-field.mat-mdc-form-field {
+  width: 100%; // Asegura que ocupe todo el ancho
+  .mdc-notched-outline > * {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  .mdc-text-field--filled {
+    background-color: rgba(0, 0, 0, 0.2) !important;
+  }
+  
+  .mat-mdc-input-element {
+    color: #ffffff !important;
+  }
+
+  .mdc-floating-label {
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
+  
+  /* Al enfocar */
+  &.mat-focused {
+    .mdc-notched-outline > * {
+      border-color: #6f42c1 !important;
+    }
+    .mdc-text-field--filled {
+       background-color: rgba(0, 0, 0, 0.3) !important;
+    }
+    .mdc-floating-label {
+      color: #6f42c1 !important;
+    }
+  }
+
+  .mdc-line-ripple {
+    display: none;
+  }
+}
+
