@@ -1,0 +1,176 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #1f2937;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.close-button {
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.3s ease;
+}
+
+.close-button:hover {
+  color: #a78bfa;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  overflow-x: hidden; /* Elimina scroll horizontal */
+}
+
+.full-width {
+  width: 100%;
+}
+
+.contacts-list {
+  margin-top: 1.5rem;
+  max-height: 400px;
+  overflow-y: auto; /* Solo scroll vertical */
+  overflow-x: hidden; /* Elimina scroll horizontal */
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+  min-width: 0; /* Previene overflow horizontal */
+}
+
+.contact-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.75rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.contact-item:last-child {
+  border-bottom: none;
+}
+
+.contact-avatar {
+  position: relative;
+  margin-right: 0.75rem;
+  flex-shrink: 0; /* Evita que se reduzca demasiado */
+}
+
+.contact-avatar img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.status-indicator {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid #1f2937;
+  background-color: #6b7280;
+}
+
+.status-indicator.online {
+  background-color: #10b981;
+}
+
+.contact-name {
+  flex: 1;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Previene texto muy largo */
+  min-width: 0;
+}
+
+.select-button {
+  color: #a78bfa;
+  transition: all 0.3s ease;
+  flex-shrink: 0; /* Mantiene el tamaño del botón */
+}
+
+.select-button:hover {
+  color: #8b5cf6;
+  transform: scale(1.1);
+}
+
+/* Estilos para el campo de búsqueda */
+::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+::ng-deep .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
+  color: #a78bfa;
+}
+
+::ng-deep .mat-input-element {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+::ng-deep .mat-form-field-label {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+::ng-deep .mat-form-field.mat-focused .mat-form-field-label {
+  color: #a78bfa;
+}
+
+::ng-deep .mat-icon {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Personalización del scroll vertical */
+.contacts-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.contacts-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.contacts-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.contacts-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}

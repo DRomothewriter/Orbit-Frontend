@@ -1,0 +1,33 @@
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Nuevo Mensaje Directo</h3>
+      <button mat-icon-button class="close-button" (click)="closeModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="search-section">
+        <mat-form-field class="full-width">
+          <mat-label>Buscar contactos</mat-label>
+          <input matInput placeholder="Escribe para buscar...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="contacts-list">
+        <div class="contact-item" *ngFor="let contact of availableContacts">
+          <div class="contact-avatar">
+            <img [src]="contact.avatar" [alt]="contact.name">
+            <div class="status-indicator" [class.online]="contact.online"></div>
+          </div>
+          <span class="contact-name">{{ contact.name }}</span>
+          <button mat-icon-button class="select-button" (click)="selectContact(contact)">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

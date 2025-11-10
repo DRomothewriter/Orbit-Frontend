@@ -1,0 +1,51 @@
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Crear Nuevo Grupo</h3>
+      <button mat-icon-button class="close-button" (click)="closeModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="form-section">
+        <mat-form-field class="full-width">
+          <mat-label>Nombre del grupo</mat-label>
+          <input matInput placeholder="Ingresa el nombre del grupo...">
+        </mat-form-field>
+
+        <mat-form-field class="full-width">
+          <mat-label>Descripción</mat-label>
+          <textarea matInput placeholder="Describe el propósito del grupo..." rows="3"></textarea>
+        </mat-form-field>
+
+        <div class="members-section">
+          <h4>Agregar miembros</h4>
+          <mat-form-field class="full-width">
+            <mat-label>Buscar contactos</mat-label>
+            <input matInput placeholder="Escribe para buscar...">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          <div class="contacts-list">
+            <div class="contact-item" *ngFor="let contact of availableContacts">
+              <div class="contact-checkbox">
+                <mat-checkbox></mat-checkbox>
+              </div>
+              <div class="contact-avatar">
+                <img [src]="contact.avatar" [alt]="contact.name">
+                <div class="status-indicator" [class.online]="contact.online"></div>
+              </div>
+              <span class="contact-name">{{ contact.name }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button mat-button class="cancel-button" (click)="closeModal()">Cancelar</button>
+        <button mat-raised-button class="create-button" (click)="createGroup()">Crear Grupo</button>
+      </div>
+    </div>
+  </div>
+</div>

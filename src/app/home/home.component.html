@@ -1,3 +1,106 @@
-<app-communities-nav></app-communities-nav>
-<app-group-nav></app-group-nav>
-<router-outlet></router-outlet>
+<div class="home-container">
+  <!-- Navbar (azul) -->
+  <nav class="navbar glass-card">
+    <div class="navbar-brand">
+      <h1>Orbit</h1>
+    </div>
+    <div class="navbar-menu">
+      <button mat-icon-button class="nav-icon">
+        <mat-icon>notifications</mat-icon>
+      </button>
+      <button mat-icon-button class="nav-icon">
+        <mat-icon>settings</mat-icon>
+      </button>
+      <div class="user-profile">
+        <img src="https://placehold.co/40x40/533483/ffffff?text=U" alt="Usuario" class="profile-pic">
+      </div>
+    </div>
+  </nav>
+
+  <div class="home-content">
+    <!-- Sidebar izquierda - Grupos (amarillo) -->
+    <aside class="sidebar-left glass-card">
+      <div class="sidebar-header">
+        <h3>Grupos</h3>
+        <button mat-icon-button class="add-button" (click)="openGroupModal()">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+      <div class="groups-list">
+        <div class="group-item" *ngFor="let group of groups">
+          <div class="group-avatar">
+            <img [src]="group.avatar" [alt]="group.name">
+          </div>
+          <span class="group-name">{{ group.name }}</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Área central (gris) -->
+    <main class="main-content glass-card">
+      <div class="content-body">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+
+    <!-- Sidebar derecha - Mensajes directos (morado) y Calendario/Personas (rojo) -->
+    <aside class="sidebar-right">
+      <!-- Mensajes directos -->
+      <div class="direct-messages glass-card">
+        <div class="dm-header">
+          <h3>Mensajes Directos</h3>
+          <button mat-icon-button class="add-button" (click)="openDirectModal()">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+        <div class="dm-list">
+          <div class="dm-item" *ngFor="let contact of directMessages">
+            <div class="contact-avatar">
+              <img [src]="contact.avatar" [alt]="contact.name">
+              <div class="status-indicator" [class.online]="contact.online"></div>
+            </div>
+            <div class="contact-info">
+              <span class="contact-name">{{ contact.name }}</span>
+              <span class="last-message">{{ contact.lastMessage }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calendario y Personas en línea -->
+      <div class="calendar-online glass-card">
+        <div class="calendar-section">
+          <div class="calendar-header flex items-center justify-between">
+            <h3>Calendario</h3>
+            <button mat-icon-button class="view-button" (click)="openCalendar()">
+              <mat-icon>calendar_month</mat-icon>
+            </button>
+          </div>
+          <div class="calendar-preview">
+            <p>Próximo evento: Reunión de equipo</p>
+            <span>Hoy, 3:00 PM</span>
+          </div>
+        </div>
+        
+        <div class="online-section">
+          <h3>Personas en Línea</h3>
+          <div class="online-list">
+            <div class="online-user" *ngFor="let user of onlineUsers">
+              <div class="user-avatar">
+                <img [src]="user.avatar" [alt]="user.name">
+              </div>
+              <span class="user-name">{{ user.name }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Modal de Mensajes Directos -->
+  <app-direct *ngIf="showDirectModal" (modalClosed)="closeDirectModal()"></app-direct>
+  <!-- Modal de Crear Grupo -->
+  <app-group *ngIf="showGroupModal" (modalClosed)="closeGroupModal()"></app-group>
+</div>
+
+
