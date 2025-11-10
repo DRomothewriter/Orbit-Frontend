@@ -7,15 +7,15 @@ import { FriendsPanelComponent } from './home/friends-panel/friends-panel.compon
 import { AddFriendComponent } from './home/friends-panel/add-friend/add-friend.component';
 import { PendingComponent } from './home/friends-panel/pending/pending.component';
 import { FriendsListComponent } from './home/friends-panel/friends-list/friends-list.component';
+import { RegisterComponent } from './auth/register/register.component';
 
 export const routes: Routes = [
 
     { path: '', redirectTo: 'login', pathMatch: 'full' },
     { path: 'login', component:LoginComponent },
+    { path: 'register', component: RegisterComponent }, 
 
-    // Aquí añadiremos más rutas (register, forgot-password, chat, etc.)
-    // { path: 'register', ... },
-    // { path: 'forgot-password', ... }
+    
 
     { path: 'home', component: HomeComponent, children: [
         { path:'friends', component: FriendsPanelComponent, children:[

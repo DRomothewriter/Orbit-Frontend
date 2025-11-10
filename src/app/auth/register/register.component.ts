@@ -1,20 +1,20 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 // Importaciones de Angular Material
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'; 
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 // Importar el Servicio
 import { AuthService } from '../services/auth.service';
-import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-register',
   standalone: true,
   imports: [
     CommonModule,
@@ -26,10 +26,10 @@ import { CommonModule } from '@angular/common';
     MatIconModule,
     MatProgressSpinnerModule
   ],
-  templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  templateUrl: './register.component.html',
+  styleUrl: './register.component.scss'
 })
-export class LoginComponent {
+export class RegisterComponent {
 
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -37,29 +37,30 @@ export class LoginComponent {
   isLoading = false;
   errorMessage: string | null = null;
 
-  loginForm = new FormGroup({
-    email: new FormControl('admin@orbit.com', [Validators.required, Validators.email]),
-    password: new FormControl('password', [Validators.required, Validators.minLength(8)]),
+  registerForm = new FormGroup({
+    name: new FormControl('', [Validators.required]),
+    email: new FormControl('', [Validators.required, Validators.email]),
+    password: new FormControl('', [Validators.required, Validators.minLength(8)]),
   });
 
- 
   onSubmit() {
-    if (this.loginForm.invalid) {
-      return; // No hacer nada si el formulario es inválido
+    if (this.registerForm.invalid) {
+      return;
     }
 
     this.isLoading = true;
     this.errorMessage = null;
-    const { email, password } = this.loginForm.value;
+    const { name, email, password } = this.registerForm.value;
 
-    this.authService.login(email!, password!).subscribe({
+    this.authService.register(name!, email!, password!).subscribe({
       next: (success) => {
         this.isLoading = false;
-        this.router.navigate(['/home']); 
+        // Éxito, redirigir a /home
+        this.router.navigate(['/home']);
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.message || 'Ocurrió un error. Intente de nuevo.';
+        this.errorMessage = err.message || 'No se pudo completar el registro.';
       }
     });
   }
