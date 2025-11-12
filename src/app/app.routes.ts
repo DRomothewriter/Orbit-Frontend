@@ -7,11 +7,13 @@ import { FriendsPanelComponent } from './home/friends-panel/friends-panel.compon
 import { AddFriendComponent } from './home/friends-panel/add-friend/add-friend.component';
 import { PendingComponent } from './home/friends-panel/pending/pending.component';
 import { FriendsListComponent } from './home/friends-panel/friends-list/friends-list.component';
+import { SignupComponent } from './auth/signup/signup.component';
 
 export const routes: Routes = [
 
     { path: '', redirectTo: 'login', pathMatch: 'full' },
     { path: 'login', component:LoginComponent },
+    { path: 'signup', component: SignupComponent},
 
     // Aquí añadiremos más rutas (register, forgot-password, chat, etc.)
     // { path: 'register', ... },
@@ -20,8 +22,8 @@ export const routes: Routes = [
     { path: 'home', component: HomeComponent, children: [
         { path:'friends', component: FriendsPanelComponent, children:[
             {path:'', component: FriendsListComponent},
-            {path:'addFriend', component: AddFriendComponent},
-            {path:'Pending', component: PendingComponent},
+            {path:'add-friend', component: AddFriendComponent},
+            {path:'pending', component: PendingComponent},
         ]},
         { path: ':id', component: ChatComponent}
     ]},

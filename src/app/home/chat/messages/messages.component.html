@@ -1,1 +1,5 @@
-<p>messages works!</p>
+<ul>
+    @for(message of messages; track message._id){
+        <li>{{message.userId}}: {{message.text}}</li>
+    }
+</ul>

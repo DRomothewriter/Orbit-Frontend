@@ -1,1 +1,21 @@
-<p>add-friend works!</p>
+<div>
+    <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        placeholder="Buscar usuario..."
+        (keyup.enter)="onSearch()"
+    />
+    <button (click)="onSearch()">Buscar</button>
+</div>
+
+<ul>
+    @for(user of users; track user.username){
+        <li >
+            {{ user.username }} ({{ user.email }})
+            {{ user._id!}}
+            <button (click)="sendFriendRequest(user._id!)">Agregar</button>
+        </li>
+    } @empty {
+        <li>No users found</li>
+    }
+</ul>

@@ -2,8 +2,8 @@ import { List } from "./list";
 import { Message } from "./message";
 
 export interface Group {
-    id: string;
-    communityId: string,
+    _id?: string;
+    communityId?: string,
     topic: string,
     description?: string,
     lastMessage?: Message,

@@ -13,7 +13,7 @@ export class AuthService {
 
 
   signup(name: string, email: string, password: string): Observable<AuthResponse>{
-    return this.httpClient.post<AuthResponse>(`${environment.apiUrl}${this.endpnt}signup`, {name, email, password})
+    return this.httpClient.post<AuthResponse>(`${environment.apiUrl}${this.endpnt}signup`, {name, email, password});
   };
 
   login(email: string, password: string): Observable<AuthResponse>{

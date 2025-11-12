@@ -1,22 +1,26 @@
 import { Injectable } from '@angular/core';
-import { User } from '../types/user';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+
+import { User } from '../types/user';
 import { environment } from '../../../environments/environment';
 import { TokenService } from './token.service';
 import { Friendship } from '../types/friendship';
 import { AcceptfrResponse } from '../types/acceptfr-response';
+
+import { Observable, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
   private endpnt: string = 'users/';
+  private user: User | null = null;
 
   constructor(
     private httpClient: HttpClient,
     private tokenService: TokenService
-  ) {}
+  ) {
+  }
 
   getCleanUser(): User {
     return {
@@ -24,18 +28,44 @@ export class UserService {
       email: '',
     };
   }
+  setUser(user: User){
+    this.user = user;
+    return;
+  };
+  clearUser() {
+    this.user = null;
+  }
 
   getMyUser(): Observable<User> {
+    if(this.user?._id) return new Observable<User>(observer => {
+      observer.next(this.user as User);
+      observer.complete();
+    }) 
     const token = this.tokenService.getToken();
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`,
     });
-    return this.httpClient.get<User>(`${environment.apiUrl}${this.endpnt}`, {
+    return this.httpClient.get<User>(`${environment.apiUrl}${this.endpnt}my-user`, {
       headers,
+    })
+    .pipe(
+      tap(user => this.user = user)
+    );
+    //Para guardarlo en user. Es como un cahceo
+  };
+
+  getAllUsers(): Observable<User[]> { 
+    const token = this.tokenService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+    return this.httpClient.get<User[]>(`${environment.apiUrl}${this.endpnt}`, {
+      headers
     });
   };
 
   getRequestsReceived(): Observable<Friendship[]> {
+    console.log(this.user)
     const token = this.tokenService.getToken();
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`,
@@ -43,7 +73,16 @@ export class UserService {
     return this.httpClient.get<Friendship[]>(`${environment.apiUrl}${this.endpnt}received-requests`, {headers});
   };
   
+  searchUsers(searchQuery: string): Observable<User[]>{
+    const token = this.tokenService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+    return this.httpClient.get<User[]>(`${environment.apiUrl}${this.endpnt}search?username=${searchQuery}`, {headers});
+  }
   sendFriendRequest(friendId: string): Observable<Friendship> {
+    console.log(friendId);
+    console.log(this.user);
     const token = this.tokenService.getToken();
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`,
@@ -60,7 +99,7 @@ export class UserService {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`,
     });
-    return this.httpClient.put<AcceptfrResponse>(`${environment.apiUrl}${this.endpnt}accept-friend`, { headers, body: {friendshipId}});
+    return this.httpClient.put<AcceptfrResponse>(`${environment.apiUrl}${this.endpnt}accept-friend`, {friendshipId}, {headers});
   };
   
   getMyFriends(): Observable<Friendship[]> {

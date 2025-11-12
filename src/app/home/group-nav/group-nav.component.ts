@@ -1,5 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { HeaderComponent } from './header/header.component';
+import { Group } from '../../shared/types/group';
+import { GroupService } from '../../shared/services/group.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-group-nav',
@@ -7,6 +10,18 @@ import { HeaderComponent } from './header/header.component';
   templateUrl: './group-nav.component.html',
   styleUrl: './group-nav.component.scss'
 })
-export class GroupNavComponent {
+export class GroupNavComponent implements OnInit {
+  groups: Group[] = [];
+  constructor(private groupService: GroupService, private router: Router){}
+  ngOnInit(): void {
+      this.groupService.getMyGroups().subscribe({
+        next:(groups) => {
+          this.groups = groups;
+        }
+      });
+  };
 
+  selectGroup(groupId: string){
+    this.router.navigateByUrl(`/home/${groupId}`);
+  };
 }

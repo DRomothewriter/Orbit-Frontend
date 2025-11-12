@@ -1,1 +1,12 @@
-<p>input works!</p>
+<div class="input-container">
+    <form (ngSubmit)="handleSubmit()">
+        <input 
+        type="text" 
+        [(ngModel)]="message" 
+        name="message"
+        #messageInput
+        placeholder="Escribe un mensaje..."
+        />
+        <button type="submit" [disabled]="!message.trim()">Enviar</button>
+    </form>
+</div>
