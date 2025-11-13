@@ -2,7 +2,6 @@
   <div class="login-card glass-card">
     <div class="card-content">
       
-      <!-- Columna del formulario -->
       <div class="form-column">
         <div class="form-header">
           <h1>Orbit</h1>
@@ -13,7 +12,6 @@
           <mat-form-field appearance="outline">
             <mat-label>Correo electrónico</mat-label>
             <input matInput type="email" placeholder="usuario@ejemplo.com" [(ngModel)]="email" name="email">
-
           </mat-form-field>
 
           <mat-form-field appearance="outline">
@@ -22,47 +20,30 @@
           </mat-form-field>
 
           <div class="form-actions">
-            <!-- 
-              Ruta deshabilitada por ahora, puede crear el componente 'forgot-password' luego.
-              <a routerLink="/auth/forgot-password" class="accent-link">¿Olvidaste tu contraseña?</a> 
-            -->
-            <span class="accent-link" style="opacity: 0.5;">¿Olvidaste tu contraseña?</span>
-          </div>
-          
-          <!-- Mensaje de Error -->
-          <div *ngIf="errorMessage" class="error-message">
-            {{ errorMessage }}
+            <a routerLink="/auth/forgot-password" class="accent-link">¿Olvidaste tu contraseña?</a>
           </div>
 
-          <!-- Botón de Submit con estado de carga -->
-          <button mat-raised-button class="accent-button login-button" type="submit" [disabled]="loginForm.invalid || isLoading">
-            <span *ngIf="!isLoading">Iniciar Sesión</span>
-            <mat-spinner *ngIf="isLoading" [diameter]="30"></mat-spinner>
+          <button mat-raised-button class="accent-button login-button">
+            Iniciar Sesión
           </button>
         </form>
 
         <div class="divider">o</div>
 
         <div class="social-buttons">
-          <button mat-stroked-button class="social-button" [disabled]="isLoading">
+          <button mat-stroked-button class="social-button">
             <i class="fab fa-google"></i> Google
           </button>
-          <button mat-stroked-button class="social-button" [disabled]="isLoading">
-            <i class="fab fa-microsoft"></i> Microsoft
-          </button>
+          
         </div>
 
         <p class="register-link">
-          ¿No tienes una cuenta? <a routerLink="/register" class="accent-link">Regístrate aquí</a>
+          ¿No tienes una cuenta? <a routerLink="/auth/register" class="accent-link">Regístrate aquí</a>
         </p>
       </div>
 
-      <!-- Columna de bienvenida (MODIFICADA) -->
       <div class="welcome-column">
-      
-        
-        <img src="https://placehold.co/150x150/111827/533483?text=Orbit&font=poppins" alt="Orbit Logo" class="welcome-logo">
-        
+        <img src="https://placehold.co/200x200/111827/533483?text=Orbit&font=poppins" alt="Orbit Logo" class="welcome-logo">
         <h2>Conecta y Colabora sin Límites</h2>
         <p>La plataforma todo-en-uno para comunicación de equipos, gestión de proyectos y productividad.</p>
       </div>
@@ -70,4 +51,5 @@
     </div>
   </div>
 </div>
+
 
