@@ -1,5 +1,14 @@
-<ul>
+
+
+<ul #messagesList class="messages-list">
     @for(message of messages; track message._id){
-        <li>{{message.userId}}: {{message.text}}</li>
+        <li class="message-card" [class.my-message]="message.username === currentUser">
+            <div class="message-header">
+                <span class="user">{{message.username}}</span>
+            </div>
+            <div class="message-text">
+                {{message.text}}
+            </div>
+        </li>
     }
 </ul>

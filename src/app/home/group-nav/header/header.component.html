@@ -1,5 +1,12 @@
-<button (click)="setGroupModal(true)">Create group modal</button>
 
+<div class="sidebar-header">
+    <h3>Grupos</h3>
+    <button mat-icon-button class="add-button" (click)="openCreateGroup()">
+        <mat-icon>add</mat-icon>
+    </button>
+</div>
+<!-- 
+<button (click)="setGroupModal(true)">Create group modal</button>
 @if(groupModal){
     <div>
         <label for="topic">Nombre del grupo:</label>
@@ -28,4 +35,5 @@
 
     <button (click)="setGroupModal(false)">Cancel</button>
     <button (click)="handleCreateGroup()">Create</button>
-}
+} -->
+

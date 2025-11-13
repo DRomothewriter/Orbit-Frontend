@@ -11,5 +11,5 @@ import { MessagesComponent } from './messages/messages.component';
   styleUrl: './chat.component.scss'
 })
 export class ChatComponent {
-
+  openInfo = false;
 }

@@ -29,6 +29,7 @@ export class SocketService {
         this.groupService.getMyGroups().subscribe({
 
           next: (myGroups: Group[]) => {
+            
           const groupIds = myGroups.map(g => g._id);
           this.socket = io(environment.apiUrl, {
             auth: {

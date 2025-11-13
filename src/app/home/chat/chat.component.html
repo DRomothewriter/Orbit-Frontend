@@ -1,5 +1,15 @@
-<app-header></app-header>
-<app-messages></app-messages>
-<app-input></app-input>
-<app-info></app-info>
+<header class="header-chat">
+    <app-header></app-header>
+</header>
+<section class="messages-chat">
+    <app-messages></app-messages>
+</section>
+<footer class="input-chat">
+    <app-input></app-input>
+</footer>
 
+@if(openInfo){
+    <aside class="aside-info">
+        <app-info></app-info>
+    </aside>
+}

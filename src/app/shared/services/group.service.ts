@@ -12,26 +12,18 @@ import { DeleteGroupResponse } from '../types/delete-group-response';
 })
 export class GroupService {
   private endpnt: string = 'groups/';
-  private selectedGroupId: string = '';
   private groupTopic: string = '';
   constructor(private httpClient: HttpClient, private tokenService: TokenService) {}
 
 
   getGroupSummary(): any { //Va a retornar un objeto específico. Tal vez Id, topic, y groupMembers
     const groupSummary = {
-      selectedGroupId: this.selectedGroupId,
-      groupTopic: this.groupTopic
+      groupTopic: this.groupTopic,
+      //groupImgUrl
     };
     return groupSummary;
   }
 
-  getSelectedGroup(): string {
-    return this.selectedGroupId;
-  };
-
-  setSelectedGroup(groupId:string): void{
-    this.selectedGroupId = groupId;
-  };
 
   getMyGroups(): Observable<Group[]> {
     const token = this.tokenService.getToken();

@@ -8,6 +8,7 @@ import { AddFriendComponent } from './home/friends-panel/add-friend/add-friend.c
 import { PendingComponent } from './home/friends-panel/pending/pending.component';
 import { FriendsListComponent } from './home/friends-panel/friends-list/friends-list.component';
 import { SignupComponent } from './auth/signup/signup.component';
+import { authGuard } from './shared/guards/auth.guard';
 
 export const routes: Routes = [
 
@@ -19,7 +20,7 @@ export const routes: Routes = [
     // { path: 'register', ... },
     // { path: 'forgot-password', ... }
 
-    { path: 'home', component: HomeComponent, children: [
+    { path: 'home', component: HomeComponent, canActivate:[authGuard], children: [
         { path:'friends', component: FriendsPanelComponent, children:[
             {path:'', component: FriendsListComponent},
             {path:'add-friend', component: AddFriendComponent},

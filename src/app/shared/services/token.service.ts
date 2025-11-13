@@ -6,21 +6,21 @@ import { Injectable } from '@angular/core';
 export class TokenService {
 
   logout(): void{
-    localStorage.setItem('token', '');
+    sessionStorage.setItem('token', '');
     return;
   }
 
   hasToken(): boolean{
-    return !!localStorage.getItem('token');
+    return !!sessionStorage.getItem('token');
   }
 
   setToken(token: string): void{
-    localStorage.setItem('token', token);
+    sessionStorage.setItem('token', token);
     return;
   }
 
   getToken():string{
-    const token = localStorage.getItem('token') || '';
+    const token = sessionStorage.getItem('token') || '';
     return token;
   }
 }

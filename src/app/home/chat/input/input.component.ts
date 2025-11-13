@@ -28,7 +28,11 @@ export class InputComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.groupId = this.route.snapshot.paramMap.get('id')!;
+    this.route.paramMap.subscribe({
+      next: (params)=> {
+        this.groupId = params.get('id')!;
+      }
+    });
     this.userService.getMyUser().subscribe({
       next: (user) => {
         this.user = user;
@@ -43,6 +47,7 @@ export class InputComponent implements OnInit {
         const newMessage: Message = {
           //  campos necesarios según Message
           userId: user._id!,
+          username: user.username,
           groupId: this.groupId,
           text: this.message,
           type: MessageType.TEXT, //Por ahora no cambia el type

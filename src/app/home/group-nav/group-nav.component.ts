@@ -12,6 +12,10 @@ import { Router } from '@angular/router';
 })
 export class GroupNavComponent implements OnInit {
   groups: Group[] = [];
+
+  groupAvatarDummy = 'https://placehold.co/40x40/533483/ffffff?text=ED'
+
+
   constructor(private groupService: GroupService, private router: Router){}
   ngOnInit(): void {
       this.groupService.getMyGroups().subscribe({

@@ -1,0 +1,223 @@
+<div class="h-full flex items-center justify-center p-4">
+    <div class="glass-card w-full max-w-7xl h-[80vh] p-6 flex gap-6 relative">
+        <button
+            class="absolute top-6 right-6 text-gray-400 hover:text-white"
+            (click)="closeCalendar()"
+        >
+            <i class="fa fa-times text-2xl"></i>
+        </button>
+
+        <!-- Calendario Principal -->
+        <div class="w-full md:w-2/3 flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-4">
+                    <button
+                        (click)="prevMonth()"
+                        class="text-gray-400 hover:text-white"
+                    >
+                        <i class="fa fa-chevron-left"></i>
+                    </button>
+                    <h2 class="text-2xl font-bold w-48 text-center">
+                        {{ monthYear }}
+                    </h2>
+                    <button
+                        (click)="nextMonth()"
+                        class="text-gray-400 hover:text-white"
+                    >
+                        <i class="fa fa-chevron-right"></i>
+                    </button>
+                    <button
+                        (click)="goToToday()"
+                        class="bg-white/10 text-white py-1 px-4 rounded-lg hover:bg-white/20"
+                    >
+                        Hoy
+                    </button>
+                </div>
+                <button
+                    (click)="openCreateEventModal()"
+                    class="accent-button py-2 px-4 rounded-lg flex items-center gap-2"
+                >
+                    <i class="fa fa-plus"></i> Crear Evento
+                </button>
+            </div>
+
+            <div
+                class="grid grid-cols-7 gap-px flex-1 bg-white/10 rounded-lg overflow-hidden"
+            >
+                <!-- Días de la semana -->
+                <div
+                    *ngFor="let day of weekDays"
+                    class="text-center font-bold p-2 text-gray-300"
+                >
+                    {{ day }}
+                </div>
+
+                <!-- Días del mes -->
+                <div
+                    *ngFor="let day of calendarDays"
+                    [class]="getDayClasses(day)"
+                    (click)="!day.isEmpty && selectDate(day.date)"
+                >
+                    <div
+                        *ngIf="!day.isEmpty"
+                        class="flex justify-between items-center"
+                    >
+                        <span [class]="getDayNumberClasses(day)">{{
+                            day.day
+                        }}</span>
+                        <div
+                            *ngIf="day.hasEvents"
+                            class="w-2 h-2 bg-indigo-400 rounded-full"
+                        ></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de Agenda Lateral -->
+        <div class="w-1/3 bg-white/5 rounded-2xl p-4 flex flex-col">
+            <h3 class="text-lg font-bold mb-4">{{ agendaDate }}</h3>
+            <div class="space-y-3 overflow-y-auto">
+                <div
+                    *ngFor="let event of agendaEvents"
+                    (click)="openViewEventModal(event)"
+                    class="p-3 rounded-lg border-l-4 bg-white/5 cursor-pointer hover:bg-white/10"
+                    [class]="'border-' + event.color + '-400'"
+                >
+                    <p class="font-semibold">{{ event.title }}</p>
+                    <p class="text-sm text-gray-400">
+                        {{ event.date | date : "HH:mm" }}
+                    </p>
+                </div>
+                <p
+                    *ngIf="agendaEvents.length === 0"
+                    class="text-gray-400 text-center mt-8"
+                >
+                    No hay eventos para este día.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Crear Evento -->
+<div
+    *ngIf="showCreateEventModal"
+    class="fixed inset-0 modal-backdrop flex items-center justify-center"
+>
+    <div class="glass-modal w-full max-w-lg p-8 space-y-4">
+        <div class="flex justify-between items-center">
+            <h2 class="text-2xl font-bold">Crear Nuevo Evento</h2>
+            <button
+                (click)="closeCreateEventModal()"
+                class="text-gray-400 hover:text-white"
+            >
+                <i class="fa fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <form (ngSubmit)="createEvent()" class="space-y-4">
+            <input
+                [(ngModel)]="eventForm.title"
+                name="title"
+                type="text"
+                placeholder="Título del evento"
+                class="form-input w-full p-3 rounded-lg text-white"
+                required
+            />
+
+            <div class="grid grid-cols-2 gap-4">
+                <input
+                    [(ngModel)]="eventForm.date"
+                    name="date"
+                    type="date"
+                    class="form-input w-full p-3 rounded-lg text-gray-400"
+                    required
+                />
+                <input
+                    [(ngModel)]="eventForm.time"
+                    name="time"
+                    type="time"
+                    class="form-input w-full p-3 rounded-lg text-gray-400"
+                />
+            </div>
+
+            <input
+                [(ngModel)]="eventForm.participants"
+                name="participants"
+                type="text"
+                placeholder="Añadir participantes (email)"
+                class="form-input w-full p-3 rounded-lg text-white"
+            />
+
+            <textarea
+                [(ngModel)]="eventForm.description"
+                name="description"
+                placeholder="Descripción"
+                rows="3"
+                class="form-input w-full p-3 rounded-lg text-white"
+            ></textarea>
+
+            <div class="flex justify-end gap-4 pt-2">
+                <button
+                    type="button"
+                    (click)="closeCreateEventModal()"
+                    class="bg-white/10 py-2 px-6 rounded-lg"
+                >
+                    Cancelar
+                </button>
+                <button
+                    type="submit"
+                    class="accent-button py-2 px-6 rounded-lg"
+                >
+                    Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Ver Evento -->
+<div
+    *ngIf="showViewEventModal && selectedEvent"
+    class="fixed inset-0 modal-backdrop flex items-center justify-center"
+>
+    <div class="glass-modal w-full max-w-lg p-8 space-y-4">
+        <div class="flex justify-between items-center">
+            <h2 class="text-2xl font-bold">{{ selectedEvent.title }}</h2>
+            <button
+                (click)="closeViewEventModal()"
+                class="text-gray-400 hover:text-white"
+            >
+                <i class="fa fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <div>
+            <p class="text-indigo-300">
+                <i class="fa fa-calendar-alt mr-2"></i>
+                {{ selectedEvent.date | date : "fullDate" }} a las
+                {{ selectedEvent.date | date : "HH:mm" }}
+            </p>
+            <p class="text-gray-400 mt-4">
+                <i class="fa fa-align-left mr-2"></i>
+                {{ selectedEvent.description }}
+            </p>
+            <p class="font-bold mt-4 mb-2">Participantes</p>
+            <div class="flex flex-wrap gap-2">
+                <span
+                    *ngFor="let participant of selectedEvent.participants"
+                    class="bg-white/10 text-xs font-semibold px-2.5 py-0.5 rounded-full"
+                >
+                    {{ participant }}
+                </span>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-4 pt-2">
+            <button type="button" class="accent-button py-2 px-6 rounded-lg">
+                Unirse a la llamada
+            </button>
+        </div>
+    </div>
+</div>
