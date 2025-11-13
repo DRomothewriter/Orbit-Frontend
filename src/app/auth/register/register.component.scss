@@ -1,4 +1,15 @@
-/* === CONTENEDOR PRINCIPAL === */
+/* SCSS ACTUALIZADO:
+  - Este archivo es ahora casi un espejo del 'login.component.scss'.
+  - Se usan las clases 'login-container' y 'login-card' directamente.
+  - Se añade 'position: relative' a 'form-column' para el botón de regresar.
+  - Se añaden estilos para '.back-button'.
+  - Se ajusta el 'margin-top' de 'form-header' para dejar espacio al botón.
+  - Se copia el estilo de 'welcome-column' (incluyendo el @media para ocultarlo).
+  - Todos los demás estilos (divider, social-buttons, error-message, etc.) 
+    se copian del SCSS de login para consistencia.
+*/
+
+/* === CONTENEDOR PRINCIPAL (Estilo Login) === */
 .login-container {
   position: relative;
   min-height: 100dvh; /* Altura dinámica correcta incluso en móviles */
@@ -7,26 +18,22 @@
   justify-content: center;
   padding: 2rem 1rem;
   box-sizing: border-box;
-
-  /* 🔥 Solo este contenedor puede hacer scroll */
   overflow-y: auto;
   overflow-x: hidden;
 }
 
-/* === TARJETA DE LOGIN === */
+/* === TARJETA (Estilo Login) === */
 .login-card {
   width: 100%;
-  max-width: 60rem;
+  max-width: 60rem; /* Ancho del login */
   background: rgba(17, 24, 39, 0.85);
   border-radius: 1.5rem;
   backdrop-filter: blur(10px);
   box-sizing: border-box;
-
-  /* Previene que la tarjeta cause scroll innecesario */
   overflow: hidden;
 }
 
-/* === CONTENIDO === */
+/* === CONTENIDO (Grid de 2 columnas) === */
 .card-content {
   display: grid;
   grid-template-columns: 1fr;
@@ -38,6 +45,7 @@
 
 /* === COLUMNA DE FORMULARIO === */
 .form-column {
+  position: relative; /* Para posicionar el botón de regreso */
   padding: 2rem;
   display: flex;
   flex-direction: column;
@@ -49,10 +57,34 @@
   }
 }
 
+/* === BOTÓN DE REGRESAR === */
+.back-button {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  color: #b0b8c4 !important;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: #ffffff !important;
+  }
+
+  @media (max-width: 480px) {
+    top: 1.25rem;
+    left: 1.25rem;
+  }
+}
+
 /* === CABECERA DEL FORMULARIO === */
 .form-header {
   text-align: center;
   margin-bottom: 1.5rem;
+  margin-top: 2rem; /* Espacio para el botón de regreso */
+  
+  @media (max-width: 480px) {
+     margin-top: 2.5rem;
+  }
+
 
   h1 {
     font-size: 2rem;
@@ -77,16 +109,10 @@
 }
 
 /* === FORMULARIO === */
-.login-form {
+.register-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-}
-
-.form-actions {
-  text-align: right;
-  margin-top: -0.5rem;
-  margin-bottom: 0.5rem;
+  gap: 0.75rem; /* Un poco menos de espacio que el login */
 }
 
 .accent-link {
@@ -101,8 +127,8 @@
   }
 }
 
-/* === BOTÓN DE LOGIN === */
-.login-button {
+/* === BOTÓN DE REGISTRO (estilo login) === */
+.register-button {
   padding: 0.75rem;
   font-size: 1.125rem;
   font-weight: 600;
@@ -110,6 +136,7 @@
   align-items: center;
   justify-content: center;
   min-height: 50px;
+  margin-top: 0.5rem;
 }
 
 /* === DIVISOR === */
@@ -169,15 +196,15 @@
   }
 }
 
-/* === LINK DE REGISTRO === */
-.register-link {
+/* === LINK DE REGISTRO/LOGIN === */
+.register-link { // Esta clase ahora estiliza el link "Inicia sesión"
   text-align: center;
   font-size: 0.875rem;
   color: #b0b8c4;
   margin-top: 1.5rem;
 }
 
-/* === COLUMNA DE BIENVENIDA === */
+/* === COLUMNA DE BIENVENIDA (copiada de login) === */
 .welcome-column {
   display: flex;
   flex-direction: column;
@@ -190,26 +217,6 @@
   border-top-right-radius: 1.5rem;
   border-bottom-right-radius: 1.5rem;
   box-sizing: border-box;
-
-  .welcome-icon-container {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 50%;
-    width: 70px;
-    height: 70px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1.5rem auto;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-
-    mat-icon {
-      font-size: 36px;
-      height: 36px;
-      width: 36px;
-      line-height: 36px;
-      color: #b0b8c4;
-    }
-  }
 
   .welcome-logo {
     width: 100px;
@@ -244,7 +251,8 @@
     }
   }
 
-  @media (max-width: 768px) {
+  /* Oculta la columna en móviles */
+  @media (max-width: 767px) { // 768px es el breakpoint del grid
     display: none;
   }
 }
@@ -258,8 +266,8 @@
   padding: 0.75rem 1rem;
   text-align: center;
   font-weight: 500;
-  margin-top: -0.5rem;
-  margin-bottom: 0.75rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
 }
 
 /* === MEDIA QUERIES ADICIONALES === */
@@ -274,7 +282,7 @@
 }
 
 @media (max-width: 400px) {
-  .login-button {
+  .register-button {
     font-size: 1rem;
     padding: 0.6rem;
   }

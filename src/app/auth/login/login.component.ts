@@ -17,6 +17,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-login',
   standalone: true,
   imports: [
+    CommonModule,
     RouterLink,
     MatFormFieldModule,
     MatInputModule,
