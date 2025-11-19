@@ -17,14 +17,13 @@ body {
   background-color: #111827;
   color: #ffffff;
   position: relative;
-  overflow-y: auto; /* ¡PERMITE EL SCROLL! */
-  overflow-x: hidden; /* Evita scroll horizontal */
+  overflow: hidden; /* Evita scroll*/
   box-sizing: border-box; /* Asegura que el padding no desborde */
 }
 
 body::before, body::after {
   content: '';
-  position: absolute;
+  position: fixed;
   border-radius: 50%;
   filter: blur(150px);
   z-index: -1;
@@ -34,17 +33,17 @@ body::before, body::after {
 body::before {
   width: 400px;
   height: 400px;
-  background: rgba(83, 52, 131, 0.3);
-  top: -100px;
-  left: -100px;
+  background: rgba(79, 140, 255, 0.3);
+  top: 40px;
+  left: 40px;
 }
 
 body::after {
   width: 500px;
   height: 500px;
-  background: rgba(15, 52, 96, 0.4);
-  bottom: -150px;
-  right: -150px;
+  background: rgba(83, 52, 131, 0.4);
+  bottom: 40px;
+  right: 40px;
 }
 
 /* --- CLASES DE ESTILO GLOBALES --- */

@@ -102,6 +102,7 @@ export class UserService {
     return this.httpClient.put<AcceptfrResponse>(`${environment.apiUrl}${this.endpnt}accept-friend`, {friendshipId}, {headers});
   };
   
+  //Falta hacer que el backend regrese también el username del friend
   getMyFriends(): Observable<Friendship[]> {
     const token = this.tokenService.getToken();
     const headers = new HttpHeaders({

@@ -1,1 +1,40 @@
-<p>friends-list works!</p>
+<section>
+    @for( friend of friends; track friend.name){
+    <article>
+        <div class="friend-avatar">
+            <img
+                [src]="
+                    friend.avatarUrl ||
+                    'https://placehold.co/40x40/111827/533483?text=F'
+                "
+                alt="Avatar"
+            />
+            <span
+                class="status-indicator"
+                [ngClass]="{ online: friend.online }"
+            ></span>
+        </div>
+        <div class="friend-info">
+            <span class="friend-name">{{ friend.name }}</span>
+            <span
+                class="friend-status"
+                [ngClass]="{ online: friend.online, offline: !friend.online }"
+            >
+                {{ friend.online ? "Online" : "Offline" }}
+            </span>
+        </div>
+        <div class="friend-actions">
+            <button class="chat-button" mat-icon-button aria-label="Chat">
+                <mat-icon>chat</mat-icon>
+            </button>
+            <button class="remove-button" mat-icon-button aria-label="Eliminar">
+                <mat-icon>person_remove</mat-icon>
+            </button>
+        </div>
+    </article>
+    } @empty {
+    <div class="no-friends" *ngIf="friends.length === 0">
+        <p>No tienes amigos aún.</p>
+    </div>
+    }
+</section>
