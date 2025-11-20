@@ -11,10 +11,10 @@ import { FormsModule } from '@angular/forms';
 import { GroupService } from '../../../services/group.service';
 import { UserService } from '../../../services/user.service';
 import { Group } from '../../../types/group';
-import { Friendship } from '../../../types/friendship';
 import { ModalsService } from '../../../services/modals.service';
+import { GetFriendsResponse } from '../../../types/get-friends-response';
 
-interface FriendshipSelectable extends Friendship {
+interface FriendshipSelectable extends GetFriendsResponse {
   selected?: boolean;
 }
 
@@ -36,7 +36,7 @@ interface FriendshipSelectable extends Friendship {
 export class CreateGroupModalComponent implements OnInit {
   topic: string = '';
   selectedFriends: Set<string> = new Set();
-  myFriends: FriendshipSelectable[] = [];
+  friends: FriendshipSelectable[] = [];
 
   friendAvatarImg = 'https://placehold.co/40x40/533483/ffffff?text=A';
 
@@ -47,11 +47,11 @@ export class CreateGroupModalComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.userService.getMyFriends().subscribe({
-      next: (friendships) => {
-        this.myFriends = friendships.map((f) => ({ ...f, selected: false }));
-      },
-    });
+      this.userService.getMyFriends().subscribe({
+        next:(friendships: GetFriendsResponse[])=> {
+          this.friends = friendships.map((f) => ({ ...f, selected: false }));
+        }
+      })
   }
   closeModal(): void {
     //service para cerrar el modal

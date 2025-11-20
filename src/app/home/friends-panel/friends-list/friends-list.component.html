@@ -1,27 +1,17 @@
 <section>
-    @for( friend of friends; track friend.name){
+    @for(friend of friends; track friend._id){
     <article>
         <div class="friend-avatar">
             <img
                 [src]="
-                    friend.avatarUrl ||
+                    
                     'https://placehold.co/40x40/111827/533483?text=F'
                 "
                 alt="Avatar"
             />
-            <span
-                class="status-indicator"
-                [ngClass]="{ online: friend.online }"
-            ></span>
         </div>
         <div class="friend-info">
-            <span class="friend-name">{{ friend.name }}</span>
-            <span
-                class="friend-status"
-                [ngClass]="{ online: friend.online, offline: !friend.online }"
-            >
-                {{ friend.online ? "Online" : "Offline" }}
-            </span>
+            <span class="friend-name">{{ friend.username }}</span>
         </div>
         <div class="friend-actions">
             <button class="chat-button" mat-icon-button aria-label="Chat">
@@ -33,8 +23,11 @@
         </div>
     </article>
     } @empty {
-    <div class="no-friends" *ngIf="friends.length === 0">
-        <p>No tienes amigos aún.</p>
-    </div>
+        @if(friends.length === 0){
+            <div class="no-friends"
+            >
+                <p>No tienes amigos aún.</p>
+            </div>
+        }
     }
 </section>

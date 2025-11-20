@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
 // Importaciones de Angular Material
@@ -12,6 +12,13 @@ import { AuthResponse } from '../../shared/types/auth-response';
 import { UserService } from '../../shared/services/user.service';
 import { TokenService } from '../../shared/services/token.service';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import {
+  SocialAuthService,
+  SocialUser,
+  GoogleSigninButtonModule,
+} from '@abacritt/angularx-social-login';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -24,34 +31,61 @@ import { CommonModule } from '@angular/common';
     MatButtonModule,
     MatIconModule,
     FormsModule,
-    CommonModule
+    CommonModule,
+    GoogleSigninButtonModule,
   ],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  styleUrl: './login.component.scss',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   email: string = '';
   password: string = '';
 
-  constructor(private authService: AuthService, private router: Router, private userService: UserService, private tokenService: TokenService) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private userService: UserService,
+    private tokenService: TokenService,
+    private httpClient: HttpClient,
+    private googleAuthService: SocialAuthService
+  ) {}
+
+  ngOnInit(): void {
+    this.googleAuthService.authState.subscribe((user: SocialUser) => {
+      if (user) {
+        this.onGoogleSignIn(user);
+      }
+    });
+  }
 
   onLogin() {
     console.log(this.email, this.password);
-    console.log("here")
-    this.authService.login(this.email, this.password)
+    this.authService.login(this.email, this.password).subscribe({
+      next: (res: AuthResponse) => {
+        this.router.navigateByUrl('/home');
+        this.userService.setUser(res.user);
+        this.tokenService.setToken(res.token);
+      },
+      error: (err) => {
+        console.error('Error en login', err);
+      },
+    });
+  }
+
+  onGoogleSignIn(user: SocialUser): void {
+    this.httpClient
+      .post<AuthResponse>(`${environment.apiUrl}auth/google`, {
+        idToken: user.idToken,
+      })
       .subscribe({
         next: (res: AuthResponse) => {
-          console.log('login exitoso', res);
           this.router.navigateByUrl('/home');
           this.userService.setUser(res.user);
           this.tokenService.setToken(res.token);
-          
         },
-        error: (err) => {
-          console.error('Error en login', err);
-        }
+        error: () => {
+          console.error('Error en login con Google');
+        },
       });
-  
   }
 }
-

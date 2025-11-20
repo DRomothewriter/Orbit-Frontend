@@ -11,7 +11,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 // Importar el Servicio
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../../shared/services/auth.service';
+import { TokenService } from '../../shared/services/token.service';
+import { UserService } from '../../shared/services/user.service';
+import { AuthResponse } from '../../shared/types/auth-response';
 
 @Component({
   selector: 'app-register',
@@ -32,6 +35,8 @@ import { AuthService } from '../services/auth.service';
 export class RegisterComponent {
 
   private authService = inject(AuthService);
+  private tokenService = inject(TokenService);
+  private userService = inject(UserService);
   private router = inject(Router);
 
   isLoading = false;
@@ -52,11 +57,14 @@ export class RegisterComponent {
     this.errorMessage = null;
     const { name, email, password } = this.registerForm.value;
 
-    this.authService.register(name!, email!, password!).subscribe({
-      next: (success) => {
+    this.authService.signup(name!, email!, password!).subscribe({
+      next: (res: AuthResponse) => {
         this.isLoading = false;
-        // Éxito, redirigir a /home
-        this.router.navigate(['/home']);
+        // Guarda el token y redirige
+          this.router.navigateByUrl('/home');
+          this.userService.setUser(res.user);
+          this.tokenService.setToken(res.token);
+          
       },
       error: (err) => {
         this.isLoading = false;
@@ -65,4 +73,3 @@ export class RegisterComponent {
     });
   }
 }
-

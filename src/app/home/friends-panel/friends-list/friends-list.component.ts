@@ -1,21 +1,25 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
-interface Friend {
-  name: string;
-  avatarUrl?: string;
-  online: boolean;
-}
+import { User } from '../../../shared/types/user';
+import { UserService } from '../../../shared/services/user.service';
+import { GetFriendsResponse } from '../../../shared/types/get-friends-response';
+
 @Component({
   selector: 'app-friends-list',
   imports: [MatIcon, CommonModule],
   templateUrl: './friends-list.component.html',
   styleUrl: './friends-list.component.scss'
 })
-export class FriendsListComponent {
-  friends: Friend[] = [
-    { name: 'Diego', avatarUrl: '', online: true },
-    { name: 'Ana', avatarUrl: '', online: false },
-    { name: 'Luis', avatarUrl: '', online: true }
-  ];
+export class FriendsListComponent implements OnInit{
+  friends: User[] = [];
+
+  constructor(private userService: UserService){}
+  ngOnInit(): void {
+      this.userService.getMyFriends().subscribe({
+        next:(friendships: GetFriendsResponse[])=> {
+          this.friends = friendships.map(f => f.friendId);
+        }
+      })
+  }
 }
