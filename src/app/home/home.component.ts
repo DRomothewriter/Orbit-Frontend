@@ -11,6 +11,7 @@ import { HeaderComponent } from './header/header.component';
 import { ModalsService } from '../shared/services/modals.service';
 import { CreateGroupModalComponent } from '../shared/components/modals/create-group-modal/create-group-modal.component';
 import { CalendarModalComponent } from '../shared/components/modals/calendar-modal/calendar-modal.component';
+import { UserService } from '../shared/services/user.service';
 
 @Component({
   selector: 'app-home',
@@ -29,19 +30,32 @@ import { CalendarModalComponent } from '../shared/components/modals/calendar-mod
   styleUrl: './home.component.scss',
 })
 export class HomeComponent implements OnInit {
-
   isCreateGroupOpen = false;
   isCalendarOpen = false;
-  constructor(private sockeService: SocketService, private modalsService: ModalsService, private router: Router) {}
+  constructor(
+    private sockeService: SocketService,
+    private modalsService: ModalsService,
+    private router: Router,
+    private userService: UserService
+  ) {}
   ngOnInit(): void {
-    this.modalsService.openCreateGroup$.subscribe(val => this.isCreateGroupOpen = val);
-    this.modalsService.openCalendar$.subscribe(val => this.isCalendarOpen = val);
+    this.modalsService.openCreateGroup$.subscribe(
+      (val) => (this.isCreateGroupOpen = val)
+    );
+    this.modalsService.openCalendar$.subscribe(
+      (val) => (this.isCalendarOpen = val)
+    );
     //así con todos los modals
-    
-    this.sockeService.connectWithGroups();
+    console.log("init home")
+    this.userService.getMyUser().subscribe(user=>{
+      console.log(user)
+      if(user&&user._id){
+        this.sockeService.connectWithGroups();
+      }
+    });
   }
 
-  navToFriends(){
+  navToFriends() {
     this.router.navigateByUrl('/home/friends');
   }
 }
