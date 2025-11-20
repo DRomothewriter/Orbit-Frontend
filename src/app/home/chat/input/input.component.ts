@@ -33,9 +33,9 @@ export class InputComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.paramMap.subscribe({
-      next: (params)=> {
+      next: (params) => {
         this.groupId = params.get('id')!;
-      }
+      },
     });
     this.userService.getMyUser().subscribe({
       next: (user) => {
@@ -43,44 +43,54 @@ export class InputComponent implements OnInit {
       },
     });
   }
-    handleImage(event: Event) {
+  handleImage(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       this.imageFile = input.files[0];
 
-      this.imagePreview = URL.createObjectURL(this.imageFile)
+      this.imagePreview = URL.createObjectURL(this.imageFile);
     }
   }
-    removeImage() {
+  removeImage() {
     this.imageFile = null;
     this.imagePreview = null;
   }
 
   handleSubmit() {
-    if (!this.message.trim()) return;
-    this.userService.getMyUser().subscribe({
-      next: (user) => {
-        const newMessage: Message = {
-          //  campos necesarios según Message
-          userId: user._id!,
-          username: user.username,
-          groupId: this.groupId,
-          text: this.message,
-          type: this.imageFile ? MessageType.IMAGE: MessageType.TEXT,
-        };
+    if (!this.message.trim() && !this.imageFile) return;
 
-        this.messageService.sendMessage(newMessage).subscribe({
-          next: () => {
-            this.message = ''; // limpia el input después de enviar
-            this.removeImage();
-          },
-          error: (err) => {
-            console.error('Error sending message:', err);
-          },
-        });
-      },
-    });
+    if (this.imageFile) {
+      // Enviar imagen
+      const formData = new FormData();
+      formData.append('groupId', this.groupId);
+      formData.append('username', this.user.username);
+      formData.append('image', this.imageFile);
+      formData.append('text', this.message || '');
+
+      this.messageService.sendImageMessage(formData).subscribe({
+        next: () => {
+          this.message = '';
+          this.removeImage();
+        },
+        error: (err) => console.error('Error sending image:', err),
+      });
+    } else {
+      // Enviar mensaje de texto normal
+      const messageData: Message = {
+        username: this.user.username,
+        groupId: this.groupId,
+        userId: this.user._id!,
+        type: MessageType.TEXT,
+        text: this.message,
+      };
+
+      this.messageService.sendMessage( messageData ).subscribe({
+        next: () => (this.message = ''),
+        error: (err) => console.error('Error sending message:', err),
+      });
+    }
   }
+  
 
   @ViewChild('messageInput') messageInput!: ElementRef;
 

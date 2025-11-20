@@ -6,6 +6,9 @@
             <div class="message-header">
                 <span class="user">{{message.username}}</span>
             </div>
+            @if(message.imageUrl){
+                <img [src]="message.imageUrl" alt="Image">
+            }
             <div class="message-text">
                 {{message.text}}
             </div>

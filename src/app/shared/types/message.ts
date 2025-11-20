@@ -6,5 +6,6 @@ export interface Message {
     groupId: string,
     userId: string,
     type: MessageType,
+    imageUrl?: String,
     text: string
 }
