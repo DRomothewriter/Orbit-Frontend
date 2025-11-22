@@ -1,0 +1,25 @@
+<app-header></app-header>
+<!-- <ul>
+    @for(group of groups; track group._id){
+    <li>{{ group.topic }} ({{ group._id }})</li>
+    <button (click)="selectGroup(group._id!)">Select</button>
+    }@empty{
+    <li>No groups</li>
+    }
+</ul> -->
+
+<aside class="sidebar-left glass-card">
+
+    <div class="groups-list">
+        @for(group of groups; track group._id){
+        <div class="group-item" (click)="selectGroup(group._id!)">
+            <div class="group-avatar">
+                <img [src]="groupAvatarDummy" alt="group avatar" />
+            </div>
+            <span class="group-name">{{ group.topic }}</span>
+        </div>
+        }@empty{
+        <div>No groups</div>
+        }
+    </div>
+</aside>

@@ -1,0 +1,17 @@
+
+
+<ul #messagesList class="messages-list">
+    @for(message of messages; track message._id){
+        <li class="message-card" [class.my-message]="message.username === currentUser">
+            <div class="message-header">
+                <span class="user">{{message.username}}</span>
+            </div>
+            @if(message.imageUrl){
+                <img [src]="message.imageUrl" alt="Image">
+            }
+            <div class="message-text">
+                {{message.text}}
+            </div>
+        </li>
+    }
+</ul>

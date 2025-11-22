@@ -1,0 +1,39 @@
+
+<div class="sidebar-header" (click)="openCreateGroup()">
+    <h3>Grupos</h3>
+    <button mat-icon-button class="add-button" >
+        <mat-icon>add</mat-icon>
+    </button>
+</div>
+<!-- 
+<button (click)="setGroupModal(true)">Create group modal</button>
+@if(groupModal){
+    <div>
+        <label for="topic">Nombre del grupo:</label>
+        <input 
+            type="text" 
+            id="topic"
+            [(ngModel)]="topic" 
+            name="topic"
+            placeholder="Ingresa el nombre del grupo..."
+            required
+        />
+    </div>
+    <ul>
+    @for(friendship of myFriends; track friendship._id){
+        <li>
+            <input 
+                type="checkbox" 
+                [id]="friendship.friendId"
+                [(ngModel)]="friendship.selected"
+                (change)="onFriendSelected(friendship)"
+            >
+            <label [for]="friendship.friendId">{{friendship.friendId}}</label>
+        </li>
+    }
+    </ul>
+
+    <button (click)="setGroupModal(false)">Cancel</button>
+    <button (click)="handleCreateGroup()">Create</button>
+} -->
+

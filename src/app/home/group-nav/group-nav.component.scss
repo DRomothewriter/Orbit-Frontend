@@ -1,0 +1,54 @@
+@use '../../../colors' as *;
+.sidebar-left {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    background: rgba($color-bg-card, 0.5);
+    border-radius: 1rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    .groups-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        height: 100%;
+        width: 100%;
+
+        .group-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            &:hover {
+                background: $color-primary-light;
+                color: $color-bg-main;
+            }
+
+            .group-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                overflow: hidden;
+                border: 2px solid $color-border;
+                background: $color-bg-main;
+                img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+            }
+
+            .group-name {
+                color: $color-text-main;
+                font-weight: 500;
+                font-size:1.05rem;
+                letter-spacing: 0.01em;
+                transition: color 0.3s;
+            }
+        }
+    }
+}

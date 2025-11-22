@@ -1,0 +1,31 @@
+@use "../../../../colors" as *;
+.sidebar-header {
+    height: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    background: $color-bg-card;
+    &:hover {
+        background-color: $color-primary-light;
+    }
+
+    h3 {
+        margin: 0;
+        color: $color-text-main;
+        font-weight: 600;
+        font-size: 1.1rem;
+        letter-spacing: 0.01em;
+    }
+
+    .add-button {
+        color: $color-text-secondary;
+        margin-top: 8px;
+        transition: color 0.2s;
+        &:hover {
+            color: $color-primary-light;
+        }
+    }
+}

@@ -1,0 +1,53 @@
+@use '../../../../colors' as *;
+header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba($color-bg-card, 0.85);
+    border-radius: 1rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+
+    img {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid $color-primary-light;
+        background: $color-bg-main;
+        margin-right: 0.5rem;
+    }
+
+    h2 {
+        flex: 1;
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: $color-primary-light;
+        letter-spacing: 0.02em;
+    }
+
+    .chat-nav {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        button[mat-icon-button] {
+            border-radius: 50%;
+            transition: background 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba($color-primary, 0.08);
+
+            mat-icon {
+                color: $color-secondary;
+                font-size: 24px;
+                margin: 0 0 2px 0;
+            }
+
+            &:hover {
+                background: rgba($color-secondary, 0.18);
+                mat-icon {
+                    color: $color-primary-light;
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,27 @@
+<div class="home-container">
+    <app-header></app-header>
+    <div class="home-content">
+        <div class="side-nav">
+            <div class="friends-button" (click)="navToFriends()">
+                <h3>Friends</h3>
+            </div>
+            <app-group-nav></app-group-nav>
+        </div>
+        <main class="main-content glass-card">
+            <div class="content-body">
+                <router-outlet></router-outlet>
+            </div>
+        </main>
+    </div>
+</div>
+
+@if(isCreateGroupOpen){
+<app-create-group-modal></app-create-group-modal>
+}
+@if(isCalendarOpen){
+<app-calendar-modal></app-calendar-modal>
+}
+
+@if(isMyUserOpen){
+<app-myuser-modal></app-myuser-modal>
+}

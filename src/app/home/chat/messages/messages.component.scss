@@ -1,0 +1,47 @@
+@use '../../../../colors' as *;
+
+.messages-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.message-card {
+    background: $color-bg-card;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 2px 8px rgba(15, 17, 22, 0.08);
+    color: $color-text-main;
+    display: flex;
+    flex-direction: column;
+    max-width: 480px;
+    align-self: flex-start;
+    border: 1px solid $color-border;
+
+    .message-header {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: $color-secondary;
+        margin-bottom: 0.25rem;
+    }
+
+    .message-text {
+        font-size: 1.05rem;
+        word-break: break-word;
+        color: $color-text-main;
+    }
+
+    &.my-message {
+        background: linear-gradient(90deg, $color-primary 0%, $color-secondary 100%);
+        color: $color-text-main;
+        align-self: flex-end;
+        border: none;
+
+        .message-header {
+            color: $color-text-main;
+        }
+    }
+}

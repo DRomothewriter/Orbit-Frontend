@@ -1,0 +1,33 @@
+<section>
+    @for(friend of friends; track friend._id){
+    <article>
+        <div class="friend-avatar">
+            <img
+                [src]="
+                    
+                    'https://placehold.co/40x40/111827/533483?text=F'
+                "
+                alt="Avatar"
+            />
+        </div>
+        <div class="friend-info">
+            <span class="friend-name">{{ friend.username }}</span>
+        </div>
+        <div class="friend-actions">
+            <button class="chat-button" mat-icon-button aria-label="Chat">
+                <mat-icon>chat</mat-icon>
+            </button>
+            <button class="remove-button" mat-icon-button aria-label="Eliminar">
+                <mat-icon>person_remove</mat-icon>
+            </button>
+        </div>
+    </article>
+    } @empty {
+        @if(friends.length === 0){
+            <div class="no-friends"
+            >
+                <p>No tienes amigos aún.</p>
+            </div>
+        }
+    }
+</section>

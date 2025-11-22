@@ -1,0 +1,10 @@
+<ul>
+    @for(fr of friendRequests; track fr.friendId){
+        <li >
+            {{ fr.friendId }}
+            <button (click)="acceptFriendRequest(fr._id!)">Aceptar</button>
+        </li>
+    } @empty {
+        <li>No users found</li>
+    }
+</ul>

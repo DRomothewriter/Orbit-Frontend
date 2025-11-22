@@ -1,0 +1,200 @@
+@use "../../../../../colors" as *;
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: linear-gradient(
+        120deg,
+        rgba($color-primary, 0.9) 10%,
+        rgba($color-bg-main, 0.9) 100%
+    );
+    color: $color-text-main;
+    border-radius: 1.25rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    padding: 2rem 1.5rem;
+    width: 500px;
+    min-height: 450px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    position: fixed;
+    top: 90px;
+    right: 10px;
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid $color-border;
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+
+    .avatar-edit-container {
+        position: relative;
+        width: 200px;
+        height: 200px;
+
+        .profile-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            display: block;
+            border: solid 2px $color-primary-light;
+        }
+
+        .edit-avatar-btn {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            opacity: 0;
+            transition: opacity 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            mat-icon {
+                font-size: 2rem;
+                pointer-events: none;
+            }
+        }
+
+        &:hover .edit-avatar-btn {
+            opacity: 1;
+            background: rgba(0, 0, 0, 0.4);
+        }
+    }
+    .username-edit-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+        .username-loader {
+            width: 24px;
+            height: 24px;
+        }
+
+        .username-success {
+            color: $color-primary;
+            font-size: 1.5rem;
+        }
+        .username-display {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: $color-primary-light;
+            padding: 0.4rem 1.2rem;
+            border-radius: 1rem;
+            cursor: pointer;
+            transition: box-shadow 0.2s, border 0.2s;
+
+            &.hovered {
+                box-shadow: 0 0 0 2px $color-primary-light;
+                border: 1px solid $color-primary-light;
+                background: rgba($color-primary-light, 0.08);
+            }
+
+            .edit-icon,
+            .username-loader,
+            .username-success {
+                margin-left: 0.5rem;
+                vertical-align: middle;
+            }
+            .edit-icon {
+                font-size: 1.2rem;
+            }
+        }
+
+        &.editing .username-display {
+            display: none;
+        }
+
+        .username-input {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: $color-primary-light;
+            padding: 0.4rem 1.2rem;
+            border-radius: 1rem;
+            border: 1px solid $color-primary-light;
+            outline: none;
+            background: rgba($color-primary-light, 0.08);
+            width: 100%;
+            box-shadow: 0 0 0 2px $color-primary-light;
+        }
+    }
+
+    h2 {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 600;
+        color: $color-primary-light;
+    }
+
+    .profile-email {
+        font-size: 0.95rem;
+        color: $color-text-secondary;
+        margin: 0;
+    }
+}
+
+.profile-actions {
+    gap: 1rem;
+    width: 100%;
+    button {
+        display: block;
+        margin: 10px auto;
+        width: 300px;
+    }
+
+    .user-status-toggle {
+        display: flex;
+        justify-content: center;
+        margin-top: 1rem;
+
+        button {
+            width: 120px;
+            margin: 0 5px;
+            display: flex;
+            align-items: center;
+            border-radius: 2rem;
+            background: rgba($color-bg-card, 0.5);
+            color: $color-text-secondary;
+            transition: background 0.2s, color 0.2s;
+
+            &.active {
+                background: $color-primary-light;
+                color: $color-bg-main;
+                font-weight: 600;
+            }
+
+            mat-icon {
+                font-size: 1.2rem;
+            }
+        }
+    }
+}

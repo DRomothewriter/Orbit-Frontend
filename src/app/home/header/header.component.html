@@ -1,0 +1,23 @@
+<nav class="navbar glass-card">
+    <div class="navbar-brand">
+        <h1>Orbit</h1>
+    </div>
+    <div class="navbar-menu">
+        <button mat-icon-button class="nav-icon" (click)="openCalendarModal()">
+            <mat-icon>calendar_month</mat-icon>
+        </button>
+        <button mat-icon-button class="nav-icon">
+            <mat-icon>notifications</mat-icon>
+        </button>
+        <button mat-icon-button class="nav-icon">
+            <mat-icon>settings</mat-icon>
+        </button>
+        <div class="user-profile" (click)="openMyuserModal()">
+            <img
+                [src]="user.profileImgUrl || 'https://placehold.co/40x40/533483/ffffff?text=U'"
+                alt="Usuario"
+                class="profile-pic"
+            />
+        </div>
+    </div>
+</nav>

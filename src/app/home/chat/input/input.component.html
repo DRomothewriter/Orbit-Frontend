@@ -1,0 +1,32 @@
+<div class="input-container">
+    <form (ngSubmit)="handleSubmit()">
+        <input
+            type="text"
+            [(ngModel)]="message"
+            name="message"
+            #messageInput
+            placeholder="Escribe un mensaje..."
+        />
+        <label class="image-upload">
+            <input
+                type="file"
+                accept="image/*"
+                (change)="handleImage($event)"
+                hidden
+            />
+            <mat-icon>image</mat-icon>
+        </label>
+
+        <button type="submit" [disabled]="!message.trim() && !imageFile">
+            <mat-icon>send</mat-icon>
+        </button>
+        @if(imagePreview){
+            <div class="image-preview">
+                <img [src]="imagePreview" alt="Imagen a enviar" />
+                <button type="button" (click)="removeImage()">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </div>
+        }
+    </form>
+</div>
