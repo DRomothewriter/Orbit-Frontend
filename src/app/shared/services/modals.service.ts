@@ -25,4 +25,16 @@ export class ModalsService {
   closeCalendar() {
     this._openCalendar.next(false);
   }
+
+  private _openMyUser = new BehaviorSubject<boolean>(false);
+  openMyUser$= this._openMyUser.asObservable(); 
+  
+  openMyUser() {
+    this._openMyUser.next(true);
+  }
+  closeMyUser() {
+    this._openMyUser.next(false);
+  }
+
+
 }

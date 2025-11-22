@@ -34,7 +34,6 @@ export class MessagesComponent implements OnInit {
         this.messageService.getGroupMessages(groupId).subscribe({
           next: (response: any) => {
             this.messages = response.messages;
-            console.log(response.messages)
           },
         });
       },

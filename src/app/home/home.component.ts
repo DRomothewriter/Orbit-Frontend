@@ -12,12 +12,14 @@ import { ModalsService } from '../shared/services/modals.service';
 import { CreateGroupModalComponent } from '../shared/components/modals/create-group-modal/create-group-modal.component';
 import { CalendarModalComponent } from '../shared/components/modals/calendar-modal/calendar-modal.component';
 import { UserService } from '../shared/services/user.service';
+import { MyuserModalComponent } from '../shared/components/modals/myuser-modal/myuser-modal.component';
 
 @Component({
   selector: 'app-home',
   imports: [
     CreateGroupModalComponent,
     CalendarModalComponent,
+    MyuserModalComponent,
     GroupNavComponent,
     HeaderComponent,
     RouterOutlet,
@@ -25,6 +27,7 @@ import { UserService } from '../shared/services/user.service';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
+
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
@@ -32,6 +35,7 @@ import { UserService } from '../shared/services/user.service';
 export class HomeComponent implements OnInit {
   isCreateGroupOpen = false;
   isCalendarOpen = false;
+  isMyUserOpen = false;
   constructor(
     private sockeService: SocketService,
     private modalsService: ModalsService,
@@ -45,10 +49,11 @@ export class HomeComponent implements OnInit {
     this.modalsService.openCalendar$.subscribe(
       (val) => (this.isCalendarOpen = val)
     );
+    this.modalsService.openMyUser$.subscribe(
+      (val) => (this.isMyUserOpen = val)
+    );
     //así con todos los modals
-    console.log("init home")
     this.userService.getMyUser().subscribe(user=>{
-      console.log(user)
       if(user&&user._id){
         this.sockeService.connectWithGroups();
       }

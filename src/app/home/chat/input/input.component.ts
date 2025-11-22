@@ -61,6 +61,12 @@ export class InputComponent implements OnInit {
 
     if (this.imageFile) {
       // Enviar imagen
+      console.log('File metadata:', {
+        name: this.imageFile.name,
+        size: this.imageFile.size,
+        type: this.imageFile.type,
+        lastModified: this.imageFile.lastModified,
+      });
       const formData = new FormData();
       formData.append('groupId', this.groupId);
       formData.append('username', this.user.username);
@@ -84,13 +90,12 @@ export class InputComponent implements OnInit {
         text: this.message,
       };
 
-      this.messageService.sendMessage( messageData ).subscribe({
+      this.messageService.sendMessage(messageData).subscribe({
         next: () => (this.message = ''),
         error: (err) => console.error('Error sending message:', err),
       });
     }
   }
-  
 
   @ViewChild('messageInput') messageInput!: ElementRef;
 

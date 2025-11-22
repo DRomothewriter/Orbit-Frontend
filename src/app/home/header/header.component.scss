@@ -1,38 +1,44 @@
-
-:host{
+@use '../../../colors' as *;
+:host {
     height: 75px;
 }
 .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    $background: $color-bg-card;
+    border-radius: 1rem;
     padding: 0.75rem 1.25rem;
-    
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
     .navbar-brand h1 {
         margin: 0;
-        color: #ffffff;
+        color: $color-primary-light;
         font-size: 1.5rem;
         font-weight: 600;
+        letter-spacing: 0.03rem;
     }
-    
+
     .navbar-menu {
         display: flex;
         align-items: center;
         gap: 1rem;
-        
+
         .nav-icon {
-        color: rgba(255, 255, 255, 0.7);
-        
-        &:hover {
-            color: #a78bfa;
+            color: $color-text-secondary;
+            transition: color 0.2s;
+
+            &:hover {
+                color: $color-primary-light;
+            }
         }
-        }
-        
+
         .profile-pic {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        border: 2px solid rgba(255, 255, 255, 0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid $color-border;
+            object-fit: cover;
+            background: $color-bg-main;
         }
     }
 }

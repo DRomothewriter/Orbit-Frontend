@@ -12,9 +12,9 @@
         <button mat-icon-button class="nav-icon">
             <mat-icon>settings</mat-icon>
         </button>
-        <div class="user-profile">
+        <div class="user-profile" (click)="openMyuserModal()">
             <img
-                src="https://placehold.co/40x40/533483/ffffff?text=U"
+                [src]="user.profileImgUrl || 'https://placehold.co/40x40/533483/ffffff?text=U'"
                 alt="Usuario"
                 class="profile-pic"
             />

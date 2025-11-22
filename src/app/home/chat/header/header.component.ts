@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { GroupService } from '../../../shared/services/group.service';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'app-header',
-  imports: [],
+  imports: [MatIconButton, MatIcon],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })

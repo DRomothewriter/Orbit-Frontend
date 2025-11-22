@@ -1,7 +1,9 @@
+@use '../../../../colors' as *;
+
 .input-container {
     width: 100%;
     padding: 1rem;
-
+    
     form {
         display: flex;
         gap: 1rem;
@@ -17,17 +19,17 @@
         overflow-y: auto;
         word-wrap: break-word;
         line-height: 1.5;
-        border: 1px solid rgba(255,255,255,0.12);
+        border: 1px solid $color-border;
         border-radius: 8px;
         font-size: 1rem;
-        background: rgba(32, 36, 44, 0.85);
-        color: rgba(255,255,255,0.95);
+        background: rgba($color-bg-card, 0.85);
+        color: $color-text-main;
         transition: border-color 0.2s;
 
         &:focus {
             outline: none;
-            border-color: #6d678cbc;
-            background: rgba(32, 36, 44, 1);
+            border-color: $color-primary-light;
+            background: rgba($color-bg-card, 1);
         }
     }
 
@@ -36,21 +38,21 @@
         height: 40px;
         border: none;
         border-radius: 8px;
-        background: linear-gradient(90deg, #4f8cff 0%, #3358ff 100%);
-        color: #fff;
+        background: linear-gradient(90deg, $color-secondary 0%, $color-secondary-light 100%);
+        color: $color-text-main;
         font-weight: 500;
         cursor: pointer;
-        box-shadow: 0 2px 8px rgba(79,140,255,0.08);
+        box-shadow: 0 2px 8px rgba($color-secondary, 0.08);
         transition: box-shadow 0.2s;
 
         &:hover:not(:disabled) {
-            background: linear-gradient(90deg, #3358ff 0%, #4f8cff 100%);
-            box-shadow: 0 4px 16px rgba(79,140,255,0.16);
+            background: linear-gradient(90deg, $color-secondary-light 0%, $color-secondary 100%);
+            box-shadow: 0 4px 16px rgba($color-secondary, 0.16);
         }
 
         &:disabled {
-            background: rgba(255,255,255,0.12);
-            color: rgba(255,255,255,0.5);
+            background: rgba($color-text-main, 0.12);
+            color: $color-text-secondary;
             cursor: not-allowed;
             box-shadow: none;
         }

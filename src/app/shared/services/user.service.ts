@@ -9,6 +9,7 @@ import { AcceptfrResponse } from '../types/acceptfr-response';
 
 import { Observable, tap } from 'rxjs';
 import { GetFriendsResponse } from '../types/get-friends-response';
+import { UserStatus } from '../types/user-status';
 
 @Injectable({
   providedIn: 'root',
@@ -26,6 +27,7 @@ export class UserService {
     return {
       username: '',
       email: '',
+      profileImgUrl: '',
     };
   }
   setUser(user: User) {
@@ -37,14 +39,13 @@ export class UserService {
   }
 
   getMyUser(): Observable<User> {
-    if (this.user?._id){
+    if (this.user?._id) {
       return new Observable<User>((observer) => {
         observer.next(this.user as User);
         observer.complete();
       });
     }
     const token = this.tokenService.getToken();
-    console.log(token)
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`,
     });
@@ -52,7 +53,12 @@ export class UserService {
       .get<User>(`${environment.apiUrl}${this.endpnt}my-user`, {
         headers,
       })
-      .pipe(tap((user) => (this.user = user)));
+      .pipe(
+        tap((user) => {
+          user.status = UserStatus.ONLINE;
+          this.user = user;
+        })
+      );
     //Para guardarlo en user. Es como un cahceo
   }
 
@@ -65,10 +71,43 @@ export class UserService {
       headers,
     });
   }
+  editProfileImg(formData: FormData): Observable<string> {
+    const token = this.tokenService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+    return this.httpClient.put<string>(
+      `${environment.apiUrl}${this.endpnt}edit-profile-image`,
+      formData,
+      { headers }
+    );
+  }
 
+  changeUserStatus(status: UserStatus): Observable<User> {
+    const token = this.tokenService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+    return this.httpClient.put<User>(
+      `${environment.apiUrl}${this.endpnt}change-user-status/${status}`,
+      {},
+      { headers }
+    );
+  }
+
+  editUsername(username: string): Observable<User> {
+    const token = this.tokenService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+    return this.httpClient.put<User>(
+      `${environment.apiUrl}${this.endpnt}edit-username`,
+      {username: username},
+      {headers}
+    );
+  }
   getRequestsReceived(): Observable<Friendship[]> {
     const token = this.tokenService.getToken();
-    console.log(token)
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`,
     });

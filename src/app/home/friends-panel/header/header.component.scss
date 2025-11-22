@@ -1,49 +1,51 @@
+@use '../../../../colors' as *;
+
 nav {
     display: flex;
     align-items: center;
     gap: 1rem;
     padding: 1rem;
-    background: rgba(32, 36, 44, 0.85);
+    background: rgba($color-bg-card, 0.85);
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(24, 28, 35, 0.08);
 
     button {
         background: none;
         border: none;
-        color: rgba(255, 255, 255, 0.85);
+        color: $color-text-secondary;
         font-weight: 500;
         font-size: 1rem;
         border-radius: 8px;
         padding: 0.5rem 1.25rem;
         cursor: pointer;
-        transition: color 0.2s;
+        transition: color 0.2s, background 0.2s;
 
         &:hover,
         &:focus {
-            background: linear-gradient(90deg, #4f8cff 0%, #3358ff 100%);
-            color: #fff;
+            background: linear-gradient(90deg, $color-secondary 0%, $color-primary 100%);
+            color: $color-text-main;
             outline: none;
         }
     }
 
     input[type="text"] {
-        background: rgba(22, 26, 34, 0.85);
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba($color-bg-main, 0.85);
+        border: 1px solid $color-border;
         border-radius: 8px;
-        color: #fff;
+        color: $color-text-main;
         padding: 0.5rem 1rem;
         font-size: 1rem;
         margin-left: auto;
         width: 200px;
-        transition: border-color 0.2s;
+        transition: border-color 0.2s, background 0.2s;
 
         &::placeholder {
-            color: rgba(255, 255, 255, 0.5);
+            color: $color-text-secondary;
         }
 
         &:focus {
-            border-color: #4f8cff;
-            background: rgba(32, 36, 44, 1);
+            border-color: $color-secondary;
+            background: rgba($color-bg-card, 1);
             outline: none;
         }
     }

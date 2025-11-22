@@ -6,7 +6,7 @@ import { Injectable } from '@angular/core';
 export class TokenService {
 
   logout(): void{
-    sessionStorage.setItem('token', '');
+    sessionStorage.removeItem('token');
     return;
   }
 

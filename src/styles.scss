@@ -1,5 +1,6 @@
 /* --- Importaciones de Angular Material --- */
-@use '@angular/material' as mat;
+@use "@angular/material" as mat;
+@use "./colors" as *;
 @include mat.core();
 
 /* --- TEMA PERSONALIZADO DE MATERIAL --- */
@@ -7,125 +8,125 @@
 
 /* --- ESTILOS GLOBALES DE LA APP (¡CORREGIDO!) --- */
 html {
-  height: 100%;
+    height: 100%;
 }
 
 body {
-  min-height: 100vh; /* Altura mínima de la pantalla */
-  margin: 0;
-  font-family: 'Poppins', sans-serif;
-  background-color: #111827;
-  color: #ffffff;
-  position: relative;
-  overflow: hidden; /* Evita scroll*/
-  box-sizing: border-box; /* Asegura que el padding no desborde */
+    min-height: 100vh; /* Altura mínima de la pantalla */
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background-color: $color-bg-main;
+    color: $color-text-main;
+    position: relative;
+    overflow: hidden; /* Evita scroll*/
+    box-sizing: border-box; /* Asegura que el padding no desborde */
+    z-index: 0;
 }
-
-body::before, body::after {
-  content: '';
-  position: fixed;
-  border-radius: 50%;
-  filter: blur(150px);
-  z-index: -1;
-  opacity: 0.7;
+body::before,
+body::after {
+    content: "";
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    transition: opacity 0.3s;
 }
 
 body::before {
-  width: 400px;
-  height: 400px;
-  background: rgba(79, 140, 255, 0.3);
-  top: 40px;
-  left: 40px;
+    width: 520px;
+    height: 520px;
+    opacity: 1;
+    filter: blur(180px);
+    background: radial-gradient(circle, $color-primary 70%, $color-primary-light 100%);
+    top: 80px;
+    left: -80px;
 }
 
-body::after {
-  width: 500px;
-  height: 500px;
-  background: rgba(83, 52, 131, 0.4);
-  bottom: 40px;
-  right: 40px;
-}
-
+// body::after {
+//     width: 620px;
+//     height: 620px;
+//     opacity: 0.3;
+//     filter: blur(250px);
+//     background: radial-gradient(circle, $color-secondary 70%, $color-secondary-light 100%);
+//     bottom: -80px;
+//     right: 180px;
+// }
 /* --- CLASES DE ESTILO GLOBALES --- */
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    background: rgba($color-text-main, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
 .accent-button {
-  background-color: #533483 !important;
-  color: #ffffff !important;
-  transition: all 0.3s ease;
+    background-color: $color-primary !important;
+    color: $color-text-main !important;
+    transition: all 0.3s ease;
 }
 .accent-button:hover {
-  background-color: #6f42c1 !important;
+    background-color: $color-primary-light !important;
 }
 
 .accent-link {
-  font-size: 0.875rem; /* 14px */
-  color: #a78bfa; /* indigo-400 */
-  text-decoration: none;
-  transition: all 0.3s ease;
+    font-size: 0.875rem; /* 14px */
+    color: $color-primary-light; /* indigo-400 */
+    text-decoration: none;
+    transition: all 0.3s ease;
 }
 .accent-link:hover {
-  text-decoration: underline;
+    text-decoration: underline;
 }
 
 .divider {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem; /* 8px */
-  margin: 1.5rem 0; /* 24px */
-  color: rgba(255, 255, 255, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem; /* 8px */
+    margin: 1.5rem 0; /* 24px */
+    color:$color-text-secondary;
 }
-.divider::before, .divider::after {
-  content: '';
-  height: 1px;
-  flex-grow: 1;
-  background-color: rgba(255, 255, 255, 0.1);
+.divider::before,
+.divider::after {
+    content: "";
+    height: 1px;
+    flex-grow: 1;
+    background-color: $color-border;
 }
 
 /* --- ANULACIÓN DE ESTILOS DE ANGULAR MATERIAL --- */
 
 /* Estilo para mat-form-field */
 .mat-mdc-form-field.mat-mdc-form-field {
-  width: 100%;
-  .mdc-notched-outline > * {
-    border-color: rgba(255, 255, 255, 0.1) !important;
-  }
-  .mdc-text-field--filled {
-    background-color: rgba(0, 0, 0, 0.2) !important;
-  }
-  .mat-mdc-input-element {
-    color: #ffffff !important;
-  }
-  .mdc-floating-label {
-    color: rgba(255, 255, 255, 0.6) !important;
-  }
-  /* Al enfocar */
-  &.mat-focused {
+    width: 100%;
     .mdc-notched-outline > * {
-      border-color: #6f42c1 !important;
+        border-color: $color-border !important;
     }
     .mdc-text-field--filled {
-       background-color: rgba(0, 0, 0, 0.3) !important;
+        background-color: rgba($color-bg-main, 0.2) !important;
+    }
+    .mat-mdc-input-element {
+        color: $color-text-main !important;
     }
     .mdc-floating-label {
-      color: #6f42c1 !important;
+        color: $color-text-secondary !important;
     }
-  }
-  .mdc-line-ripple {
-    display: none;
-  }
+    /* Al enfocar */
+    &.mat-focused {
+        .mdc-notched-outline > * {
+            border-color: $color-primary-light !important;
+        }
+        .mdc-text-field--filled {
+            background-color: rgba($color-bg-main, 0.3) !important;
+        }
+        .mdc-floating-label {
+            color: $color-primary-light !important;
+        }
+    }
+    .mdc-line-ripple {
+        display: none;
+    }
 }
-
-
-
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
