@@ -6,7 +6,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    $background: $color-bg-card;
+    background: rgba($color-bg-card, 0.8);
     border-radius: 1rem;
     padding: 0.75rem 1.25rem;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);

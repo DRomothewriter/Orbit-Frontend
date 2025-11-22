@@ -7,5 +7,6 @@ export interface Message {
     userId: string,
     type: MessageType,
     imageUrl?: String,
-    text: string
+    text: string,
+    createdAt?: string
 }

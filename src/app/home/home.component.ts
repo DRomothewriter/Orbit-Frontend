@@ -27,7 +27,6 @@ import { MyuserModalComponent } from '../shared/components/modals/myuser-modal/m
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',

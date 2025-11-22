@@ -1,20 +1,30 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { Message } from '../../../shared/types/message';
 import { MessageService } from '../../../shared/services/message.service';
 import { SocketService } from '../../../shared/services/socket.service';
 import { ActivatedRoute } from '@angular/router';
 import { UserService } from '../../../shared/services/user.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-messages',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './messages.component.html',
   styleUrl: './messages.component.scss',
 })
-export class MessagesComponent implements OnInit {
+export class MessagesComponent implements OnInit, AfterViewInit {
   messages: Message[] = [];
   groupId: string = '';
   currentUser: string = '';
+
+  @ViewChild('lastRef') lastRef!: ElementRef<HTMLLIElement>;
+
   constructor(
     private messageService: MessageService,
     private socketService: SocketService,
@@ -22,10 +32,20 @@ export class MessagesComponent implements OnInit {
     private userService: UserService
   ) {}
 
+  ngAfterViewInit(): void {
+    this.scrollToBottom();
+  }
+
+  scrollToBottom() {
+    setTimeout(() => {
+      this.lastRef.nativeElement.scrollIntoView({ behavior: 'smooth' });
+    }, 0);
+  }
+
   ngOnInit(): void {
-    this.userService.getMyUser().subscribe(user => {
+    this.userService.getMyUser().subscribe((user) => {
       this.currentUser = user.username;
-    })
+    });
 
     this.route.paramMap.subscribe({
       next: (params) => {
@@ -34,6 +54,7 @@ export class MessagesComponent implements OnInit {
         this.messageService.getGroupMessages(groupId).subscribe({
           next: (response: any) => {
             this.messages = response.messages;
+            this.scrollToBottom();
           },
         });
       },
@@ -44,6 +65,7 @@ export class MessagesComponent implements OnInit {
         //Verificar si es del grupo seleccionado. Si no, subir la card del grupo y sumar 1 al contador de mensajes sin leer.
         if (response.groupId === this.groupId) {
           this.messages.push(response);
+          this.scrollToBottom();
         }
       },
     });

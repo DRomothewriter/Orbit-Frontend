@@ -8,11 +8,11 @@
     }
 </ul> -->
 
-<aside class="sidebar-left glass-card">
+<aside class="sidebar-left">
 
     <div class="groups-list">
         @for(group of groups; track group._id){
-        <div class="group-item" (click)="selectGroup(group._id!)">
+        <div class="group-item" (click)="selectGroup(group._id!, group.groupImgUrl || '', group.topic)">
             <div class="group-avatar">
                 <img [src]="groupAvatarDummy" alt="group avatar" />
             </div>

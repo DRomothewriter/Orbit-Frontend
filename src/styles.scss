@@ -15,7 +15,7 @@ body {
     min-height: 100vh; /* Altura mínima de la pantalla */
     margin: 0;
     font-family: "Poppins", sans-serif;
-    background-color: $color-bg-main;
+    background: linear-gradient($color-primary 0%, $color-secondary 100%);
     color: $color-text-main;
     position: relative;
     overflow: hidden; /* Evita scroll*/
@@ -28,7 +28,7 @@ body::after {
     position: fixed;
     border-radius: 50%;
     pointer-events: none;
-    z-index: 0;
+    z-index: -1;
     transition: opacity 0.3s;
 }
 
@@ -42,15 +42,15 @@ body::before {
     left: -80px;
 }
 
-// body::after {
-//     width: 620px;
-//     height: 620px;
-//     opacity: 0.3;
-//     filter: blur(250px);
-//     background: radial-gradient(circle, $color-secondary 70%, $color-secondary-light 100%);
-//     bottom: -80px;
-//     right: 180px;
-// }
+body::after {
+    width: 620px;
+    height: 620px;
+    opacity: 0.3;
+    filter: blur(250px);
+    background: radial-gradient(circle, $color-secondary 70%, $color-secondary-light 100%);
+    bottom: -80px;
+    right: 180px;
+}
 /* --- CLASES DE ESTILO GLOBALES --- */
 
 .glass-card {

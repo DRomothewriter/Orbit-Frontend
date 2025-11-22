@@ -10,14 +10,17 @@ import { MatIcon } from '@angular/material/icon';
   styleUrl: './header.component.scss'
 })
 export class HeaderComponent implements OnInit {
-  private selectedGroupId: string = '';
-  private groupTopic: string = '';
+  topic: string = '';
+  groupImgUrl: string = '';
   constructor(private groupService: GroupService){}
 
   ngOnInit(): void {
-    const groupSummary = this.groupService.getGroupSummary();
-    this.groupTopic = groupSummary.groupTopic;
-    this.selectedGroupId = groupSummary.selectedGroupId;
+    this.groupService.getTopic().subscribe(topic => {
+      this.topic = topic
+    });
+    this.groupService.getGroupImgUrl().subscribe(groupImgUrl => {
+      this.groupImgUrl = groupImgUrl
+    });
   };
   
 }

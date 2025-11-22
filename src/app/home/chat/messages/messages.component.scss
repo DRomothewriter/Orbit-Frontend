@@ -1,4 +1,4 @@
-@use '../../../../colors' as *;
+@use "../../../../colors" as *;
 
 .messages-list {
     list-style: none;
@@ -12,15 +12,21 @@
 .message-card {
     background: $color-bg-card;
     border-radius: 12px;
-    padding: 1rem 1.25rem;
+    padding: 1rem 1.25rem 0.2rem 1.25rem;
     box-shadow: 0 2px 8px rgba(15, 17, 22, 0.08);
     color: $color-text-main;
     display: flex;
     flex-direction: column;
-    max-width: 480px;
+    max-width: 980px;
     align-self: flex-start;
     border: 1px solid $color-border;
-
+    .message-footer {
+        font-size: 0.85rem;
+        font-weight: 350;
+        color: $color-text-main;
+        margin-top: 5px;
+        margin-left: auto;
+    }
     .message-header {
         font-size: 0.95rem;
         font-weight: 600;
@@ -35,7 +41,11 @@
     }
 
     &.my-message {
-        background: linear-gradient(90deg, $color-primary 0%, $color-secondary 100%);
+        background: linear-gradient(
+            90deg,
+            $color-primary 0%,
+            $color-secondary 100%
+        );
         color: $color-text-main;
         align-self: flex-end;
         border: none;
