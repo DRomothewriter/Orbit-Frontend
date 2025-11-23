@@ -38,7 +38,9 @@ export class MessagesComponent implements OnInit, AfterViewInit {
 
   scrollToBottom() {
     setTimeout(() => {
-      this.lastRef.nativeElement.scrollIntoView({ behavior: 'smooth' });
+      if(this.lastRef){
+        this.lastRef.nativeElement.scrollIntoView({ behavior: 'smooth' });
+      }
     }, 0);
   }
 

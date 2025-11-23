@@ -63,6 +63,7 @@
     .content-body {
         flex: 1;
         overflow-x: hidden;
+        background: rgba($color-bg-card, 0.8);
 
         /* Estilos del scroll personalizados */
         &::-webkit-scrollbar {
