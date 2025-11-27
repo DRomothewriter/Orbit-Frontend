@@ -6,33 +6,31 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { GroupMember } from '../types/group-member';
 import { TokenService } from './token.service';
 import { DeleteGroupResponse } from '../types/delete-group-response';
+import { GetGroupMembersResponse } from '../types/get-group-members-response';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GroupService {
   private endpnt: string = 'groups/';
-  private topic = new BehaviorSubject<string>('');
-  private groupImgUrl = new BehaviorSubject<string>('');
+  private groupSummary = new BehaviorSubject<Group>({ topic: '' });
   private myGroups = new BehaviorSubject<Group[]>([]);
-  myGroups$ = this.myGroups.asObservable(); 
-  
+  myGroups$ = this.myGroups.asObservable();
+
   constructor(
     private httpClient: HttpClient,
     private tokenService: TokenService
   ) {}
+  
+  updateGroupSummary(changes: Partial<Group>) {
+    this.groupSummary.next({
+      ...this.groupSummary.value,
+      ...changes,
+    });
+  }
 
-  getTopic(): Observable<string> {
-    return this.topic;
-  }
-  setTopic(topic: string): void {
-    this.topic.next(topic);
-  }
-  getGroupImgUrl(): Observable<string> {
-    return this.groupImgUrl;
-  }
-  setGroupImgUrl(groupImgUrl: string): void {
-    this.groupImgUrl.next(groupImgUrl);
+  getGroupSummary(): Observable<Group> {
+    return this.groupSummary.asObservable();
   }
 
   getMyGroups(): Observable<Group[]> {
@@ -44,6 +42,17 @@ export class GroupService {
     return this.httpClient
       .get<Group[]>(`${environment.apiUrl}${this.endpnt}my-groups`, { headers })
       .pipe(tap((response) => this.myGroups.next(response)));
+  }
+
+  getGroupMembers(groupId: string): Observable<GetGroupMembersResponse[]> {
+    const token = this.tokenService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+    return this.httpClient.get<GetGroupMembersResponse[]>(
+      `${environment.apiUrl}${this.endpnt}group-members/${groupId}`,
+      { headers }
+    );
   }
 
   createGroup(group: Group, friendIds: string[]): Observable<Group> {
@@ -58,14 +67,14 @@ export class GroupService {
     );
   }
 
-  addGroupMember(userId: string, groupId: string): Observable<GroupMember> {
+  addGroupMembers(userIds: string[], groupId: string): Observable<GroupMember[]> {
     const token = this.tokenService.getToken();
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`,
     });
-    return this.httpClient.post<GroupMember>(
-      `${environment.apiUrl}${this.endpnt}`,
-      { groupId, userId },
+    return this.httpClient.post<GroupMember[]>(
+      `${environment.apiUrl}${this.endpnt}add-groupmembers`,
+      { groupId, userIds },
       { headers }
     );
   }
@@ -83,7 +92,7 @@ export class GroupService {
       )
       .pipe(
         tap((response) => {
-          this.setGroupImgUrl(response);
+          this.updateGroupSummary({groupImgUrl: response});
           const updatedGroups = this.myGroups.value.map((group) =>
             group._id === groupId ? { ...group, groupImgUrl: response } : group
           );
@@ -104,7 +113,7 @@ export class GroupService {
       )
       .pipe(
         tap((response) => {
-          this.setTopic(response);
+          this.updateGroupSummary({topic: response});
           const updatedGroups = this.myGroups.value.map((group) =>
             group._id === groupId ? { ...group, topic: response } : group
           );

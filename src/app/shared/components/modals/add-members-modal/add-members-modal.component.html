@@ -1,0 +1,31 @@
+<div class="modal-overlay" (click)="closeModal()">
+    <article class="modal-content">
+        <div class="search-display">
+            <input type="text" />
+        </div>
+        <div class="users-display">
+            <ul class="users-list">
+                @for(user of users; track user._id){
+                <li class="user-item">
+                    <div class="user-checkbox">
+                        <mat-checkbox
+                            (change)="
+                                onUserSelected(user._id!)
+                            "
+                        ></mat-checkbox>
+                    </div>
+                    <div class="user-avatar">
+                        <img
+                            [src]="user.profileImgUrl || 'https://placehold.co/40x40/533483/ffffff?text=A'"
+                            alt="user profile image"
+                        />
+                    </div>
+                    <span class="username">{{
+                        user.username
+                    }}</span>
+                </li>
+                }
+            </ul>
+        </div>
+    </article>
+</div>

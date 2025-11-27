@@ -1,0 +1,31 @@
+<div class="modal-overlay" (click)="closeModal()">
+    <article class="modal-content">
+        <section class="group-info">
+            <img [src]="group.groupImgUrl" alt="Group image" />
+            <h1 class="group-topic">{{ group.topic }}</h1>
+            <p class="group-description">
+                {{ group.description || "Add group description" }}
+            </p>
+        </section>
+        <h1>Members</h1><button (click)="openAddMember()">Add member</button>
+        <section class="group-members">
+            <ul>
+                @for(member of groupMembers; track member._id){
+                <li>
+                    <img [src]="member.userId.profileImgUrl" alt="User image" />
+                    <h2 class="member-username">
+                        {{ member.userId.username }}
+                    </h2>
+                    @if(member.role === 'admin'){
+                    <div class="admin-card">Admin</div>
+                    }
+                </li>
+                }
+            </ul>
+        </section>
+    </article>
+</div>
+
+@if(isAddMemberOpen){
+    <app-add-member-modal></app-add-member-modal>
+}

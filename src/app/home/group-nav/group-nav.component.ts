@@ -25,9 +25,9 @@ export class GroupNavComponent implements OnInit {
       });
   };
 
-  selectGroup(groupId: string, groupImgUrl: string, topic: string){
-    this.groupService.setGroupImgUrl(groupImgUrl);
-    this.groupService.setTopic(topic);
-    this.router.navigateByUrl(`/home/${groupId}`);
+  selectGroup(group: Group){
+    if(!group.groupImgUrl) group.groupImgUrl = ''
+    this.groupService.updateGroupSummary(group);
+    this.router.navigateByUrl(`/home/${group._id}`);
   };
 }

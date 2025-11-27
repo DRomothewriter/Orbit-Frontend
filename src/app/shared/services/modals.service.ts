@@ -36,5 +36,25 @@ export class ModalsService {
     this._openMyUser.next(false);
   }
 
+  private _openGroupInfo = new BehaviorSubject<boolean>(false);
+  openGroupInfo$ = this._openGroupInfo.asObservable();
+
+  openGroupInfo(){
+    this._openGroupInfo.next(true);
+  }
+  closeGroupInfo(){
+    this._openGroupInfo.next(false);
+  }
+
+  private _openAddMembers = new BehaviorSubject<boolean>(false);
+  openAddMembers$ = this._openAddMembers.asObservable();
+
+  openAddMembers(){
+    this._openAddMembers.next(true);
+  }
+
+  closeAddMembers(){
+    this._openAddMembers.next(false);
+  }
 
 }

@@ -4,6 +4,8 @@ import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { ModalsService } from '../../../shared/services/modals.service';
+import { Group } from '../../../shared/types/group';
 
 @Component({
   selector: 'app-header',
@@ -12,8 +14,7 @@ import { ActivatedRoute } from '@angular/router';
   styleUrl: './header.component.scss',
 })
 export class HeaderComponent implements OnInit {
-  topic: string = '';
-  groupImgUrl: string = '';
+  group: Group = { topic: '' };
   imageFile: File | null = null;
 
   hoverTopic: boolean = false;
@@ -25,15 +26,13 @@ export class HeaderComponent implements OnInit {
 
   constructor(
     private groupService: GroupService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private modalsService: ModalsService
   ) {}
 
   ngOnInit(): void {
-    this.groupService.getTopic().subscribe((topic) => {
-      this.topic = topic;
-    });
-    this.groupService.getGroupImgUrl().subscribe((groupImgUrl) => {
-      this.groupImgUrl = groupImgUrl;
+    this.groupService.getGroupSummary().subscribe((group) => {
+      this.group = group;
     });
   }
 
@@ -41,36 +40,39 @@ export class HeaderComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       this.imageFile = input.files[0];
-      const pastImgUrl = this.groupImgUrl;
-      this.groupImgUrl = URL.createObjectURL(this.imageFile);
+      const pastImgUrl = this.group.groupImgUrl;
+      this.group.groupImgUrl = URL.createObjectURL(this.imageFile);
       const formData = new FormData();
       formData.append('image', this.imageFile);
       const groupId = this.route.snapshot.paramMap.get('id');
 
       this.groupService.editGroupImg(formData, groupId!).subscribe({
         next: (newImageUrl) => {
-          this.groupService.setGroupImgUrl(newImageUrl);
-          this.groupImgUrl = newImageUrl;
+          this.groupService.updateGroupSummary({ groupImgUrl: newImageUrl });
+          this.group.groupImgUrl = newImageUrl;
         },
         error: () => {
           alert('Error al editar la imagen del grupo');
-          this.groupImgUrl = pastImgUrl;
+          this.group.groupImgUrl = pastImgUrl;
         },
       });
     }
   }
+  openGroupInfo() {
+    this.modalsService.openGroupInfo();
+  }
 
   enableTopicEdit() {
     this.editingTopic = true;
-    this.newTopic = this.topic;
+    this.newTopic = this.group.topic;
   }
 
   submitTopicEdit() {
-    if (this.newTopic && this.newTopic !== this.topic) {
+    if (this.newTopic && this.newTopic !== this.group.topic) {
       this.isTopicLoading = true;
       this.editingTopic = false;
-      const pastTopic = this.topic;
-      this.topic = this.newTopic;
+      const pastTopic = this.group.topic;
+      this.group.topic = this.newTopic;
       const groupId = this.route.snapshot.paramMap.get('id');
       this.groupService.editTopic(this.newTopic, groupId!).subscribe({
         next: () => {
@@ -83,7 +85,7 @@ export class HeaderComponent implements OnInit {
         error: () => {
           alert('No se pudo editar el topic');
           this.isTopicLoading = false;
-          this.topic = pastTopic;
+          this.group.topic = pastTopic;
         },
       });
     }

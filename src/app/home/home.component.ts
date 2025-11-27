@@ -35,6 +35,7 @@ export class HomeComponent implements OnInit {
   isCreateGroupOpen = false;
   isCalendarOpen = false;
   isMyUserOpen = false;
+  isGroupInfoOpen = false;
   constructor(
     private sockeService: SocketService,
     private modalsService: ModalsService,
@@ -51,6 +52,7 @@ export class HomeComponent implements OnInit {
     this.modalsService.openMyUser$.subscribe(
       (val) => (this.isMyUserOpen = val)
     );
+
     //así con todos los modals
     this.userService.getMyUser().subscribe(user=>{
       if(user&&user._id){

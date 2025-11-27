@@ -1,5 +1,6 @@
 export interface GroupMember {
-        serId: string,
+		_id?: string,
+        userId: string,
 		groupId:string,
 		role: 'admin' | 'member',
 }
