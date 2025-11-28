@@ -44,7 +44,6 @@ export class SocketService {
                 user: JSON.stringify(this.user),
               },
             });
-
             this.socket.on('connect', () => {
               this.socketReady = true;
             });
@@ -53,7 +52,6 @@ export class SocketService {
       },
     });
   }
-
   disconnect() {
     if (this.socket) {
       this.socket.disconnect();
@@ -75,7 +73,6 @@ export class SocketService {
       checkSocket();
     });
   }
-
   onNotification(): Observable<Notification> {
     return new Observable((observer) => {
       this.socket.on('notification', (data: Notification) => {
@@ -83,6 +80,5 @@ export class SocketService {
       });
     });
   }
-
   //onCall
 }

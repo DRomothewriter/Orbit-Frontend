@@ -7,7 +7,7 @@
                 {{ group.description || "Add group description" }}
             </p>
         </section>
-        <h1>Members</h1><button (click)="openAddMember()">Add member</button>
+        <h1>Members</h1><button (click)="openAddMembers()">Add member</button>
         <section class="group-members">
             <ul>
                 @for(member of groupMembers; track member._id){
@@ -26,6 +26,6 @@
     </article>
 </div>
 
-@if(isAddMemberOpen){
-    <app-add-member-modal></app-add-member-modal>
+@if(isAddMembersOpen){
+    <app-add-members-modal></app-add-members-modal>
 }

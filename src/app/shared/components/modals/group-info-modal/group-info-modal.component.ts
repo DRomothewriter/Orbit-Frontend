@@ -4,10 +4,11 @@ import { ModalsService } from '../../../services/modals.service';
 import { GroupService } from '../../../services/group.service';
 import { ActivatedRoute } from '@angular/router';
 import { Group } from '../../../types/group';
+import { AddMembersModalComponent } from '../add-members-modal/add-members-modal.component';
 
 @Component({
   selector: 'app-group-info-modal',
-  imports: [],
+  imports: [AddMembersModalComponent],
   templateUrl: './group-info-modal.component.html',
   styleUrl: './group-info-modal.component.scss',
 })

@@ -5,10 +5,12 @@ import { User } from '../../../types/user';
 import { ActivatedRoute } from '@angular/router';
 import { GroupService } from '../../../services/group.service';
 import { ModalsService } from '../../../services/modals.service';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-add-members-modal',
-  standalone: false,
+  standalone: true,
+  imports: [MatCheckboxModule],
   templateUrl: './add-members-modal.component.html',
   styleUrl: './add-members-modal.component.scss'
 })
