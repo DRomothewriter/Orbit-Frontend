@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ModalsService } from '../../../shared/services/modals.service';
 import { Group } from '../../../shared/types/group';
+import { GroupMember } from '../../../shared/types/group-member';
 
 @Component({
   selector: 'app-header',
@@ -24,6 +25,7 @@ export class HeaderComponent implements OnInit {
   isTopicLoading = false;
   isTopicSuccess = false;
 
+  myGroupMember: GroupMember = {} as GroupMember;
   constructor(
     private groupService: GroupService,
     private route: ActivatedRoute,
@@ -31,8 +33,16 @@ export class HeaderComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.groupService.getGroupSummary().subscribe((group) => {
+    const groupId = this.route.snapshot.paramMap.get('id');
+    this.groupService.getGroupSummary(groupId!).subscribe((group) => {
       this.group = group;
+      if(group._id){        
+        this.groupService.getMyGroupMember(group._id).subscribe({
+          next: (response: GroupMember) => {
+            this.myGroupMember = response;
+          },
+        });
+      }
     });
   }
 
@@ -51,9 +61,10 @@ export class HeaderComponent implements OnInit {
           this.groupService.updateGroupSummary({ groupImgUrl: newImageUrl });
           this.group.groupImgUrl = newImageUrl;
         },
-        error: () => {
+        error: (e) => {
           alert('Error al editar la imagen del grupo');
           this.group.groupImgUrl = pastImgUrl;
+          console.log('Error al editar la imagen del grupo', e)
         },
       });
     }
@@ -82,12 +93,15 @@ export class HeaderComponent implements OnInit {
             this.isTopicSuccess = false;
           }, 1500);
         },
-        error: () => {
+        error: (e) => {
           alert('No se pudo editar el topic');
           this.isTopicLoading = false;
           this.group.topic = pastTopic;
+          console.log('Error al editar la imagen del grupo', e)
         },
       });
+    } else {
+      this.editingTopic = false;
     }
   }
 }

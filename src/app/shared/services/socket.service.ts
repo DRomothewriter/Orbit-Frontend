@@ -31,9 +31,9 @@ export class SocketService {
     this.userService.getMyUser().subscribe({
       next: (user) => {
         this.user = user;
-        this.groupService.getMyGroups().subscribe({
-          next: (myGroups: Group[]) => {
-            const groupIds = myGroups.map((g) => g._id);
+        this.groupService.getAllMyGroups().subscribe({
+          next: (allMyGroups: Group[]) => {
+            const groupIds = allMyGroups.map((g) => g._id);
             this.socket = io(environment.apiUrl, {
               auth: {
                 token: this.tokenService.getToken(),

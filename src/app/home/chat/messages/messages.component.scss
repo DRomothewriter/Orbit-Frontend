@@ -1,11 +1,13 @@
 @use "../../../../colors" as *;
-
+:host {
+    margin-top: auto;
+}
 .messages-list {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
-    flex-direction: column;
+    flex-direction: column; 
     gap: 1rem;
 }
 

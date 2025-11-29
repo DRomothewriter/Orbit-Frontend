@@ -2,11 +2,14 @@
     <div class="group-image-container">
         <img
             [src]="
-                group.groupImgUrl || 'https://placehold.co/40x40/533483/ffffff?text=U'
+                group.groupImgUrl ||
+                'https://placehold.co/40x40/533483/ffffff?text=U'
             "
             alt="group-image"
             class="group-image"
         />
+        <!-- Esto de los permisos podríamos hacerlo en una directiva -->
+        @if(myGroupMember.role === 'admin'){
         <label class="edit-groupImg-btn">
             <input
                 type="file"
@@ -16,6 +19,7 @@
             />
             <mat-icon>edit</mat-icon>
         </label>
+        }
     </div>
     <div class="topic-edit-container" [class.editing]="editingTopic">
         @if(!editingTopic){
@@ -23,11 +27,11 @@
             class="topic-display"
             (mouseenter)="hoverTopic = true"
             (mouseleave)="hoverTopic = false"
-            (click)="enableTopicEdit()"
-            [class.hovered]="hoverTopic"
+            (click)="myGroupMember.role === 'admin' && enableTopicEdit()" 
+            [class.hovered]="myGroupMember.role === 'admin' &&  hoverTopic"
         >
             {{ group.topic }}
-            @if(hoverTopic){
+            @if(myGroupMember.role === 'admin' && hoverTopic){
             <mat-icon class="edit-icon">edit</mat-icon>
             } @if(isTopicLoading){
             <img src="assets/loading.gif" class="topic-loader" alt="Loading" />
@@ -50,7 +54,11 @@
         <button mat-icon-button aria-label="Llamada">
             <mat-icon>call</mat-icon>
         </button>
-        <button mat-icon-button aria-label="Info del grupo" (click)="openGroupInfo()">
+        <button
+            mat-icon-button
+            aria-label="Info del grupo"
+            (click)="openGroupInfo()"
+        >
             <mat-icon>info</mat-icon>
         </button>
     </nav>

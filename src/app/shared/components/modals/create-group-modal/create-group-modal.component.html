@@ -36,21 +36,20 @@
                     </mat-form-field>
 
                     <div class="contacts-list">
-                        @for(friendship of friends; track friendship._id){
+                        @for(friend of friends; track friend._id){
                         <div class="contact-item">
                             <div class="contact-checkbox">
                                 <mat-checkbox
-                                [(ngModel)]="friendship.selected"
-                                (change)="onFriendSelected(friendship.friendId._id!)"
+                                    [(ngModel)]="friend.selected"
+                                    (change)="onFriendSelected(friend._id!)"
                                 ></mat-checkbox>
                             </div>
                             <div class="contact-avatar">
-                                <img
-                                    [src]="friendAvatarImg"
-                                    alt="friendship.friendId"
-                                />
+                                <img [src]="friendAvatarImg" alt="Avatar" />
                             </div>
-                            <span class="contact-name">{{ friendship.friendId.username }}</span>
+                            <span class="contact-name">{{
+                                friend.username
+                            }}</span>
                         </div>
                         }
                     </div>
