@@ -1,30 +1,37 @@
 @use "../../../../colors" as *;
 .sidebar-header {
-    height: 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 20px;
-    border-radius: 5px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    border-radius: 0.75rem;
+    background: rgba($color-bg-card, 0.3);
     cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    
     &:hover {
-        background-color: $color-primary-light;
+        background: rgba($color-primary-light, 0.15);
+        border-color: rgba($color-primary-light, 0.3);
+        transform: translateY(-1px);
     }
 
     h3 {
         margin: 0;
         color: $color-text-main;
         font-weight: 600;
-        font-size: 1.1rem;
-        letter-spacing: 0.01em;
+        font-size: 1.15rem;
+        letter-spacing: 0.02em;
     }
 
     .add-button {
         color: $color-text-secondary;
-        margin-top: 8px;
-        transition: color 0.2s;
+        transition: all 0.3s ease;
+        
         &:hover {
             color: $color-primary-light;
+            background: rgba($color-primary-light, 0.1);
         }
     }
 }
