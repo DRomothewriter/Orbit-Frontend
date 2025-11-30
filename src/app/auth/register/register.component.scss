@@ -258,6 +258,46 @@
   }
 }
 
+/* === ESTILOS PERSONALIZADOS PARA MAT-FORM-FIELD === */
+::ng-deep .register-form .mat-mdc-form-field {
+  width: 100%;
+  
+  .mdc-notched-outline > * {
+    border-color: $color-border !important;
+  }
+  
+  .mdc-text-field--filled {
+    background-color: rgba($color-bg-main, 0.2) !important;
+  }
+  
+  .mat-mdc-input-element {
+    color: $color-text-main !important;
+  }
+  
+  .mdc-floating-label {
+    color: $color-text-secondary !important;
+  }
+  
+  /* Al enfocar */
+  &.mat-focused {
+    .mdc-notched-outline > * {
+      border-color: $color-primary-light !important;
+    }
+    
+    .mdc-text-field--filled {
+      background-color: rgba($color-bg-main, 0.3) !important;
+    }
+    
+    .mdc-floating-label {
+      color: $color-primary-light !important;
+    }
+  }
+  
+  .mdc-line-ripple {
+    display: none;
+  }
+}
+
 /* === MENSAJE DE ERROR === */
 .error-message {
   color: $color-error;
