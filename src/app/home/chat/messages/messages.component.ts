@@ -11,10 +11,12 @@ import { SocketService } from '../../../shared/services/socket.service';
 import { ActivatedRoute } from '@angular/router';
 import { UserService } from '../../../shared/services/user.service';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon'; // Importación vital
 
 @Component({
   selector: 'app-messages',
-  imports: [CommonModule],
+  standalone: true,
+  imports: [CommonModule, MatIconModule], // Agregado aquí
   templateUrl: './messages.component.html',
   styleUrl: './messages.component.scss',
 })
@@ -38,8 +40,10 @@ export class MessagesComponent implements OnInit, AfterViewInit {
 
   scrollToBottom() {
     setTimeout(() => {
-      this.lastRef.nativeElement.scrollIntoView({ behavior: 'smooth' });
-    }, 0);
+      if (this.lastRef) {
+        this.lastRef.nativeElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
   }
 
   ngOnInit(): void {
@@ -53,7 +57,7 @@ export class MessagesComponent implements OnInit, AfterViewInit {
         this.groupId = groupId;
         this.messageService.getGroupMessages(groupId).subscribe({
           next: (response: any) => {
-            this.messages = response.messages;
+            this.messages = Array.isArray(response) ? response : response.messages || [];
             this.scrollToBottom();
           },
         });
@@ -62,7 +66,6 @@ export class MessagesComponent implements OnInit, AfterViewInit {
 
     this.socketService.onMessage().subscribe({
       next: (response) => {
-        //Verificar si es del grupo seleccionado. Si no, subir la card del grupo y sumar 1 al contador de mensajes sin leer.
         if (response.groupId === this.groupId) {
           this.messages.push(response);
           this.scrollToBottom();

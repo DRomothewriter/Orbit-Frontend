@@ -3,129 +3,170 @@
 @use "./colors" as *;
 @include mat.core();
 
-/* --- TEMA PERSONALIZADO DE MATERIAL --- */
-// (Aquí iría la definición de paletas)
+h1, h2, h3 {
+    letter-spacing: 0.05em; 
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3); 
+    margin: 0;
+}
 
-/* --- ESTILOS GLOBALES DE LA APP (¡CORREGIDO!) --- */
 html {
     height: 100%;
 }
 
 body {
-    min-height: 100vh; /* Altura mínima de la pantalla */
+    min-height: 100vh;
     margin: 0;
     font-family: "Poppins", sans-serif;
-    background: linear-gradient($color-primary 0%, $color-secondary 100%);
+    background-color: #0f111a; 
     color: $color-text-main;
     position: relative;
-    overflow: hidden; /* Evita scroll*/
-    box-sizing: border-box; /* Asegura que el padding no desborde */
+    overflow-x: hidden; 
+    box-sizing: border-box;
     z-index: 0;
-}
-body::before,
-body::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: -1;
-    transition: opacity 0.3s;
+
+    &::before, &::after {
+        content: '';
+        position: fixed; 
+        border-radius: 50%;
+        filter: blur(100px); 
+        z-index: -1;
+        opacity: 0.6;
+        will-change: transform;
+        animation: float 20s infinite alternate ease-in-out;
+    }
+
+    &::before {
+        width: 60vw;
+        height: 60vw;
+        background: radial-gradient(circle, $color-primary 20%, transparent 70%);
+        top: -20%;
+        left: -20%;
+    }
+
+
+    &::after {
+        width: 70vw;
+        height: 70vw;
+        background: radial-gradient(circle, $color-secondary 20%, transparent 70%);
+        bottom: -20%;
+        right: -20%;
+        animation-delay: -10s; 
+    }
 }
 
-body::before {
-    width: 520px;
-    height: 520px;
-    opacity: 1;
-    filter: blur(180px);
-    background: radial-gradient(circle, $color-primary 70%, $color-primary-light 100%);
-    top: 80px;
-    left: -80px;
+@keyframes float {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(30px, 50px) scale(1.1); }
 }
 
-body::after {
-    width: 620px;
-    height: 620px;
-    opacity: 0.3;
-    filter: blur(250px);
-    background: radial-gradient(circle, $color-secondary 70%, $color-secondary-light 100%);
-    bottom: -80px;
-    right: 180px;
+@keyframes float-reverse {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(-50px, -30px) scale(1.05); }
 }
-/* --- CLASES DE ESTILO GLOBALES --- */
 
 .glass-card {
-    background: rgba($color-text-main, 0.05);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba($color-text-main, 0.03);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-radius: 1.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .accent-button {
     background-color: $color-primary !important;
     color: $color-text-main !important;
     transition: all 0.3s ease;
-}
-.accent-button:hover {
-    background-color: $color-primary-light !important;
+    box-shadow: 0 4px 15px rgba($color-primary, 0.4); 
+
+    &:hover {
+        background-color: $color-primary-light !important;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba($color-primary-light, 0.5);
+    }
+    
+    &:active {
+        transform: translateY(0);
+    }
 }
 
 .accent-link {
-    font-size: 0.875rem; /* 14px */
-    color: $color-primary-light; /* indigo-400 */
+    font-size: 0.875rem;
+    color: $color-primary-light;
     text-decoration: none;
     transition: all 0.3s ease;
-}
-.accent-link:hover {
-    text-decoration: underline;
+    position: relative;
+    
+    &::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 1px;
+        bottom: -2px;
+        left: 0;
+        background-color: $color-primary-light;
+        transition: width 0.3s;
+    }
+
+    &:hover::after {
+        width: 100%;
+    }
 }
 
 .divider {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem; /* 8px */
-    margin: 1.5rem 0; /* 24px */
+    gap: 1rem;
+    margin: 1.5rem 0;
     color:$color-text-secondary;
-}
-.divider::before,
-.divider::after {
-    content: "";
-    height: 1px;
-    flex-grow: 1;
-    background-color: $color-border;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+
+    &::before, &::after {
+        content: "";
+        height: 1px;
+        flex-grow: 1;
+        background: linear-gradient(90deg, transparent, $color-border, transparent); 
+    }
 }
 
-/* --- ANULACIÓN DE ESTILOS DE ANGULAR MATERIAL --- */
-
-/* Estilo para mat-form-field */
 .mat-mdc-form-field.mat-mdc-form-field {
     width: 100%;
+    
     .mdc-notched-outline > * {
         border-color: $color-border !important;
     }
+    
     .mdc-text-field--filled {
-        background-color: rgba($color-bg-main, 0.2) !important;
+        background-color: rgba(0, 0, 0, 0.25) !important;
+        border-radius: 8px 8px 0 0;
     }
+    
     .mat-mdc-input-element {
         color: $color-text-main !important;
+        caret-color: $color-primary-light;
     }
+    
     .mdc-floating-label {
         color: $color-text-secondary !important;
     }
-    /* Al enfocar */
+    
     &.mat-focused {
         .mdc-notched-outline > * {
             border-color: $color-primary-light !important;
+            border-width: 2px;
         }
         .mdc-text-field--filled {
-            background-color: rgba($color-bg-main, 0.3) !important;
+            background-color: rgba(0, 0, 0, 0.35) !important;
         }
         .mdc-floating-label {
             color: $color-primary-light !important;
         }
     }
+    
     .mdc-line-ripple {
         display: none;
     }

@@ -1,17 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { ModalsService } from '../../../services/modals.service';
-
-interface CalendarEvent {
-  id: number;
-  date: Date;
-  title: string;
-  color: string;
-  description: string;
-  participants: string[];
-}
+import { EventsService, CalendarEvent } from '../../../services/events.service';
 
 @Component({
   selector: 'app-calendar-modal',
@@ -24,39 +16,13 @@ export class CalendarModalComponent implements OnInit {
   currentDate: Date = new Date();
   selectedDate: Date = new Date();
 
-  events: CalendarEvent[] = [
-    {
-      id: 1,
-      date: new Date(2025, 9, 16, 10, 30),
-      title: 'Reunión de Equipo',
-      color: 'teal',
-      description: 'Revisión semanal de avances del proyecto.',
-      participants: ['Ana', 'Carlos'],
-    },
-    {
-      id: 2,
-      date: new Date(2025, 9, 22, 18, 0),
-      title: 'Entrega: Onboarding',
-      color: 'orange',
-      description:
-        'Fecha límite para entregar el diseño del flujo de onboarding.',
-      participants: ['Tú', 'Ana'],
-    },
-    {
-      id: 3,
-      date: new Date(2025, 9, 2, 14, 0),
-      title: 'Llamada con Cliente',
-      color: 'sky',
-      description: 'Discutir feedback sobre el último prototipo.',
-      participants: ['Tú', 'Cliente X'],
-    },
-  ];
+  events: CalendarEvent[] = [];
+  daysInView: any[] = []; // Definida para evitar el error NG9
 
   showCreateEventModal = false;
   showViewEventModal = false;
   selectedEvent: CalendarEvent | null = null;
 
-  // Form data
   eventForm = {
     title: '',
     date: '',
@@ -65,31 +31,27 @@ export class CalendarModalComponent implements OnInit {
     description: '',
   };
 
-  constructor(private modalsService: ModalsService){}
+  constructor(
+    private modalsService: ModalsService,
+    private eventsService: EventsService,
+    private cdr: ChangeDetectorRef
+  ){}
+
   ngOnInit(): void {
-    this.renderCalendar();
-    this.renderAgenda();
-  }
-
-  get monthYear(): string {
-    return `${this.currentDate.toLocaleDateString('es-ES', {
-      month: 'long',
-    })} ${this.currentDate.getFullYear()}`;
-  }
-
-  get agendaDate(): string {
-    return this.selectedDate.toLocaleDateString('es-ES', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
+    this.eventsService.getEvents().subscribe(events => {
+        this.events = events;
+        this.generateCalendarDays();
+        this.cdr.detectChanges();
     });
   }
 
-  get weekDays(): string[] {
-    return ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  private isSameDate(date1: Date, date2: Date): boolean {
+    return date1.getDate() === date2.getDate() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getFullYear() === date2.getFullYear();
   }
 
-  get calendarDays(): any[] {
+  generateCalendarDays() {
     const year = this.currentDate.getFullYear();
     const month = this.currentDate.getMonth();
     const firstDayOfMonth = new Date(year, month, 1).getDay();
@@ -97,67 +59,103 @@ export class CalendarModalComponent implements OnInit {
 
     const days: any[] = [];
 
-    // Add empty days for the beginning of the month
     for (let i = 0; i < firstDayOfMonth; i++) {
       days.push({ isEmpty: true });
     }
 
-    // Add actual days
     for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, month, day);
-      const hasEvents = this.events.some(
-        (e) => e.date.toDateString() === date.toDateString()
-      );
-      const isToday = date.toDateString() === new Date().toDateString();
-      const isSelected =
-        date.toDateString() === this.selectedDate.toDateString();
+      const dateToCheck = new Date(year, month, day);
+      
+      const hasEvents = this.events.some(e => {
+          const eventDate = new Date(e.date);
+          return this.isSameDate(eventDate, dateToCheck);
+      });
+
+      const isToday = this.isSameDate(dateToCheck, new Date());
+      const isSelected = this.isSameDate(dateToCheck, this.selectedDate);
 
       days.push({
         day,
-        date,
-        hasEvents,
+        date: dateToCheck,
+        hasEvents, 
         isToday,
         isSelected,
       });
     }
+    
+    this.daysInView = days;
+  }
 
-    return days;
+  get monthYear(): string {
+    return `${this.currentDate.toLocaleDateString('es-ES', { month: 'long' })} ${this.currentDate.getFullYear()}`;
+  }
+
+  get agendaDate(): string {
+    return this.selectedDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+  }
+
+  get weekDays(): string[] {
+    return ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
   }
 
   get agendaEvents(): CalendarEvent[] {
     return this.events
-      .filter((e) => e.date.toDateString() === this.selectedDate.toDateString())
-      .sort((a, b) => a.date.getTime() - b.date.getTime());
+      .filter((e) => this.isSameDate(new Date(e.date), this.selectedDate))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }
 
   prevMonth(): void {
-    this.currentDate = new Date(
-      this.currentDate.getFullYear(),
-      this.currentDate.getMonth() - 1,
-      1
-    );
+    this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() - 1, 1);
+    this.generateCalendarDays();
   }
 
   nextMonth(): void {
-    this.currentDate = new Date(
-      this.currentDate.getFullYear(),
-      this.currentDate.getMonth() + 1,
-      1
-    );
+    this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 1);
+    this.generateCalendarDays();
   }
 
   goToToday(): void {
     this.currentDate = new Date();
     this.selectedDate = new Date();
+    this.generateCalendarDays();
   }
 
   selectDate(date: Date): void {
     this.selectedDate = date;
+    this.generateCalendarDays();
   }
 
   openCreateEventModal(): void {
-    this.eventForm.date = this.selectedDate.toISOString().split('T')[0];
+    const year = this.selectedDate.getFullYear();
+    const month = (this.selectedDate.getMonth() + 1).toString().padStart(2, '0');
+    const day = this.selectedDate.getDate().toString().padStart(2, '0');
+    this.eventForm.date = `${year}-${month}-${day}`;
     this.showCreateEventModal = true;
+  }
+
+  createEvent(): void {
+    if (!this.eventForm.title || !this.eventForm.date) return;
+
+    const [year, month, day] = this.eventForm.date.split('-').map(Number);
+    let hour = 0, minute = 0;
+    
+    if(this.eventForm.time) {
+        [hour, minute] = this.eventForm.time.split(':').map(Number);
+    }
+
+    const eventDate = new Date(year, month - 1, day, hour, minute);
+
+    const newEvent: CalendarEvent = {
+      id: Date.now(),
+      date: eventDate,
+      title: this.eventForm.title,
+      color: 'purple',
+      description: this.eventForm.description || '',
+      participants: []
+    };
+
+    this.eventsService.addEvent(newEvent);
+    this.closeCreateEventModal();
   }
 
   closeCreateEventModal(): void {
@@ -175,80 +173,22 @@ export class CalendarModalComponent implements OnInit {
     this.selectedEvent = null;
   }
 
-  createEvent(): void {
-    if (!this.eventForm.title || !this.eventForm.date) return;
-
-    const [year, month, day] = this.eventForm.date.split('-');
-    const [hour, minute] = this.eventForm.time.split(':');
-
-    const newEvent: CalendarEvent = {
-      id: this.events.length + 1,
-      date: new Date(
-        parseInt(year),
-        parseInt(month) - 1,
-        parseInt(day),
-        parseInt(hour || '0'),
-        parseInt(minute || '0')
-      ),
-      title: this.eventForm.title,
-      color: 'rose',
-      description: this.eventForm.description,
-      participants: this.eventForm.participants
-        .split(',')
-        .map((p) => p.trim())
-        .filter((p) => p),
-    };
-
-    this.events.push(newEvent);
-    this.closeCreateEventModal();
-  }
-
   private resetForm(): void {
-    this.eventForm = {
-      title: '',
-      date: '',
-      time: '',
-      participants: '',
-      description: '',
-    };
+    this.eventForm = { title: '', date: '', time: '', participants: '', description: '' };
   }
 
-  // Métodos para mantener compatibilidad con el código original
-  renderCalendar(): void {
-    // Implementado con getters
-  }
-
-  renderAgenda(): void {
-    // Implementado con getters
-  }
-
-  toggleModal(modal: string, show: boolean): void {
-    if (modal === 'create-event-modal') {
-      this.showCreateEventModal = show;
-    } else if (modal === 'view-event-modal') {
-      this.showViewEventModal = show;
-    }
-  }
-
-  viewEvent(eventId: number): void {
-    const event = this.events.find((e) => e.id === eventId);
-    if (event) {
-      this.openViewEventModal(event);
-    }
-  }
   getDayClasses(day: any): string {
-    const baseClasses =
-      'calendar-day bg-white/5 p-2 flex flex-col cursor-pointer transition-colors duration-200';
-    const selectedClass = day.isSelected ? 'day-selected' : '';
-    const emptyClass = day.isEmpty ? 'opacity-50' : '';
-
-    return `${baseClasses} ${selectedClass} ${emptyClass}`.trim();
+    const baseClasses = 'calendar-day bg-white/5 p-2 flex flex-col items-center justify-start cursor-pointer transition-colors duration-200 h-20 relative border border-transparent';
+    const selectedClass = day.isSelected ? 'day-selected border-purple-500 bg-white/10 shadow-inner' : 'hover:bg-white/10';
+    const emptyClass = day.isEmpty ? 'opacity-0 pointer-events-none' : '';
+    return `${baseClasses} ${selectedClass} ${emptyClass}`;
   }
 
   getDayNumberClasses(day: any): string {
+    const base = 'w-8 h-8 flex items-center justify-center rounded-full text-sm z-10';
     return day.isToday
-      ? 'font-semibold bg-indigo-500 rounded-full w-7 h-7 flex items-center justify-center'
-      : 'font-semibold';
+      ? `${base} bg-indigo-500 font-bold text-white shadow-lg`
+      : `${base} font-medium text-gray-300`;
   }
 
   closeCalendar(){

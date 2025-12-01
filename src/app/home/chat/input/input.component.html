@@ -1,13 +1,12 @@
 <div class="input-container">
     <form (ngSubmit)="handleSubmit()">
-        <input
-            type="text"
-            [(ngModel)]="message"
-            name="message"
-            #messageInput
-            placeholder="Escribe un mensaje..."
-        />
-        <label class="image-upload">
+        <!-- Botón para Eventos -->
+        <button type="button" class="icon-btn" (click)="openEventModal()" title="Crear Evento">
+            <mat-icon>event</mat-icon>
+        </button>
+
+        <!-- Botón para Imágenes -->
+        <label class="image-upload icon-btn">
             <input
                 type="file"
                 accept="image/*"
@@ -17,9 +16,19 @@
             <mat-icon>image</mat-icon>
         </label>
 
-        <button type="submit" [disabled]="!message.trim() && !imageFile">
+        <input
+            type="text"
+            [(ngModel)]="message"
+            name="message"
+            #messageInput
+            placeholder="Escribe un mensaje..."
+            autocomplete="off"
+        />
+
+        <button type="submit" [disabled]="!message.trim() && !imageFile" class="send-btn">
             <mat-icon>send</mat-icon>
         </button>
+
         @if(imagePreview){
             <div class="image-preview">
                 <img [src]="imagePreview" alt="Imagen a enviar" />
@@ -30,3 +39,11 @@
         }
     </form>
 </div>
+
+<!-- Modal de Creación de Evento -->
+@if(showEventModal) {
+    <app-create-event-modal 
+        (onClose)="closeEventModal()" 
+        (onCreate)="handleCreateEvent($event)">
+    </app-create-event-modal>
+}

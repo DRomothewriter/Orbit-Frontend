@@ -2,13 +2,18 @@
 
 nav {
     display: flex;
-    align-items: center;
+    align-items: center; /* Centra verticalmente los botones y el input */
     gap: 0.75rem;
-    padding: 1.25rem 1.5rem;
-    background: rgba($color-bg-card, 0.3);
-    border-radius: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    margin-bottom: 1.5rem;
+    padding: 1rem 1.5rem; /* Espaciado interno para que no se vea aplastado */
+    margin-bottom: 1.5rem; /* Separación con el contenido de abajo */
+
+    /* Estilos Glassmorphism */
+    background: rgba(31, 41, 55, 0.4); /* Más transparente */
+    backdrop-filter: blur(16px); /* El truco del vidrio */
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
 
     button {
         background: transparent;

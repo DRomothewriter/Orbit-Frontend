@@ -4,5 +4,6 @@ export enum MessageType {
     VOICE = 'voice',
     VIDEO = 'video',
     EMOJI = 'emoji',
-    MEDIA = 'multimedia'
+    MEDIA = 'multimedia',
+    EVENT = 'event'
 }

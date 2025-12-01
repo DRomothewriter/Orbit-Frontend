@@ -1,23 +1,122 @@
-<nav class="navbar ">
+<nav class="navbar">
     <div class="navbar-brand">
         <h1>Orbit</h1>
     </div>
     <div class="navbar-menu">
-        <button mat-icon-button class="nav-icon" (click)="openCalendarModal()">
+        <button mat-icon-button class="nav-icon" (click)="openCalendarModal()" matTooltip="Calendario">
             <mat-icon>calendar_month</mat-icon>
         </button>
-        <button mat-icon-button class="nav-icon">
-            <mat-icon>notifications</mat-icon>
-        </button>
-        <button mat-icon-button class="nav-icon">
-            <mat-icon>settings</mat-icon>
-        </button>
+        
+        <!-- === BOTÓN DE NOTIFICACIONES === -->
+        <div class="dropdown-container" (appClickOutside)="closeNotifications()">
+            <button mat-icon-button class="nav-icon relative" (click)="toggleNotifications()" [class.active]="isNotificationsOpen">
+                <mat-icon>notifications</mat-icon>
+                @if(unreadCount > 0) {
+                    <span class="badge">{{ unreadCount }}</span>
+                }
+            </button>
+
+            <!-- Panel de Notificaciones -->
+            @if(isNotificationsOpen) {
+                <div class="notifications-dropdown glass-card">
+                    <div class="dropdown-header">
+                        <span>Notificaciones</span>
+                        @if(unreadCount > 0){ <button class="mark-read" (click)="markAsRead()">Limpiar todo</button> }
+                    </div>
+                    
+                    <div class="notifications-list">
+                        @for(notif of notifications; track $index) {
+                            
+                            <!-- Tipo: Solicitud de Amistad -->
+                            @if(notif.type === 'friend_request') {
+                                <div class="notification-item request">
+                                    <div class="notif-avatar">
+                                        <img [src]="notif.data.friendId?.profileImgUrl || 'https://placehold.co/40x40/533483/ffffff?text=U'" alt="Avatar">
+                                        <div class="icon-badge"><mat-icon>person_add</mat-icon></div>
+                                    </div>
+                                    <div class="notif-content">
+                                        <p class="message">
+                                            <strong>{{ notif.data.friendId?.username || 'Usuario' }}</strong> quiere ser tu amigo.
+                                        </p>
+                                        <div class="actions">
+                                            <button class="btn-accept" (click)="acceptRequest(notif.data._id, $event)">Confirmar</button>
+                                            <button class="btn-reject" (click)="rejectRequest(notif.data._id, $event)">Borrar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Tipo: Mensaje -->
+                            @if(notif.type === 'message') {
+                                <div class="notification-item message">
+                                    <div class="notif-avatar">
+                                        <img [src]="notif.data.avatar" alt="Avatar">
+                                        <div class="icon-badge msg"><mat-icon>chat</mat-icon></div>
+                                    </div>
+                                    <div class="notif-content">
+                                        <p class="title"><strong>{{ notif.data.username }}</strong></p>
+                                        <p class="text">{{ notif.data.text }}</p>
+                                        <span class="time">{{ notif.timestamp | date:'shortTime' }}</span>
+                                    </div>
+                                </div>
+                            }
+
+                        } @empty {
+                            <div class="empty-state">
+                                <mat-icon>notifications_off</mat-icon>
+                                <p>No tienes notificaciones nuevas</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+        
+        <!-- Botón de Configuración -->
+        <div class="dropdown-container" (appClickOutside)="closeSettings()">
+            <button mat-icon-button class="nav-icon" (click)="toggleSettings()" [class.active]="isSettingsOpen">
+                <mat-icon>settings</mat-icon>
+            </button>
+
+            @if(isSettingsOpen) {
+                <div class="settings-dropdown glass-card">
+                    <div class="dropdown-header">Configuración</div>
+                    <ul>
+                        <li (click)="handleSettingClick('Cuenta')">
+                            <mat-icon>person</mat-icon>
+                            <span>Cuenta</span>
+                        </li>
+                        <li (click)="handleSettingClick('Apariencia')">
+                            <mat-icon>palette</mat-icon>
+                            <span>Apariencia</span>
+                        </li>
+                        <li (click)="handleSettingClick('Notificaciones')">
+                            <mat-icon>notifications_active</mat-icon>
+                            <span>Notificaciones</span>
+                        </li>
+                        <li (click)="handleSettingClick('Idioma')">
+                            <mat-icon>language</mat-icon>
+                            <span>Idioma</span>
+                        </li>
+                        <!-- Botón de Cerrar Sesión REAL -->
+                        <li class="danger" (click)="handleLogout()">
+                            <mat-icon>logout</mat-icon>
+                            <span>Cerrar Sesión</span>
+                        </li>
+                    </ul>
+                </div>
+            }
+        </div>
+
         <div class="user-profile" (click)="openMyuserModal()">
-            <img
-                [src]="user.profileImgUrl || 'https://placehold.co/40x40/533483/ffffff?text=U'"
-                alt="Usuario"
-                class="profile-pic"
-            />
+            <div class="avatar-container">
+                <img
+                    [src]="user.profileImgUrl || 'https://placehold.co/40x40/533483/ffffff?text=U'"
+                    alt="Usuario"
+                    class="profile-pic"
+                />
+                <span class="status-indicator" [ngClass]="user.status || 'offline'"></span>
+            </div>
         </div>
     </div>
 </nav>

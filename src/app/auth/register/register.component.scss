@@ -1,6 +1,7 @@
 @use '../../../colors' as *;
 @use 'sass:color';
-/* === CONTENEDOR PRINCIPAL (Estilo Login) === */
+
+/* Reutilizamos la estructura del Login para consistencia */
 .login-container {
   position: relative;
   min-height: 100dvh;
@@ -9,24 +10,23 @@
   justify-content: center;
   padding: 2rem 1rem;
   box-sizing: border-box;
-  overflow-y: auto;
-  overflow-x: hidden;
-  background: $color-bg-main;
-  color: $color-text-main;
-}
-
-/* === TARJETA (Estilo Login) === */
-.login-card {
-  width: 100%;
-  max-width: 60rem;
-  background: rgba($color-bg-card, 0.85);
-  border-radius: 1.5rem;
-  backdrop-filter: blur(10px);
-  box-sizing: border-box;
+  background: transparent; /* Fondo transparente */
   overflow: hidden;
 }
 
-/* === CONTENIDO (Grid de 2 columnas) === */
+.login-card {
+  width: 100%;
+  max-width: 65rem; /* Un poco más estrecho para registro */
+  background: rgba(20, 25, 40, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 2rem;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  overflow: hidden;
+  animation: zoomIn 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
 .card-content {
   display: grid;
   grid-template-columns: 1fr;
@@ -36,300 +36,163 @@
   }
 }
 
-/* === COLUMNA DE FORMULARIO === */
 .form-column {
   position: relative;
-  padding: 2rem;
+  padding: 3rem 2.5rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  box-sizing: border-box;
-
-  @media (max-width: 480px) {
-    padding: 1.5rem;
-  }
 }
 
-/* === BOTÓN DE REGRESAR === */
 .back-button {
   position: absolute;
   top: 1.5rem;
   left: 1.5rem;
-  color: $color-text-secondary !important;
-  transition: color 0.3s ease;
-
+  color: rgba(255,255,255,0.5) !important;
+  
   &:hover {
-    color: $color-text-main !important;
-  }
-
-  @media (max-width: 480px) {
-    top: 1.25rem;
-    left: 1.25rem;
+    color: white !important;
+    background: rgba(255,255,255,0.1);
   }
 }
 
-/* === CABECERA DEL FORMULARIO === */
 .form-header {
   text-align: center;
-  margin-bottom: 1.5rem;
-  margin-top: 2rem;
-
-  @media (max-width: 480px) {
-     margin-top: 2.5rem;
-  }
+  margin-bottom: 2rem;
+  margin-top: 1rem;
 
   h1 {
-    font-size: 2rem;
+    font-size: 2.2rem;
     font-weight: 700;
-    letter-spacing: 0.1em;
-    color: $color-text-main;
-
-    @media (max-width: 480px) {
-      font-size: 1.75rem;
-    }
+    margin-bottom: 0.5rem;
+    background: linear-gradient(90deg, #fff, $color-primary-light);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   p {
     font-size: 1rem;
     color: $color-text-secondary;
-    margin-top: 0.5rem;
-
-    @media (max-width: 480px) {
-      font-size: 0.9rem;
-    }
   }
 }
 
-/* === FORMULARIO === */
 .register-form {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
-.accent-link {
-  font-size: 0.875rem;
-  color: $color-primary-light;
-  font-weight: 500;
-  text-decoration: none;
-  transition: color 0.3s ease;
-
-  &:hover {
-    color:  color.adjust($color-primary-light, $lightness: 10%);
-  }
-}
-
-/* === BOTÓN DE REGISTRO (estilo login) === */
 .register-button {
   padding: 0.75rem;
-  font-size: 1.125rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 50px;
+  height: 50px;
   margin-top: 0.5rem;
   background: linear-gradient(90deg, $color-primary 0%, $color-secondary 100%);
-  color: $color-text-main;
-  border: none;
-  border-radius: 0.75rem;
-  cursor: pointer;
-  transition: background 0.3s;
+  color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba($color-primary, 0.3);
+  transition: all 0.3s ease;
 
   &:hover {
-    background: linear-gradient(90deg, $color-secondary 0%, $color-primary 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba($color-primary, 0.5);
+  }
+  
+  &:disabled {
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.3);
+      box-shadow: none;
+      transform: none;
   }
 }
 
-/* === DIVISOR === */
 .divider {
   display: flex;
   align-items: center;
   text-align: center;
-  color: $color-text-secondary;
-  font-size: 0.875rem;
-  margin: 1.25rem 0;
+  color: rgba(255,255,255,0.4);
+  font-size: 0.85rem;
+  margin: 1.5rem 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 
-  &::before,
-  &::after {
+  &::before, &::after {
     content: '';
     flex: 1;
-    border-bottom: 1px solid $color-border;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
   }
-
-  &::before {
-    margin-right: 0.5rem;
-  }
-
-  &::after {
-    margin-left: 0.5rem;
-  }
+  &::before { margin-right: 1rem; }
+  &::after { margin-left: 1rem; }
 }
 
-/* === BOTONES SOCIALES === */
 .social-buttons {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-  }
-}
-
-.social-button {
-  padding: 0.75rem;
-  font-weight: 500;
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  border: 1px solid $color-border !important;
-  color: $color-text-main !important;
-  background: rgba($color-bg-card, 0.15) !important;
-  transition: background-color 0.3s ease;
-
-  i {
-    font-size: 1.25rem;
-  }
-
-  &:hover {
-    background: rgba($color-bg-card, 0.25) !important;
-  }
 }
 
-/* === LINK DE REGISTRO/LOGIN === */
 .register-link {
   text-align: center;
-  font-size: 0.875rem;
+  font-size: 0.95rem;
   color: $color-text-secondary;
-  margin-top: 1.5rem;
+  margin-top: 2rem;
+  
+  a {
+      margin-left: 0.5rem;
+      font-weight: 600;
+      color: $color-primary-light;
+      text-decoration: none;
+      &:hover { color: white; }
+  }
 }
 
-/* === COLUMNA DE BIENVENIDA (copiada de login) === */
 .welcome-column {
+  background: linear-gradient(135deg, rgba($color-secondary, 0.15), rgba($color-primary, 0.15));
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba($color-bg-card, 0.03);
-  padding: 2.5rem 1.5rem;
-  border-left: 1px solid $color-border;
   text-align: center;
-  border-top-right-radius: 1.5rem;
-  border-bottom-right-radius: 1.5rem;
-  box-sizing: border-box;
+  padding: 3rem;
+  border-left: 1px solid rgba(255,255,255,0.05);
 
   .welcome-logo {
     width: 100px;
     height: 100px;
     border-radius: 50%;
-    margin-bottom: 1.5rem;
-    border: 2px solid rgba($color-primary, 0.8);
-    padding: 4px;
-    background: $color-bg-main;
+    margin-bottom: 2rem;
+    border: 3px solid rgba(255,255,255,0.1);
+    background: #0f111a;
   }
 
   h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: $color-text-main;
-    margin-bottom: 0.75rem;
-
-    @media (max-width: 480px) {
-      font-size: 1.25rem;
-    }
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 1rem;
   }
 
   p {
-    font-size: 0.95rem;
-    color: $color-text-secondary;
+    font-size: 1rem;
+    color: rgba(255,255,255,0.7);
     line-height: 1.6;
     max-width: 300px;
-    margin: 0 auto;
-
-    @media (max-width: 480px) {
-      font-size: 0.85rem;
-    }
   }
 
-  @media (max-width: 767px) {
+  @media (max-width: 768px) {
     display: none;
   }
 }
 
-/* === ESTILOS PERSONALIZADOS PARA MAT-FORM-FIELD === */
+@keyframes zoomIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Corrección de estilos de inputs */
 ::ng-deep .register-form .mat-mdc-form-field {
-  width: 100%;
-  
-  .mdc-notched-outline > * {
-    border-color: $color-border !important;
-  }
-  
-  .mdc-text-field--filled {
-    background-color: rgba($color-bg-main, 0.2) !important;
-  }
-  
-  .mat-mdc-input-element {
-    color: $color-text-main !important;
-  }
-  
-  .mdc-floating-label {
-    color: $color-text-secondary !important;
-  }
-  
-  /* Al enfocar */
-  &.mat-focused {
-    .mdc-notched-outline > * {
-      border-color: $color-primary-light !important;
-    }
-    
     .mdc-text-field--filled {
-      background-color: rgba($color-bg-main, 0.3) !important;
+        background-color: rgba(0,0,0,0.25) !important;
     }
-    
-    .mdc-floating-label {
-      color: $color-primary-light !important;
-    }
-  }
-  
-  .mdc-line-ripple {
-    display: none;
-  }
-}
-
-/* === MENSAJE DE ERROR === */
-.error-message {
-  color: $color-error;
-  background-color: rgba($color-error, 0.1);
-  border: 1px solid rgba($color-error, 0.5);
-  border-radius: 0.5rem;
-  padding: 0.75rem 1rem;
-  text-align: center;
-  font-weight: 500;
-  margin-top: 0.25rem;
-  margin-bottom: 0.5rem;
-}
-
-/* === MEDIA QUERIES ADICIONALES === */
-@media (max-width: 600px) {
-  .login-card {
-    border-radius: 1rem;
-  }
-
-  .form-column {
-    padding: 1.25rem;
-  }
-}
-
-@media (max-width: 400px) {
-  .register-button {
-    font-size: 1rem;
-    padding: 0.6rem;
-  }
-
-  .accent-link,
-  .register-link {
-    font-size: 0.8rem;
-  }
 }

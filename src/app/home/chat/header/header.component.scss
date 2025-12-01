@@ -1,9 +1,13 @@
 @use '../../../../colors' as *;
+
 header {
     display: flex;
     align-items: center;
     gap: 1rem;
-    border-radius: 1rem;
+    /* Removemos borde y fondo fijo si queremos que sea parte del glassmorphism global, 
+       o lo dejamos sutil */
+    background: transparent; 
+    padding: 0.5rem;
 
     img {
         width: 48px;
@@ -13,6 +17,7 @@ header {
         border: 2px solid $color-primary-light;
         background: $color-bg-main;
         margin-right: 0.5rem;
+        box-shadow: 0 0 10px rgba($color-primary, 0.3);
     }
 
     h2 {
@@ -20,8 +25,9 @@ header {
         margin: 0;
         font-size: 1.25rem;
         font-weight: 600;
-        color: $color-primary-light;
+        color: white;
         letter-spacing: 0.02em;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 
     .chat-nav {
@@ -31,20 +37,22 @@ header {
 
         button[mat-icon-button] {
             border-radius: 50%;
-            transition: background 0.2s, box-shadow 0.2s;
-            box-shadow: 0 2px 8px rgba($color-primary, 0.08);
+            transition: all 0.2s;
+            color: $color-text-secondary;
 
             mat-icon {
-                color: $color-secondary;
                 font-size: 24px;
-                margin: 0 0 2px 0;
             }
 
             &:hover {
-                background: rgba($color-secondary, 0.18);
-                mat-icon {
-                    color: $color-primary-light;
-                }
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+            }
+            
+            /* Estilo específico para el botón de eliminar */
+            &[color="warn"]:hover {
+                background: rgba(239, 68, 68, 0.15);
+                color: #ef4444;
             }
         }
     }

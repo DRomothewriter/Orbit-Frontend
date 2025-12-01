@@ -16,6 +16,7 @@ import { MyuserModalComponent } from '../shared/components/modals/myuser-modal/m
 
 @Component({
   selector: 'app-home',
+  standalone: true,
   imports: [
     CreateGroupModalComponent,
     CalendarModalComponent,
@@ -35,12 +36,14 @@ export class HomeComponent implements OnInit {
   isCreateGroupOpen = false;
   isCalendarOpen = false;
   isMyUserOpen = false;
+  
   constructor(
     private sockeService: SocketService,
     private modalsService: ModalsService,
     private router: Router,
     private userService: UserService
   ) {}
+  
   ngOnInit(): void {
     this.modalsService.openCreateGroup$.subscribe(
       (val) => (this.isCreateGroupOpen = val)
@@ -51,9 +54,9 @@ export class HomeComponent implements OnInit {
     this.modalsService.openMyUser$.subscribe(
       (val) => (this.isMyUserOpen = val)
     );
-    //así con todos los modals
+    
     this.userService.getMyUser().subscribe(user=>{
-      if(user&&user._id){
+      if(user && user._id){
         this.sockeService.connectWithGroups();
       }
     });

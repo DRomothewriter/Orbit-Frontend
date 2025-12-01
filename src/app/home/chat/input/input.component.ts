@@ -2,16 +2,19 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { MessageService } from '../../../shared/services/message.service';
 import { Message } from '../../../shared/types/message';
 import { UserService } from '../../../shared/services/user.service';
+import { EventsService } from '../../../shared/services/events.service';
 import { MessageType } from '../../../shared/types/message-type';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { User } from '../../../shared/types/user';
 import { ActivatedRoute } from '@angular/router';
-import { MatIcon } from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon'; // Importación vital
+import { CreateEventModalComponent } from '../../../shared/components/modals/create-event-modal/create-event-modal.component';
 
 @Component({
   selector: 'app-input',
-  imports: [FormsModule, CommonModule, MatIcon],
+  standalone: true,
+  imports: [FormsModule, CommonModule, MatIconModule, CreateEventModalComponent], // Agregado aquí
   templateUrl: './input.component.html',
   styleUrl: './input.component.scss',
 })
@@ -22,10 +25,13 @@ export class InputComponent implements OnInit {
 
   imageFile: File | null = null;
   imagePreview: string | null = null;
+  
+  showEventModal = false;
 
   constructor(
     private messageService: MessageService,
     private userService: UserService,
+    private eventsService: EventsService,
     private route: ActivatedRoute
   ) {
     this.user = this.userService.getCleanUser();
@@ -43,11 +49,11 @@ export class InputComponent implements OnInit {
       },
     });
   }
+
   handleImage(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       this.imageFile = input.files[0];
-
       this.imagePreview = URL.createObjectURL(this.imageFile);
     }
   }
@@ -56,17 +62,41 @@ export class InputComponent implements OnInit {
     this.imagePreview = null;
   }
 
+  openEventModal() {
+    this.showEventModal = true;
+  }
+
+  closeEventModal() {
+    this.showEventModal = false;
+  }
+
+  handleCreateEvent(eventData: {title: string, date: string}) {
+    // 1. Guardar evento
+    this.eventsService.createEventFromChat(eventData.title, eventData.date, this.user.username);
+
+    // 2. Enviar mensaje
+    const message: Message = {
+        username: this.user.username,
+        groupId: this.groupId,
+        userId: this.user._id!,
+        type: MessageType.EVENT,
+        text: `Evento creado: ${eventData.title}`,
+        eventData: {
+            title: eventData.title,
+            date: eventData.date,
+            participants: [this.user.username]
+        }
+    };
+
+    this.messageService.sendMessage(message).subscribe({
+        error: (err) => console.error('Error enviando evento', err)
+    });
+  }
+
   handleSubmit() {
     if (!this.message.trim() && !this.imageFile) return;
 
     if (this.imageFile) {
-      // Enviar imagen
-      console.log('File metadata:', {
-        name: this.imageFile.name,
-        size: this.imageFile.size,
-        type: this.imageFile.type,
-        lastModified: this.imageFile.lastModified,
-      });
       const formData = new FormData();
       formData.append('groupId', this.groupId);
       formData.append('username', this.user.username);
@@ -81,7 +111,6 @@ export class InputComponent implements OnInit {
         error: (err) => console.error('Error sending image:', err),
       });
     } else {
-      // Enviar mensaje de texto normal
       const messageData: Message = {
         username: this.user.username,
         groupId: this.groupId,
@@ -98,10 +127,4 @@ export class InputComponent implements OnInit {
   }
 
   @ViewChild('messageInput') messageInput!: ElementRef;
-
-  adjustHeight(e: Event): void {
-    const textarea = e.target as HTMLTextAreaElement;
-    textarea.style.height = 'auto';
-    textarea.style.height = textarea.scrollHeight + 'px';
-  }
 }

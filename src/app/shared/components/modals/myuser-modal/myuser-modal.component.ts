@@ -6,6 +6,7 @@ import { MatIcon } from '@angular/material/icon';
 import { ModalsService } from '../../../services/modals.service';
 import { UserService } from '../../../services/user.service';
 import { TokenService } from '../../../services/token.service';
+import { SocketService } from '../../../services/socket.service'; // Importar SocketService
 
 import { User } from '../../../types/user';
 import { UserStatus } from '../../../types/user-status';
@@ -30,9 +31,11 @@ export class MyuserModalComponent implements OnInit {
 
   isUsernameLoading = false;
   isUsernameSuccess = false;
+  
   constructor(
     private modalService: ModalsService,
     private userService: UserService,
+    private socketService: SocketService, // Inyectar
     private router: Router,
     private tokenService: TokenService,
     private googleAuthService: SocialAuthService
@@ -51,7 +54,13 @@ export class MyuserModalComponent implements OnInit {
   }
 
   setStatus(status: UserStatus) {
-    this.userService.changeUserStatus(status).subscribe(() => {});
+    // 1. Actualizar en Backend y Localmente (UserService maneja ambos)
+    this.userService.changeUserStatus(status).subscribe(() => {
+        // 2. Avisar a los amigos por Socket
+        this.socketService.emitStatusChange(status);
+    });
+    
+    // Optimista: Actualizar la vista inmediatamente
     this.user.status = status;
   }
 
@@ -74,7 +83,11 @@ export class MyuserModalComponent implements OnInit {
   handleLogout(): void {
     this.tokenService.logout();
     this.userService.clearUser();
-    this.googleAuthService.signOut();
+    this.socketService.disconnect(); // Desconectar socket
+    try {
+        this.googleAuthService.signOut();
+    } catch(e) {}
+    
     this.router.navigateByUrl('/login');
     this.closeModal();
   }
@@ -95,16 +108,15 @@ export class MyuserModalComponent implements OnInit {
         next: () => {
           this.isUsernameLoading = false;
           this.isUsernameSuccess = true;
-          setTimeout(() => (this.isUsernameSuccess = false), 3500); // Oculta el check después de 1.5s
+          setTimeout(() => (this.isUsernameSuccess = false), 3500); 
         },
         error: () => {
-          alert('Error changing de username');
+          alert('Error changing username');
           this.user.username = pastUsername;
           this.isUsernameLoading = false;
           this.isUsernameSuccess = false;
         },
       });
-      console.log('SubmitUsernameEdit');
     } else {
       this.editingUsername = false;
     }
