@@ -36,7 +36,6 @@ export class InputComponent implements OnInit {
       next: (params) => {
         const groupId = params.get('id')!;
         this.groupId = groupId;
-        console.log("input:",groupId)
       },
     });
     this.userService.getMyUser().subscribe({

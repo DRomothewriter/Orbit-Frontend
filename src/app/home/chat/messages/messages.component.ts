@@ -50,7 +50,6 @@ export class MessagesComponent implements OnInit {
     this.route.paramMap.subscribe({
       next: (params) => {
         const groupId = params.get('id')!;
-        console.log("here:", groupId)
         this.groupId = groupId;
         this.messageService.getGroupMessages(groupId).subscribe({
           next: (response: Message[]) => {

@@ -146,6 +146,7 @@ export class GroupInfoModalComponent implements OnInit {
   }
   closeMemberOptions(result: 'removed' | 'admin' | void) {
     this.isMemberGroupOptionsOpen = false;
+    console.log(result)
     if (result === 'removed') {
       alert(`${this.selectedMember!.userId.username} has been removed from group`)
       this.onNewGroupMembers();
