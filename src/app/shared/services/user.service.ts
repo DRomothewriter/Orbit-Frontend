@@ -59,7 +59,6 @@ export class UserService {
           this.user = user;
         })
       );
-    //Para guardarlo en user. Es como un cahceo
   }
 
   getAllUsers(): Observable<User[]> {

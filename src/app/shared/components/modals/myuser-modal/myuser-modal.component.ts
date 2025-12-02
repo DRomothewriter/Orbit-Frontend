@@ -95,7 +95,7 @@ export class MyuserModalComponent implements OnInit {
         next: () => {
           this.isUsernameLoading = false;
           this.isUsernameSuccess = true;
-          setTimeout(() => (this.isUsernameSuccess = false), 3500); // Oculta el check después de 1.5s
+          setTimeout(() => (this.isUsernameSuccess = false), 1500); // Oculta el check después de 1.5s
         },
         error: () => {
           alert('Error changing de username');
@@ -104,7 +104,6 @@ export class MyuserModalComponent implements OnInit {
           this.isUsernameSuccess = false;
         },
       });
-      console.log('SubmitUsernameEdit');
     } else {
       this.editingUsername = false;
     }

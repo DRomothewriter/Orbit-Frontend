@@ -34,7 +34,8 @@ export class InputComponent implements OnInit {
   ngOnInit(): void {
     this.route.paramMap.subscribe({
       next: (params) => {
-        this.groupId = params.get('id')!;
+        const groupId = params.get('id')!;
+        this.groupId = groupId;
       },
     });
     this.userService.getMyUser().subscribe({

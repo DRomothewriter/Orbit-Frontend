@@ -53,8 +53,6 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {
     this.googleAuthService.authState.subscribe((user: SocialUser) => {
       if (user) {
-        console.log(user);
-        console.log("here");
         this.onGoogleSignIn(user);
       }
     });

@@ -13,6 +13,7 @@ import { CreateGroupModalComponent } from '../shared/components/modals/create-gr
 import { CalendarModalComponent } from '../shared/components/modals/calendar-modal/calendar-modal.component';
 import { UserService } from '../shared/services/user.service';
 import { MyuserModalComponent } from '../shared/components/modals/myuser-modal/myuser-modal.component';
+import { CommunitiesNavComponent } from './communities-nav/communities-nav.component';
 
 @Component({
   selector: 'app-home',
@@ -27,6 +28,7 @@ import { MyuserModalComponent } from '../shared/components/modals/myuser-modal/m
     MatInputModule,
     MatButtonModule,
     MatIconModule,
+    CommunitiesNavComponent
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
@@ -35,6 +37,7 @@ export class HomeComponent implements OnInit {
   isCreateGroupOpen = false;
   isCalendarOpen = false;
   isMyUserOpen = false;
+  isGroupInfoOpen = false;
   constructor(
     private sockeService: SocketService,
     private modalsService: ModalsService,
@@ -51,11 +54,12 @@ export class HomeComponent implements OnInit {
     this.modalsService.openMyUser$.subscribe(
       (val) => (this.isMyUserOpen = val)
     );
-    //así con todos los modals
+
     this.userService.getMyUser().subscribe(user=>{
       if(user&&user._id){
         this.sockeService.connectWithGroups();
       }
+      //get my communities
     });
   }
 

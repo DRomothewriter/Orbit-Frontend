@@ -39,6 +39,12 @@
             border: 2px solid $color-border;
             object-fit: cover;
             background: $color-bg-main;
+            cursor: pointer;
+            transition: opacity 300ms;
+
+            &:hover {
+                opacity: 0.5;
+            }
         }
     }
 }

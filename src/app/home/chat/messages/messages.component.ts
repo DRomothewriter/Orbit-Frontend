@@ -18,7 +18,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './messages.component.html',
   styleUrl: './messages.component.scss',
 })
-export class MessagesComponent implements OnInit, AfterViewInit {
+export class MessagesComponent implements OnInit {
   messages: Message[] = [];
   groupId: string = '';
   currentUser: string = '';
@@ -32,13 +32,13 @@ export class MessagesComponent implements OnInit, AfterViewInit {
     private userService: UserService
   ) {}
 
-  ngAfterViewInit(): void {
-    this.scrollToBottom();
-  }
+
 
   scrollToBottom() {
     setTimeout(() => {
-      this.lastRef.nativeElement.scrollIntoView({ behavior: 'smooth' });
+      if(this.lastRef){
+        this.lastRef.nativeElement.scrollIntoView({ behavior: 'smooth' });
+      }
     }, 0);
   }
 
@@ -52,9 +52,9 @@ export class MessagesComponent implements OnInit, AfterViewInit {
         const groupId = params.get('id')!;
         this.groupId = groupId;
         this.messageService.getGroupMessages(groupId).subscribe({
-          next: (response: any) => {
-            this.messages = response.messages;
-            this.scrollToBottom();
+          next: (response: Message[]) => {
+            this.messages = response;
+            this.scrollToBottom()
           },
         });
       },
@@ -63,6 +63,8 @@ export class MessagesComponent implements OnInit, AfterViewInit {
     this.socketService.onMessage().subscribe({
       next: (response) => {
         //Verificar si es del grupo seleccionado. Si no, subir la card del grupo y sumar 1 al contador de mensajes sin leer.
+        console.log(this.groupId)
+        console.log(response.groupId)
         if (response.groupId === this.groupId) {
           this.messages.push(response);
           this.scrollToBottom();

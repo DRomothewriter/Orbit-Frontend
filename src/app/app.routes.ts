@@ -24,6 +24,9 @@ export const routes: Routes = [
             {path:'add-friend', component: AddFriendComponent},
             {path:'pending', component: PendingComponent},
         ]},
-        { path: ':id', component: ChatComponent}
+        { path: 'community/:communityId', children: [
+            { path: 'group/:id', component: ChatComponent},
+        ]},
+        { path: ':id', component: ChatComponent},
     ]},
 ];
