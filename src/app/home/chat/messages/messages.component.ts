@@ -1,22 +1,16 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { Message } from '../../../shared/types/message';
 import { MessageService } from '../../../shared/services/message.service';
 import { SocketService } from '../../../shared/services/socket.service';
 import { ActivatedRoute } from '@angular/router';
 import { UserService } from '../../../shared/services/user.service';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon'; // Importación vital
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-messages',
   standalone: true,
-  imports: [CommonModule, MatIconModule], // Agregado aquí
+  imports: [CommonModule, MatIconModule], 
   templateUrl: './messages.component.html',
   styleUrl: './messages.component.scss',
 })
@@ -24,7 +18,7 @@ export class MessagesComponent implements OnInit, AfterViewInit {
   messages: Message[] = [];
   groupId: string = '';
   currentUser: string = '';
-
+  
   @ViewChild('lastRef') lastRef!: ElementRef<HTMLLIElement>;
 
   constructor(
@@ -34,17 +28,14 @@ export class MessagesComponent implements OnInit, AfterViewInit {
     private userService: UserService
   ) {}
 
-  ngAfterViewInit(): void {
-    this.scrollToBottom();
-  }
-
   scrollToBottom() {
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       if (this.lastRef) {
         this.lastRef.nativeElement.scrollIntoView({ behavior: 'smooth' });
       }
-    }, 100);
+    });
   }
+
 
   ngOnInit(): void {
     this.userService.getMyUser().subscribe((user) => {
@@ -56,9 +47,9 @@ export class MessagesComponent implements OnInit, AfterViewInit {
         const groupId = params.get('id')!;
         this.groupId = groupId;
         this.messageService.getGroupMessages(groupId).subscribe({
-          next: (response: any) => {
-            this.messages = Array.isArray(response) ? response : response.messages || [];
-            this.scrollToBottom();
+          next: (response: Message[]) => {
+            this.messages = response;
+            setTimeout(() => this.scrollToBottom(), 100);
           },
         });
       },
@@ -68,9 +59,13 @@ export class MessagesComponent implements OnInit, AfterViewInit {
       next: (response) => {
         if (response.groupId === this.groupId) {
           this.messages.push(response);
-          this.scrollToBottom();
+            this.scrollToBottom()          
         }
       },
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.scrollToBottom();
   }
 }

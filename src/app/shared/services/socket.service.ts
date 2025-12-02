@@ -33,9 +33,9 @@ export class SocketService {
     this.userService.getMyUser().subscribe({
       next: (user) => {
         this.user = user;
-        this.groupService.getMyGroups().subscribe({
-          next: (myGroups: Group[]) => {
-            const groupIds = myGroups.map((g) => g._id);
+        this.groupService.getAllMyGroups().subscribe({
+          next: (allMyGroups: Group[]) => {
+            const groupIds = allMyGroups.map((g) => g._id);
             this.socket = io(environment.apiUrl, {
               auth: {
                 token: this.tokenService.getToken(),
@@ -45,21 +45,15 @@ export class SocketService {
                 user: JSON.stringify(this.user),
               },
             });
-
             this.socket.on('connect', () => {
               this.socketReady = true;
               console.log('Socket connected');
-              // Emitir mi estado actual al reconectar
-              if (this.user.status) {
-                this.emitStatusChange(this.user.status as UserStatus);
-              }
             });
           },
         });
       },
     });
   }
-
   disconnect() {
     if (this.socket) {
       this.socket.disconnect();
@@ -104,7 +98,6 @@ export class SocketService {
       checkSocket();
     });
   }
-
   onNotification(): Observable<Notification> {
     return new Observable((observer) => {
         const checkSocket = () => {
@@ -119,4 +112,5 @@ export class SocketService {
         checkSocket();
     });
   }
+  //onCall
 }

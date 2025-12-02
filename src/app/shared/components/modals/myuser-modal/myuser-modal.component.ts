@@ -108,7 +108,7 @@ export class MyuserModalComponent implements OnInit {
         next: () => {
           this.isUsernameLoading = false;
           this.isUsernameSuccess = true;
-          setTimeout(() => (this.isUsernameSuccess = false), 3500); 
+          setTimeout(() => (this.isUsernameSuccess = false), 1500);
         },
         error: () => {
           alert('Error changing username');

@@ -4,7 +4,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.25rem;
     margin-bottom: 0.75rem;
     border-radius: 1rem;
     
@@ -30,7 +29,7 @@
     .add-button {
         /* Botón Gradiente Brillante */
         background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
-        color: white;
+        color: $color-text-secondary;
         width: 36px;
         height: 36px;
         border-radius: 50%;

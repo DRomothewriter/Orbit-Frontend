@@ -1,8 +1,6 @@
+import { Friendship } from "./friendship";
 import { User } from "./user";
 
-export interface GetFriendsResponse {
-    _id?: string,
-    userId: string,
-    friendId: User,
-    status: 'pending' | 'accepted' | 'blocked' | 'muted'
+export interface GetFriendsResponse extends Omit<Friendship, 'friendId'>{
+    friendId: User;
 }

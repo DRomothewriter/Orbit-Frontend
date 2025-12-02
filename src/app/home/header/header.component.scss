@@ -271,6 +271,12 @@
             object-fit: cover;
             background: $color-bg-main;
             transition: all 0.3s;
+                        cursor: pointer;
+            transition: opacity 300ms;
+
+            &:hover {
+                opacity: 0.5;
+            }
         }
 
         .user-profile:hover .profile-pic {

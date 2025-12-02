@@ -93,9 +93,8 @@ export class FriendsListComponent implements OnInit, OnDestroy {
 
   private enterChat(group: Group) {
     if(!group._id) return;
-    this.groupService.setTopic(group.topic); 
-    if(group.groupImgUrl) this.groupService.setGroupImgUrl(group.groupImgUrl);
-    this.router.navigate(['/home', group._id]);
+    this.groupService.updateGroupSummary(group);
+    this.router.navigate([`/home/${group._id}`]);
   }
 
   deleteFriend(friendshipId: string, event: Event) {

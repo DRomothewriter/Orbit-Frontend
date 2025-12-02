@@ -1,6 +1,7 @@
 <div class="home-container">
     <app-header></app-header>
     <div class="home-content">
+        <app-communities-nav></app-communities-nav>
         <div class="side-nav">
             <div class="nav-section friends-section">
                 <div class="section-header" (click)="navToFriends()">
@@ -12,7 +13,7 @@
                 <app-group-nav></app-group-nav>
             </div>
         </div>
-        <main class="main-content ">
+        <main class="main-content">
             <div class="content-body">
                 <router-outlet></router-outlet>
             </div>
@@ -22,11 +23,8 @@
 
 @if(isCreateGroupOpen){
 <app-create-group-modal></app-create-group-modal>
-}
-@if(isCalendarOpen){
+} @if(isCalendarOpen){
 <app-calendar-modal></app-calendar-modal>
-}
-
-@if(isMyUserOpen){
+} @if(isMyUserOpen){
 <app-myuser-modal></app-myuser-modal>
 }
