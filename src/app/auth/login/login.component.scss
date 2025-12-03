@@ -87,11 +87,20 @@
   text-align: center;
   margin-bottom: 2rem;
 
+  .brand-row {
+        display: flex;
+        align-items: center;     /* Centra verticalmente el texto con el logo */
+        justify-content: center; /* Centra el grupo horizontalmente */
+        gap: 0.5rem;             /* Espacio entre "Orbit" y el Planeta */
+        margin-bottom: 0.5rem; }
+
+ 
+
   h1 {
     font-size: 2.5rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
-    background: linear-gradient(90deg, #fff, $color-primary-light);
+    background: white;
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;

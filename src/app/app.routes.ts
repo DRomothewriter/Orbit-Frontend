@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 import { LoginComponent } from './auth/login/login.component';
 import { HomeComponent } from './home/home.component';
+import { WelcomeComponent } from './home/welcome/welcome.component';
 import { ChatComponent } from './home/chat/chat.component';
 import { FriendsPanelComponent } from './home/friends-panel/friends-panel.component';
 import { AddFriendComponent } from './home/friends-panel/add-friend/add-friend.component';
@@ -15,20 +16,27 @@ import { VerifyEmailComponent } from './auth/verify-email/verify-email.component
 
 
 export const routes: Routes = [
-
     { path: '', redirectTo: 'login', pathMatch: 'full' },
-    { path: 'login', component:LoginComponent },
+    { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
     { path: 'verify-email', component: VerifyEmailComponent }, 
-    { path: 'home', component: HomeComponent, canActivate:[authGuard], children: [
-        { path:'friends', component: FriendsPanelComponent, children:[
-            {path:'', component: FriendsListComponent},
-            {path:'add-friend', component: AddFriendComponent},
-            {path:'pending', component: PendingComponent},
-        ]},
-        { path: 'community/:communityId', children: [
-            { path: 'group/:id', component: ChatComponent},
-        ]},
-        { path: ':id', component: ChatComponent},
-    ]},
+    { 
+        path: 'home', 
+        component: HomeComponent, 
+        canActivate: [authGuard], 
+        children: [
+            // AGREGA ESTA LÍNEA AL PRINCIPIO DE LOS CHILDREN:
+            { path: '', component: WelcomeComponent }, 
+            
+            { path:'friends', component: FriendsPanelComponent, children:[
+                {path:'', component: FriendsListComponent},
+                {path:'add-friend', component: AddFriendComponent},
+                {path:'pending', component: PendingComponent},
+            ]},
+            { path: 'community/:communityId', children: [
+                { path: 'group/:id', component: ChatComponent},
+            ]},
+            { path: ':id', component: ChatComponent},
+        ]
+    },
 ];

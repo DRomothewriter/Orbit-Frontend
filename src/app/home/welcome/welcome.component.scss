@@ -1,0 +1,137 @@
+@use '../../../colors' as *;
+
+:host {
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+
+.welcome-container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    overflow: hidden;
+    padding: 2rem;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+.orbit-visual {
+    margin-bottom: 3rem; /* Un poco más de espacio */
+    position: relative;
+    
+    /* EL AURA TRASERA (Ahora mucho más intensa) */
+    &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 180px; /* Más grande */
+        height: 180px;
+        /* Gradiente más fuerte desde el inicio */
+        background: radial-gradient(circle, rgba($color-primary, 0.5) 0%, rgba($color-primary-light, 0.2) 40%, transparent 70%);
+        filter: blur(25px);
+        z-index: -1;
+        animation: pulse-background-glow 4s ease-in-out infinite; 
+    }
+
+    .saturn-logo {
+        width: 220px; /* Un poco más grande para imponer */
+        height: 220px;
+        
+        /* Animaciones combinadas */
+        animation: 
+            float-planet 6s ease-in-out infinite,
+            glowing-saturn 4s ease-in-out infinite;
+            
+        will-change: filter, transform;
+    }
+}
+
+.text-content {
+    text-align: center;
+    z-index: 1;
+
+    h1 {
+        font-size: 4.5rem; /* Texto más grande */
+        font-weight: 800;
+        margin: 0;
+        /* Gradiente de texto más brillante */
+        background: linear-gradient(135deg, #ffffff 20%, $color-primary-light 80%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.5rem;
+        /* Sombra de texto para legibilidad sobre el brillo */
+        text-shadow: 0 0 30px rgba($color-primary, 0.5);
+    }
+
+    p {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.9); /* Texto más blanco */
+        font-weight: 600;
+        letter-spacing: 0.4em;
+        text-transform: uppercase;
+        margin: 0;
+        opacity: 0;
+        text-shadow: 0 0 10px rgba($color-primary, 0.8); /* El texto también brilla un poco */
+        animation: fadeUp 1s ease-out forwards 0.3s;
+    }
+}
+
+/* --- Animaciones --- */
+
+@keyframes float-planet {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-25px) rotate(3deg);
+    }
+}
+
+/* AQUÍ ESTÁ LA MAGIA DEL BRILLO */
+@keyframes glowing-saturn {
+    0%, 100% {
+        /* Estado "Reposo": Aún brilla, pero suave */
+        filter: drop-shadow(0 0 15px rgba($color-primary, 0.4));
+    }
+    50% {
+        /* Estado "FULL POWER": Doble sombra para intensidad nuclear */
+        /* 1. Sombra amplia y difusa del color primario */
+        /* 2. Sombra cerrada y brillante del color claro */
+        filter: 
+            drop-shadow(0 0 60px rgba($color-primary, 0.9))
+            drop-shadow(0 0 20px rgba($color-primary-light, 1));
+    }
+}
+
+@keyframes pulse-background-glow {
+    0%, 100% { 
+        opacity: 0.5; 
+        transform: translate(-50%, -50%) scale(0.85); 
+    }
+    50% { 
+        opacity: 1; 
+        transform: translate(-50%, -50%) scale(1.3); 
+    }
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+        letter-spacing: 0.1em;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        letter-spacing: 0.4em;
+    }
+}

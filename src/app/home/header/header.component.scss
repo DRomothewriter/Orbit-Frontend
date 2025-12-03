@@ -17,12 +17,29 @@
     border: 1px solid rgba(255,255,255,0.05);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 
-    .navbar-brand h1 {
-        margin: 0;
-        color: $color-primary-light;
-        font-size: 1.5rem;
-        font-weight: 700;
-        letter-spacing: 0.05em;
+    /* --- CAMBIO PRINCIPAL AQUÍ (LOGO + TEXTO) --- */
+    .navbar-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem; /* Espacio entre el texto y el planeta */
+        cursor: default;
+
+        h1 {
+            margin: 0;
+            color: $color-primary-light;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        /* Estilos del SVG de Saturno */
+        .saturn-logo {
+            width: 32px;
+            height: 32px;
+            fill: #a855f7; /* Color púrpura brillante */
+            filter: drop-shadow(0 0 5px rgba(168, 85, 247, 0.6)); /* Brillo neón */
+            animation: floatPlanet 6s ease-in-out infinite;
+        }
     }
 
     .navbar-menu {
@@ -178,7 +195,7 @@
                     .icon-badge {
                         position: absolute;
                         bottom: -2px; right: -2px;
-                        width: 22px; height: 22px; /* Ligeramente más grande */
+                        width: 22px; height: 22px;
                         border-radius: 50%;
                         background: $color-primary;
                         color: white;
@@ -186,7 +203,7 @@
                         border: 2px solid #1e1e28;
                         
                         mat-icon {
-                            font-size: 14px; /* Tamaño de fuente explícito */
+                            font-size: 14px;
                             width: 14px;
                             height: 14px;
                             line-height: 14px;
@@ -271,7 +288,7 @@
             object-fit: cover;
             background: $color-bg-main;
             transition: all 0.3s;
-                        cursor: pointer;
+            cursor: pointer;
             transition: opacity 300ms;
 
             &:hover {
@@ -301,7 +318,13 @@
     }
 }
 
+/* --- ANIMACIONES --- */
 @keyframes slideDown {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes floatPlanet {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-3px) rotate(5deg); }
 }

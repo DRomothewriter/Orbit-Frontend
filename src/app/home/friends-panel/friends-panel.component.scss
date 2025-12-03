@@ -1,0 +1,36 @@
+@use '../../../colors' as *;
+
+.friends-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    overflow: hidden; /* Evita scroll doble */
+}
+
+.friends-header {
+    flex-shrink: 0; /* No se encoge */
+    padding-bottom: 0.5rem;
+}
+
+.friends-content {
+    flex: 1; /* Toma el resto del espacio */
+    overflow-y: auto; /* Scroll interno para la lista */
+    min-height: 0; /* Truco de Flexbox para el scroll */
+    padding-bottom: 1rem;
+
+    /* Scroll personalizado */
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+    &::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+    }
+    &::-webkit-scrollbar-thumb {
+        background: rgba($color-primary, 0.3);
+        border-radius: 3px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+        background: rgba($color-primary, 0.5);
+    }
+}

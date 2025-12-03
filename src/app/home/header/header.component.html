@@ -1,6 +1,41 @@
 <nav class="navbar">
     <div class="navbar-brand">
         <h1>Orbit</h1>
+        <svg viewBox="0 0 24 24" width="50" height="50"
+     xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <defs>
+    <radialGradient id="g-planet" cx="40%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#f8f0ff" stop-opacity="0.75"/>
+      <stop offset="60%" stop-color="#a855f7" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#6b21a8" stop-opacity="0.1"/>
+    </radialGradient>
+
+    <linearGradient id="g-ring" x1="0" x2="1">
+      <stop offset="0" stop-color="#a855f7" stop-opacity="0.12"/>
+      <stop offset="0.6" stop-color="#a855f7" stop-opacity="0.06"/>
+      <stop offset="1" stop-color="#a855f7" stop-opacity="0.12"/>
+    </linearGradient>
+
+    <filter id="f-shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="0.6" stdDeviation="0.6" flood-color="#000" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+
+  <ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(-20 12 12)"
+           fill="url(#g-ring)" stroke="none"/>
+
+  <g filter="url(#f-shadow)">
+    <circle cx="12" cy="12" r="5.2" fill="url(#g-planet)" stroke="#a855f7" stroke-width="1.2"/>
+  </g>
+
+  <ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(-20 12 12)"
+           fill="none" stroke="#a855f7" stroke-width="1.2" stroke-opacity="0.95"
+           stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- small accent: thin equator line to suggest curvature -->
+  <path d="M9.2 14.6c.8-.4 1.8-.6 2.8-.6 1 .0 1.9.2 2.8.6" stroke="#7c2ae8" stroke-width="0.6" stroke-linecap="round" fill="none" opacity="0.5"/>
+</svg>
+
     </div>
     <div class="navbar-menu">
         <button mat-icon-button class="nav-icon" (click)="openCalendarModal()" matTooltip="Calendario">

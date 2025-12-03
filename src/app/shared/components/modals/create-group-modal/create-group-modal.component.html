@@ -1,24 +1,26 @@
 <div class="modal-overlay" (click)="closeModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
+        
         <div class="modal-header">
             <h3>Crear Nuevo Grupo</h3>
-            <button mat-icon-button class="close-button" (click)="closeModal()">
+            <button class="close-button" (click)="closeModal()">
                 <mat-icon>close</mat-icon>
             </button>
         </div>
 
         <div class="modal-body">
             <div class="form-section">
-                <mat-form-field class="full-width">
+                <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Nombre del grupo</mat-label>
                     <input
                         matInput
                         [(ngModel)]="topic"
                         placeholder="Ingresa el nombre del grupo..."
+                        autocomplete="off"
                     />
                 </mat-form-field>
 
-                <mat-form-field class="full-width">
+                <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Descripción</mat-label>
                     <textarea
                         matInput
@@ -26,48 +28,52 @@
                         rows="3"
                     ></textarea>
                 </mat-form-field>
+            </div>
 
-                <div class="members-section">
-                    <h4>Agregar miembros</h4>
-                    <mat-form-field class="full-width">
-                        <mat-label>Buscar contactos</mat-label>
-                        <input matInput placeholder="Escribe para buscar..." />
-                        <mat-icon matSuffix>search</mat-icon>
-                    </mat-form-field>
+            <div class="members-section">
+                <h4>Agregar miembros</h4>
+                
+                <mat-form-field appearance="outline" class="full-width search-field">
+                    <mat-label>Buscar contactos</mat-label>
+                    <input matInput placeholder="Escribe para buscar..." />
+                    <mat-icon matSuffix>search</mat-icon>
+                </mat-form-field>
 
-                    <div class="contacts-list">
-                        @for(friend of friends; track friend._id){
-                        <div class="contact-item">
-                            <div class="contact-checkbox">
-                                <mat-checkbox
-                                    [(ngModel)]="friend.selected"
-                                    (change)="onFriendSelected(friend._id!)"
-                                ></mat-checkbox>
-                            </div>
-                            <div class="contact-avatar">
-                                <img [src]="friendAvatarImg" alt="Avatar" />
-                            </div>
-                            <span class="contact-name">{{
-                                friend.username
-                            }}</span>
+                <div class="contacts-list">
+                    @for(friend of friends; track friend._id){
+                    <div class="contact-item" 
+                         [class.selected]="friend.selected" 
+                         (click)="friend.selected = !friend.selected; onFriendSelected(friend._id!)">
+                        
+                        <div class="contact-checkbox">
+                            <input 
+                                type="checkbox" 
+                                [(ngModel)]="friend.selected"
+                                (change)="onFriendSelected(friend._id!)"
+                                (click)="$event.stopPropagation()"
+                            />
                         </div>
-                        }
+                        
+                        <div class="contact-avatar">
+                            <img [src]="friendAvatarImg" alt="Avatar" />
+                        </div>
+                        
+                        <span class="contact-name">
+                            {{ friend.username }}
+                        </span>
                     </div>
+                    }
                 </div>
             </div>
+        </div>
 
-            <div class="modal-actions">
-                <button mat-button class="cancel-button" (click)="closeModal()">
-                    Cancelar
-                </button>
-                <button
-                    mat-raised-button
-                    class="create-button"
-                    (click)="createGroup()"
-                >
-                    Crear Grupo
-                </button>
-            </div>
+        <div class="modal-actions">
+            <button class="cancel-button" (click)="closeModal()">
+                Cancelar
+            </button>
+            <button class="create-button" (click)="createGroup()">
+                Crear Grupo
+            </button>
         </div>
     </div>
 </div>
