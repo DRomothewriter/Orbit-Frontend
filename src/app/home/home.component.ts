@@ -17,6 +17,7 @@ import { CommunitiesNavComponent } from './communities-nav/communities-nav.compo
 
 @Component({
   selector: 'app-home',
+  standalone: true,
   imports: [
     CreateGroupModalComponent,
     CalendarModalComponent,
@@ -28,7 +29,7 @@ import { CommunitiesNavComponent } from './communities-nav/communities-nav.compo
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    CommunitiesNavComponent
+    CommunitiesNavComponent,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
@@ -42,8 +43,8 @@ export class HomeComponent implements OnInit {
     private sockeService: SocketService,
     private modalsService: ModalsService,
     private router: Router,
-    private userService: UserService
   ) {}
+
   ngOnInit(): void {
     this.modalsService.openCreateGroup$.subscribe(
       (val) => (this.isCreateGroupOpen = val)
@@ -54,13 +55,8 @@ export class HomeComponent implements OnInit {
     this.modalsService.openMyUser$.subscribe(
       (val) => (this.isMyUserOpen = val)
     );
-
-    this.userService.getMyUser().subscribe(user=>{
-      if(user&&user._id){
-        this.sockeService.connectWithGroups();
-      }
-      //get my communities
-    });
+    this.sockeService.connectWithGroups();
+    //get my communities
   }
 
   navToFriends() {

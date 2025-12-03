@@ -6,15 +6,17 @@ import { TokenService } from './token.service';
 import { GroupService } from './group.service';
 import { UserService } from './user.service';
 import { User } from '../types/user';
+import { UserStatus } from '../types/user-status'; // Importar enum
 
 import { io, Socket } from 'socket.io-client';
 import { Observable } from 'rxjs';
 import { Group } from '../types/group';
+import { Notification } from '../types/notification';
+
 @Injectable({
   providedIn: 'root',
 })
 export class SocketService {
-  //Confía porque se inicializará en connectWithGroups
   private socket!: Socket;
   private user: User;
   private socketReady = false; 
@@ -40,12 +42,12 @@ export class SocketService {
               },
               query: {
                 groupIds: JSON.stringify(groupIds),
-                //communitiesIds
                 user: JSON.stringify(this.user),
               },
             });
             this.socket.on('connect', () => {
               this.socketReady = true;
+              console.log('Socket connected');
             });
           },
         });
@@ -57,16 +59,39 @@ export class SocketService {
       this.socket.disconnect();
     }
   }
+
+  // === NUEVO: Manejo de Estado ===
+  emitStatusChange(status: UserStatus) {
+    if (this.socket && this.socketReady) {
+        this.socket.emit('status-change', { status });
+    }
+  }
+
+  onFriendStatusChange(): Observable<{userId: string, status: UserStatus}> {
+    return new Observable((observer) => {
+        // Esperamos a que el socket esté listo
+        const checkSocket = () => {
+            if (this.socket && this.socketReady) {
+                this.socket.on('friend-status-change', (data: {userId: string, status: UserStatus}) => {
+                    observer.next(data);
+                });
+            } else {
+                setTimeout(checkSocket, 500);
+            }
+        };
+        checkSocket();
+    });
+  }
+  // ==============================
+
   onMessage(): Observable<Message> {
     return new Observable((observer) => {
-      // Espera a que el socket esté listo
       const checkSocket = () => {
         if (this.socket && this.socketReady) {
           this.socket.on('message', (data: Message) => {
             observer.next(data);
           });
         } else {
-          // Reintenta después de un pequeño delay
           setTimeout(checkSocket, 100);
         }
       };
@@ -75,9 +100,16 @@ export class SocketService {
   }
   onNotification(): Observable<Notification> {
     return new Observable((observer) => {
-      this.socket.on('notification', (data: Notification) => {
-        observer.next(data);
-      });
+        const checkSocket = () => {
+            if (this.socket && this.socketReady) {
+                this.socket.on('notification', (data: Notification) => {
+                    observer.next(data);
+                });
+            } else {
+                setTimeout(checkSocket, 100);
+            }
+        };
+        checkSocket();
     });
   }
   //onCall

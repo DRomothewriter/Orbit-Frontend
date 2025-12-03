@@ -20,7 +20,7 @@ export class GroupService {
 
   constructor(
     private httpClient: HttpClient,
-    private tokenService: TokenService,
+    private tokenService: TokenService
   ) {}
 
   private getHeaders(): HttpHeaders {
@@ -33,15 +33,21 @@ export class GroupService {
       ...changes,
     });
   }
-
+  clearGroupSummary() {
+    this.groupSummary.next({ topic: '' }); // Restablece el estado inicial
+  }
   getGroupSummary(groupId?: string): Observable<Group> {
-    if(!this.groupSummary.value._id && groupId){
+    if (!this.groupSummary.value._id && groupId) {
       const headers = this.getHeaders();
-      this.httpClient.get<Group>(`${environment.apiUrl}${this.endpnt}${groupId}`, {headers}).subscribe({
-        next: (group) => {
-          this.updateGroupSummary(group)
-        }
-      })
+      this.httpClient
+        .get<Group>(`${environment.apiUrl}${this.endpnt}${groupId}`, {
+          headers,
+        })
+        .subscribe({
+          next: (group) => {
+            this.updateGroupSummary(group);
+          },
+        });
     }
     return this.groupSummary.asObservable();
   }
@@ -56,8 +62,10 @@ export class GroupService {
 
   getAllMyGroups(): Observable<Group[]> {
     const headers = this.getHeaders();
-    return this.httpClient
-      .get<Group[]>(`${environment.apiUrl}${this.endpnt}all-my-groups`, { headers })
+    return this.httpClient.get<Group[]>(
+      `${environment.apiUrl}${this.endpnt}all-my-groups`,
+      { headers }
+    );
   }
 
   // getMyCommunityGroups
@@ -187,6 +195,7 @@ export class GroupService {
             (g) => g._id !== groupId
           );
           this.myGroups.next(updatedGroups);
+          this.clearGroupSummary();
         })
       );
   }

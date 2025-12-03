@@ -19,4 +19,8 @@ export class HeaderComponent {
   navToPending() {
     this.router.navigateByUrl('/home/friends/pending');
   }
+
+  isAddFriendRoute(): boolean {
+    return this.router.url.includes('/add-friend');
+  }
 }

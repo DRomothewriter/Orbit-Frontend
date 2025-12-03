@@ -3,10 +3,15 @@
     <div class="home-content">
         <app-communities-nav></app-communities-nav>
         <div class="side-nav">
-            <div class="friends-button" (click)="navToFriends()">
-                <h3>Friends</h3>
+            <div class="nav-section friends-section">
+                <div class="section-header" (click)="navToFriends()">
+                    <h3>Friends</h3>
+                </div>
             </div>
-            <app-group-nav></app-group-nav>
+            
+            <div class="nav-section groups-section">
+                <app-group-nav></app-group-nav>
+            </div>
         </div>
         <main class="main-content">
             <div class="content-body">

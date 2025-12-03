@@ -1,33 +1,40 @@
-<section>
-    @for(friend of friends; track friend._id){
-    <article>
-        <div class="friend-avatar">
-            <img
-                [src]="
-                    
-                    'https://placehold.co/40x40/111827/533483?text=F'
-                "
-                alt="Avatar"
-            />
+<section class="friends-container">
+    @for(item of friends; track item._id){
+    <div class="friend-card">
+        <!-- Avatar con inicial (o imagen) -->
+        <div class="avatar-container">
+            @if(item.friendId.profileImgUrl) {
+                <img [src]="item.friendId.profileImgUrl" alt="avatar" class="avatar-img">
+            } @else {
+                <div class="avatar-placeholder">
+                    {{ item.friendId.username.charAt(0).toUpperCase() }}
+                </div>
+            }
         </div>
-        <div class="friend-info">
-            <span class="friend-name">{{ friend.username }}</span>
+
+        <!-- Info del Usuario -->
+        <div class="info-container">
+            <h3 class="username">{{ item.friendId.username }}</h3>
+            <!-- Usamos ngClass para colorear el status -->
+            <span class="status" [ngClass]="item.friendId.status || 'offline'">
+                {{ item.friendId.status || 'Offline' }}
+            </span>
         </div>
-        <div class="friend-actions">
-            <button class="chat-button" mat-icon-button aria-label="Chat">
-                <mat-icon>chat</mat-icon>
+
+        <!-- Acciones -->
+        <div class="actions-container">
+            <button mat-icon-button class="action-btn chat-btn" (click)="startChat(item)" matTooltip="Enviar mensaje">
+                <mat-icon>chat_bubble_outline</mat-icon>
             </button>
-            <button class="remove-button" mat-icon-button aria-label="Eliminar">
+            <button mat-icon-button class="action-btn delete-btn" (click)="deleteFriend(item._id!, $event)" matTooltip="Eliminar amigo">
                 <mat-icon>person_remove</mat-icon>
             </button>
         </div>
-    </article>
+    </div>
     } @empty {
-        @if(friends.length === 0){
-            <div class="no-friends"
-            >
-                <p>No tienes amigos aún.</p>
-            </div>
-        }
+        <div class="empty-state">
+            <mat-icon class="empty-icon">sentiment_dissatisfied</mat-icon>
+            <p>Aún no tienes amigos agregados.</p>
+        </div>
     }
 </section>

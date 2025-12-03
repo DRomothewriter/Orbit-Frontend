@@ -3,7 +3,7 @@ import { GroupService } from '../../../shared/services/group.service';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ModalsService } from '../../../shared/services/modals.service';
 import { Group } from '../../../shared/types/group';
 import { GroupMember } from '../../../shared/types/group-member';
@@ -29,7 +29,8 @@ export class HeaderComponent implements OnInit {
   constructor(
     private groupService: GroupService,
     private route: ActivatedRoute,
-    private modalsService: ModalsService
+    private modalsService: ModalsService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -46,6 +47,18 @@ export class HeaderComponent implements OnInit {
     });
   }
 
+    deleteChat() {
+
+    if(confirm('¿Estás seguro de que quieres borrar este chat? Esta acción no se puede deshacer.')) {
+        this.groupService.deleteGroup(this.group._id!).subscribe({
+            next: () => {
+                // Redirigir a home o friends
+                this.router.navigate(['/home/']);
+            },
+            error: (err) => console.error('Error deleting chat', err)
+        });
+    }
+  }
   editGroupImage(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {

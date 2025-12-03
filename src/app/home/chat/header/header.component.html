@@ -51,7 +51,7 @@
     </div>
 
     <nav class="chat-nav">
-        <button mat-icon-button aria-label="Llamada">
+        <button mat-icon-button aria-label="Llamada" matTooltip="Iniciar llamada">
             <mat-icon>call</mat-icon>
         </button>
         <button
@@ -60,6 +60,10 @@
             (click)="openGroupInfo()"
         >
             <mat-icon>info</mat-icon>
+        </button>
+
+        <button mat-icon-button aria-label="Eliminar chat" color="warn" (click)="deleteChat()" matTooltip="Eliminar chat">
+            <mat-icon>delete</mat-icon>
         </button>
     </nav>
 </header>

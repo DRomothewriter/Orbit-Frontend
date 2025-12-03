@@ -15,6 +15,7 @@ header {
             object-fit: cover;
             display: block;
             border: solid 2px $color-primary-light;
+            box-shadow: 0 0 10px rgba($color-primary, 0.3);
             &:hover {
                 cursor: not-allowed;
             }
@@ -131,11 +132,10 @@ header {
             border-radius: 50%;
             transition: background-color 0.2s, box-shadow 0.2s;
             box-shadow: 0 2px 8px rgba($color-primary, 0.08);
+            color: $color-text-secondary;
 
             mat-icon {
-                color: $color-secondary;
                 font-size: 24px;
-                margin: 0 0 2px 0;
             }
 
             &:hover {

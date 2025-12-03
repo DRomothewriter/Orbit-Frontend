@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { HeaderComponent } from './header/header.component';
-import { InfoComponent } from './info/info.component';
 import { InputComponent } from './input/input.component';
 import { MessagesComponent } from './messages/messages.component';
 import { ModalsService } from '../../shared/services/modals.service';
@@ -8,7 +7,7 @@ import { GroupInfoModalComponent } from '../../shared/components/modals/group-in
 
 @Component({
   selector: 'app-chat',
-  imports: [HeaderComponent, InfoComponent, InputComponent, MessagesComponent, GroupInfoModalComponent],
+  imports: [HeaderComponent, InputComponent, MessagesComponent, GroupInfoModalComponent],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss',
 })

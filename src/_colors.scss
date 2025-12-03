@@ -1,12 +1,25 @@
-$color-bg-main: #111827;
-$color-bg-card: #1f2937;
-$color-primary: #533483;
-$color-primary-light: #a78bfa;
-$color-secondary: #4f8cff;
-$color-secondary-light: #79b8ff;
+// src/_colors.scss
+
+$color-bg-main: #171e30; // Deep space black/blue
+$color-bg-card: #161b27; // Slightly lighter for panels
+$color-bg-hover: #1f2536; // Hover state
+
+$color-primary: #6d28d9; // Violet
+$color-primary-light: #8b5cf6; // Lighter Violet
+$color-primary-dark: #5b21b6; 
+
+$color-secondary: #0ea5e9; // Sky Blue
+$color-secondary-light: #38bdf8;
+$color-secondary-dark: #0284c7;
+
 $color-success: #10b981;
-$color-warning: #f59e42;
+$color-warning: #f59e0b;
 $color-error: #ef4444;
-$color-text-main: #ffffff;
-$color-text-secondary: rgba(255,255,255,0.7);
-$color-border: rgba(255,255,255,0.1);
+
+$color-text-main: #f8fafc;
+$color-text-secondary: #94a3b8;
+$color-text-muted: #64748b;
+
+$color-border: rgba(148, 163, 184, 0.1);
+$glass-bg: rgba(30, 41, 59, 0.7);
+$glass-border: rgba(255, 255, 255, 0.08);

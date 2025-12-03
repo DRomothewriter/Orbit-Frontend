@@ -7,7 +7,7 @@ import { TokenService } from './token.service';
 import { Friendship } from '../types/friendship';
 import { AcceptfrResponse } from '../types/acceptfr-response';
 
-import { Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { GetFriendsResponse } from '../types/get-friends-response';
 import { UserStatus } from '../types/user-status';
 
@@ -16,7 +16,9 @@ import { UserStatus } from '../types/user-status';
 })
 export class UserService {
   private endpnt: string = 'users/';
-  private user: User | null = null;
+  
+  private currentUserSubject = new BehaviorSubject<User>(this.getCleanUser());
+  currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(
     private httpClient: HttpClient,
@@ -28,35 +30,38 @@ export class UserService {
       username: '',
       email: '',
       profileImgUrl: '',
+      status: UserStatus.ONLINE
     };
   }
+
   setUser(user: User) {
-    this.user = user;
-    return;
+    this.currentUserSubject.next(user);
   }
+
   clearUser() {
-    this.user = null;
+    this.currentUserSubject.next(this.getCleanUser());
   }
 
   getMyUser(): Observable<User> {
-    if (this.user?._id) {
-      return new Observable<User>((observer) => {
-        observer.next(this.user as User);
-        observer.complete();
-      });
+    const currentValue = this.currentUserSubject.value;
+    
+    if (currentValue._id) {
+      return this.currentUser$;
     }
+
     const token = this.tokenService.getToken();
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`,
     });
+
     return this.httpClient
       .get<User>(`${environment.apiUrl}${this.endpnt}my-user`, {
         headers,
       })
       .pipe(
         tap((user) => {
-          user.status = UserStatus.ONLINE;
-          this.user = user;
+          if (!user.status) user.status = UserStatus.ONLINE;
+          this.currentUserSubject.next(user);
         })
       );
   }
@@ -70,6 +75,7 @@ export class UserService {
       headers,
     });
   }
+
   editProfileImg(formData: FormData): Observable<string> {
     const token = this.tokenService.getToken();
     const headers = new HttpHeaders({
@@ -79,6 +85,11 @@ export class UserService {
       `${environment.apiUrl}${this.endpnt}edit-profile-image`,
       formData,
       { headers }
+    ).pipe(
+      tap((newUrl) => {
+        const currentUser = this.currentUserSubject.value;
+        this.currentUserSubject.next({ ...currentUser, profileImgUrl: newUrl });
+      })
     );
   }
 
@@ -91,6 +102,11 @@ export class UserService {
       `${environment.apiUrl}${this.endpnt}change-user-status/${status}`,
       {},
       { headers }
+    ).pipe(
+      tap(() => {
+        const currentUser = this.currentUserSubject.value;
+        this.currentUserSubject.next({ ...currentUser, status: status });
+      })
     );
   }
 
@@ -103,8 +119,14 @@ export class UserService {
       `${environment.apiUrl}${this.endpnt}edit-username`,
       {username: username},
       {headers}
+    ).pipe(
+        tap(() => {
+            const currentUser = this.currentUserSubject.value;
+            this.currentUserSubject.next({ ...currentUser, username: username });
+        })
     );
   }
+
   getRequestsReceived(): Observable<Friendship[]> {
     const token = this.tokenService.getToken();
     const headers = new HttpHeaders({
@@ -126,9 +148,8 @@ export class UserService {
       { headers }
     );
   }
+
   sendFriendRequest(friendId: string): Observable<Friendship> {
-    console.log(friendId);
-    console.log(this.user);
     const token = this.tokenService.getToken();
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`,
@@ -152,7 +173,6 @@ export class UserService {
     );
   }
 
-  //Falta hacer que el backend regrese también el username del friend
   getMyFriends(): Observable<GetFriendsResponse[]> {
     const token = this.tokenService.getToken();
     const headers = new HttpHeaders({
@@ -174,9 +194,4 @@ export class UserService {
       { headers, body: { friendshipId } }
     );
   }
-
-  //blockFriend
-  //muteFriend
-  //update
-  //getUserById
 }

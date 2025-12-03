@@ -1,28 +1,24 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { Message } from '../../../shared/types/message';
 import { MessageService } from '../../../shared/services/message.service';
 import { SocketService } from '../../../shared/services/socket.service';
 import { ActivatedRoute } from '@angular/router';
 import { UserService } from '../../../shared/services/user.service';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-messages',
-  imports: [CommonModule],
+  standalone: true,
+  imports: [CommonModule, MatIconModule], 
   templateUrl: './messages.component.html',
   styleUrl: './messages.component.scss',
 })
-export class MessagesComponent implements OnInit {
+export class MessagesComponent implements OnInit, AfterViewInit {
   messages: Message[] = [];
   groupId: string = '';
   currentUser: string = '';
-
+  
   @ViewChild('lastRef') lastRef!: ElementRef<HTMLLIElement>;
 
   constructor(
@@ -32,15 +28,14 @@ export class MessagesComponent implements OnInit {
     private userService: UserService
   ) {}
 
-
-
   scrollToBottom() {
-    setTimeout(() => {
-      if(this.lastRef){
+    requestAnimationFrame(() => {
+      if (this.lastRef) {
         this.lastRef.nativeElement.scrollIntoView({ behavior: 'smooth' });
       }
-    }, 0);
+    });
   }
+
 
   ngOnInit(): void {
     this.userService.getMyUser().subscribe((user) => {
@@ -54,7 +49,7 @@ export class MessagesComponent implements OnInit {
         this.messageService.getGroupMessages(groupId).subscribe({
           next: (response: Message[]) => {
             this.messages = response;
-            this.scrollToBottom()
+            setTimeout(() => this.scrollToBottom(), 100);
           },
         });
       },
@@ -62,14 +57,15 @@ export class MessagesComponent implements OnInit {
 
     this.socketService.onMessage().subscribe({
       next: (response) => {
-        //Verificar si es del grupo seleccionado. Si no, subir la card del grupo y sumar 1 al contador de mensajes sin leer.
-        console.log(this.groupId)
-        console.log(response.groupId)
         if (response.groupId === this.groupId) {
           this.messages.push(response);
-          this.scrollToBottom();
+            this.scrollToBottom()          
         }
       },
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.scrollToBottom();
   }
 }
