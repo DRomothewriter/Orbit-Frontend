@@ -8,6 +8,14 @@
                 </div>
 
                 <form class="login-form" (ngSubmit)="onLogin()">
+                    <!-- Mensaje de error -->
+                    @if(errorMessage) {
+                        <div class="alert alert-error">
+                            <mat-icon>error</mat-icon>
+                            {{ errorMessage }}
+                        </div>
+                    }
+
                     <mat-form-field>
                         <mat-label>Correo electrónico</mat-label>
                         <input
