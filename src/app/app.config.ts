@@ -22,11 +22,7 @@ export const appConfig: ApplicationConfig = {
           {
             id: GoogleLoginProvider.PROVIDER_ID,
             provider: new GoogleLoginProvider(
-              '612249363958-h0mjsvc9j3ul4l9gu98mck29mseen60i.apps.googleusercontent.com',//El que saquemos de la consola de google.
-              {
-                oneTapEnabled: false,
-                scopes: 'openid profile email',
-              }
+              '254477133617-3uspokauaenla1dj04fqtjgtdrpoap1o.apps.googleusercontent.com'
             ),
           },
         ],

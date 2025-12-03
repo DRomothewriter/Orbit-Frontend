@@ -60,6 +60,11 @@ export class SocketService {
     }
   }
 
+  // Método para obtener el socket (necesario para videollamadas)
+  getSocket(): Socket {
+    return this.socket;
+  }
+
   // === NUEVO: Manejo de Estado ===
   emitStatusChange(status: UserStatus) {
     if (this.socket && this.socketReady) {

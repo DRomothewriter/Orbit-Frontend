@@ -93,8 +93,8 @@ export class LoginComponent implements OnInit {
           this.userService.setUser(res.user);
           this.tokenService.setToken(res.token);
         },
-        error: () => {
-          console.error('Error en login con Google');
+        error: (e) => {
+          console.error(e);
         },
       });
   }
