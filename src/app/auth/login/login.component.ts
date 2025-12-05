@@ -90,11 +90,10 @@ export class LoginComponent implements OnInit {
       .subscribe({
         next: (res: AuthResponse) => {
           this.router.navigateByUrl('/home');
-          this.userService.setUser(res.user);
           this.tokenService.setToken(res.token);
         },
-        error: () => {
-          console.error('Error en login con Google');
+        error: (e) => {
+          console.error(e);
         },
       });
   }

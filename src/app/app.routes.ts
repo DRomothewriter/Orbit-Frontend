@@ -15,7 +15,6 @@ import { VerifyEmailComponent } from './auth/verify-email/verify-email.component
 import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';
 
-
 export const routes: Routes = [
 
     { path: '', redirectTo: 'login', pathMatch: 'full' },

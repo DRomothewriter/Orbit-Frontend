@@ -24,23 +24,19 @@ export class GroupNavComponent implements OnInit {
       this.groups = groups;
     });
 
-    // Escucha eventos de navegación
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe(() => {
         this.updateGroupsBasedOnRoute();
       });
 
-    // Ejecuta al inicio
     this.updateGroupsBasedOnRoute();
   }
 
   private updateGroupsBasedOnRoute(): void {
-    // Busca el parámetro communityId en las rutas hijas
     let route = this.route.root;
     let communityId: string | null = null;
 
-    // Recorre todas las rutas hijas para encontrar communityId
     while (route.firstChild) {
       route = route.firstChild;
       if (route.snapshot.paramMap.has('communityId')) {

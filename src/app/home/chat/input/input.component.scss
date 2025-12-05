@@ -8,7 +8,7 @@
         display: flex;
         gap: 0.75rem;
         align-items: flex-end; /* Align to bottom for multiline */
-        background: rgba($color-bg-card, 0.6);
+        background: rgba($color-bg-card, 0.1);
         backdrop-filter: blur(10px);
         padding: 0.5rem;
         border-radius: 24px; /* Capsule shape */
@@ -53,7 +53,7 @@
         border: 1px solid $color-border;
         border-radius: 8px;
         font-size: 1rem;
-        background: rgba($color-bg-card, 0.4);
+        background: rgba($color-bg-card, 0.1);
         color: $color-text-main;
         font-size: 0.95rem;
         margin-bottom: 2px;
