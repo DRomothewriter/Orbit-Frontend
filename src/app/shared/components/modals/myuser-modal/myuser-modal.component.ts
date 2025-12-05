@@ -82,6 +82,7 @@ export class MyuserModalComponent implements OnInit {
 
   handleLogout(): void {
     this.tokenService.logout();
+    sessionStorage.removeItem('userStatus');
     this.userService.clearUser();
     this.socketService.disconnect(); // Desconectar socket
     try {

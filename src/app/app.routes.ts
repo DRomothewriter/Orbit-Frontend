@@ -15,8 +15,6 @@ import { VerifyEmailComponent } from './auth/verify-email/verify-email.component
 import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';
 
-import {VideoCallComponent} from './shared/components/video-call/video-call.component'
-
 export const routes: Routes = [
 
     { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -34,7 +32,6 @@ export const routes: Routes = [
         { path: 'community/:communityId', children: [
             { path: 'group/:id', component: ChatComponent},
         ]},
-        { path: 'call/:roomId', component: VideoCallComponent}, /*Realmente no será por ruta ya que será un modal que se mueda expandir, minimizar o cambiar de posición. Además, estará conectado con el header del chat */
         { path: ':id', component: ChatComponent},
     ]},
 ];

@@ -90,7 +90,6 @@ export class LoginComponent implements OnInit {
       .subscribe({
         next: (res: AuthResponse) => {
           this.router.navigateByUrl('/home');
-          this.userService.setUser(res.user);
           this.tokenService.setToken(res.token);
         },
         error: (e) => {
