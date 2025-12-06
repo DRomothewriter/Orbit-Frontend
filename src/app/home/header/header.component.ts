@@ -6,7 +6,6 @@ import { Router } from '@angular/router';
 
 import { SocialAuthService } from '@abacritt/angularx-social-login';
 
-import { ClickOutsideDirective } from '../../shared/directives/click-outside.directive';
 import { TokenService } from '../../shared/services/token.service';
 import { ModalsService } from '../../shared/services/modals.service';
 import { UserService } from '../../shared/services/user.service';

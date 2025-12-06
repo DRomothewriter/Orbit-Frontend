@@ -7,9 +7,14 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "e2e": "ng e2e",
+    "test:unit": "ng test --watch=false --code-coverage",
+    "test:unit:watch": "ng test",
+    "e2e": "cypress run",
+    "e2e:open": "cypress open",
     "cypress:open": "cypress open",
-    "cypress:run": "cypress run"
+    "cypress:run": "cypress run",
+    "cypress:run:headless": "cypress run --headless --browser chrome",
+    "test:all": "npm run test:unit && npm run cypress:run"
   },
   "private": true,
   "dependencies": {
