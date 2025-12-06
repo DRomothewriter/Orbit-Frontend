@@ -20,7 +20,11 @@ body {
     background-color: #0f111a; 
     color: $color-text-main;
     position: relative;
+<<<<<<< HEAD
     overflow: hidden; 
+=======
+    overflow-x: hidden; 
+>>>>>>> main
     box-sizing: border-box;
     z-index: 0;
 

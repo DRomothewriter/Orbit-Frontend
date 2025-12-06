@@ -18,6 +18,7 @@ export class GroupService {
     private myGroups = new BehaviorSubject<Group[]>([]);
     myGroups$ = this.myGroups.asObservable();
 
+<<<<<<< HEAD
     constructor(
         private httpClient: HttpClient,
         private tokenService: TokenService
@@ -50,6 +51,38 @@ export class GroupService {
                 });
         }
         return this.groupSummary.asObservable();
+=======
+  constructor(
+    private httpClient: HttpClient,
+    private tokenService: TokenService
+  ) {}
+
+  private getHeaders(): HttpHeaders {
+    const token = this.tokenService.getToken();
+    return new HttpHeaders({ Authorization: `Bearer ${token}` });
+  }
+  updateGroupSummary(changes: Partial<Group>) {
+    this.groupSummary.next({
+      ...this.groupSummary.value,
+      ...changes,
+    });
+  }
+  clearGroupSummary() {
+    this.groupSummary.next({ topic: '' }); // Restablece el estado inicial
+  }
+  getGroupSummary(groupId?: string): Observable<Group> {
+    if (!this.groupSummary.value._id && groupId) {
+      const headers = this.getHeaders();
+      this.httpClient
+        .get<Group>(`${environment.apiUrl}${this.endpnt}${groupId}`, {
+          headers,
+        })
+        .subscribe({
+          next: (group) => {
+            this.updateGroupSummary(group);
+          },
+        });
+>>>>>>> main
     }
 
     //DMs
@@ -62,6 +95,7 @@ export class GroupService {
             .pipe(tap((response) => this.myGroups.next(response)));
     }
 
+<<<<<<< HEAD
     getAllMyGroups(): Observable<Group[]> {
         const headers = this.getHeaders();
         return this.httpClient.get<Group[]>(
@@ -69,6 +103,15 @@ export class GroupService {
             { headers }
         );
     }
+=======
+  getAllMyGroups(): Observable<Group[]> {
+    const headers = this.getHeaders();
+    return this.httpClient.get<Group[]>(
+      `${environment.apiUrl}${this.endpnt}all-my-groups`,
+      { headers }
+    );
+  }
+>>>>>>> main
 
     // getMyCommunityGroups
     //Lo ponemos en este service para cambiar el observable myGroups
@@ -189,6 +232,7 @@ export class GroupService {
         );
     }
 
+<<<<<<< HEAD
     deleteGroup(groupId: string): Observable<DeleteGroupResponse> {
         const headers = this.getHeaders();
         return this.httpClient
@@ -206,6 +250,25 @@ export class GroupService {
                 })
             );
     }
+=======
+  deleteGroup(groupId: string): Observable<DeleteGroupResponse> {
+    const headers = this.getHeaders();
+    return this.httpClient
+      .delete<DeleteGroupResponse>(
+        `${environment.apiUrl}${this.endpnt}${groupId}`,
+        { headers }
+      )
+      .pipe(
+        tap(() => {
+          const updatedGroups = this.myGroups.value.filter(
+            (g) => g._id !== groupId
+          );
+          this.myGroups.next(updatedGroups);
+          this.clearGroupSummary();
+        })
+      );
+  }
+>>>>>>> main
 
     leaveGroup(groupId: string): Observable<GroupMember> {
         const headers = this.getHeaders();

@@ -18,6 +18,7 @@ import { CommonModule } from '@angular/common';
 import { Group } from '../shared/types/group';
 
 @Component({
+<<<<<<< HEAD
     selector: 'app-home',
     standalone: true,
     imports: [
@@ -86,6 +87,50 @@ export class HomeComponent implements OnInit {
             (val) => (this.isCallOpen = val)
         );
         this.sockeService.connectWithGroups();
+=======
+  selector: 'app-home',
+  standalone: true,
+  imports: [
+    CreateGroupModalComponent,
+    CalendarModalComponent,
+    MyuserModalComponent,
+    GroupNavComponent,
+    HeaderComponent,
+    RouterOutlet,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    CommunitiesNavComponent,
+  ],
+  templateUrl: './home.component.html',
+  styleUrl: './home.component.scss',
+})
+export class HomeComponent implements OnInit {
+  isCreateGroupOpen = false;
+  isCalendarOpen = false;
+  isMyUserOpen = false;
+  isGroupInfoOpen = false;
+  constructor(
+    private sockeService: SocketService,
+    private modalsService: ModalsService,
+    private router: Router,
+  ) {}
+
+  ngOnInit(): void {
+    this.modalsService.openCreateGroup$.subscribe(
+      (val) => (this.isCreateGroupOpen = val)
+    );
+    this.modalsService.openCalendar$.subscribe(
+      (val) => (this.isCalendarOpen = val)
+    );
+    this.modalsService.openMyUser$.subscribe(
+      (val) => (this.isMyUserOpen = val)
+    );
+    this.sockeService.connectWithGroups();
+    //get my communities
+  }
+>>>>>>> main
 
         console.log('📞 Suscribiendo al evento onCall...');
         this.sockeService.onCall().subscribe((group) => {

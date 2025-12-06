@@ -15,11 +15,19 @@ import { UserStatus } from '../types/user-status';
     providedIn: 'root',
 })
 export class UserService {
+<<<<<<< HEAD
     private endpnt: string = 'users/';
+=======
+  private endpnt: string = 'users/';
+  
+  private currentUserSubject = new BehaviorSubject<User>(this.getCleanUser());
+  currentUser$ = this.currentUserSubject.asObservable();
+>>>>>>> main
 
     private currentUserSubject = new BehaviorSubject<User>(this.getCleanUser());
     currentUser$ = this.currentUserSubject.asObservable();
 
+<<<<<<< HEAD
     constructor(
         private httpClient: HttpClient,
         private tokenService: TokenService
@@ -49,11 +57,149 @@ export class UserService {
 
     getMyUser(): Observable<User> {
         const currentValue = this.currentUserSubject.value;
+=======
+  getCleanUser(): User {
+    return {
+      username: '',
+      email: '',
+      profileImgUrl: '',
+      status: UserStatus.ONLINE
+    };
+  }
+
+  setUser(user: User) {
+    this.currentUserSubject.next(user);
+  }
+
+  clearUser() {
+    this.currentUserSubject.next(this.getCleanUser());
+  }
+
+  getMyUser(): Observable<User> {
+    const currentValue = this.currentUserSubject.value;
+    
+    if (currentValue._id) {
+      return this.currentUser$;
+    }
+
+    const token = this.tokenService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    return this.httpClient
+      .get<User>(`${environment.apiUrl}${this.endpnt}my-user`, {
+        headers,
+      })
+      .pipe(
+        tap((user) => {
+          if (!user.status) user.status = UserStatus.ONLINE;
+          this.currentUserSubject.next(user);
+        })
+      );
+  }
+
+  getAllUsers(): Observable<User[]> {
+    const token = this.tokenService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+    return this.httpClient.get<User[]>(`${environment.apiUrl}${this.endpnt}`, {
+      headers,
+    });
+  }
+
+  editProfileImg(formData: FormData): Observable<string> {
+    const token = this.tokenService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+    return this.httpClient.put<string>(
+      `${environment.apiUrl}${this.endpnt}edit-profile-image`,
+      formData,
+      { headers }
+    ).pipe(
+      tap((newUrl) => {
+        const currentUser = this.currentUserSubject.value;
+        this.currentUserSubject.next({ ...currentUser, profileImgUrl: newUrl });
+      })
+    );
+  }
+
+  changeUserStatus(status: UserStatus): Observable<User> {
+    const token = this.tokenService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+    return this.httpClient.put<User>(
+      `${environment.apiUrl}${this.endpnt}change-user-status/${status}`,
+      {},
+      { headers }
+    ).pipe(
+      tap(() => {
+        const currentUser = this.currentUserSubject.value;
+        this.currentUserSubject.next({ ...currentUser, status: status });
+      })
+    );
+  }
+
+  editUsername(username: string): Observable<User> {
+    const token = this.tokenService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+    return this.httpClient.put<User>(
+      `${environment.apiUrl}${this.endpnt}edit-username`,
+      {username: username},
+      {headers}
+    ).pipe(
+        tap(() => {
+            const currentUser = this.currentUserSubject.value;
+            this.currentUserSubject.next({ ...currentUser, username: username });
+        })
+    );
+  }
+
+  getRequestsReceived(): Observable<Friendship[]> {
+    const token = this.tokenService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+    return this.httpClient.get<Friendship[]>(
+      `${environment.apiUrl}${this.endpnt}received-requests`,
+      { headers }
+    );
+  }
+
+  searchUsers(searchQuery: string): Observable<User[]> {
+    const token = this.tokenService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+    return this.httpClient.get<User[]>(
+      `${environment.apiUrl}${this.endpnt}search?username=${searchQuery}`,
+      { headers }
+    );
+  }
+
+  sendFriendRequest(friendId: string): Observable<Friendship> {
+    const token = this.tokenService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+    return this.httpClient.post<Friendship>(
+      `${environment.apiUrl}${this.endpnt}friend-request`,
+      { friendId },
+      { headers }
+    );
+  }
+>>>>>>> main
 
         if (currentValue._id) {
             return this.currentUser$;
         }
 
+<<<<<<< HEAD
         const headers = this.getHeaders();
 
         return this.httpClient
@@ -202,3 +348,27 @@ export class UserService {
         );
     }
 }
+=======
+  getMyFriends(): Observable<GetFriendsResponse[]> {
+    const token = this.tokenService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+    return this.httpClient.get<GetFriendsResponse[]>(
+      `${environment.apiUrl}${this.endpnt}friends`,
+      { headers }
+    );
+  }
+
+  deleteFriendship(friendshipId: string): Observable<Friendship> {
+    const token = this.tokenService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+    return this.httpClient.delete<Friendship>(
+      `${environment.apiUrl}${this.endpnt}delete-friendship`,
+      { headers, body: { friendshipId } }
+    );
+  }
+}
+>>>>>>> main

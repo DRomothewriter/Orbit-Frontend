@@ -60,6 +60,7 @@ export class SocketService {
     }
   }
 
+<<<<<<< HEAD
   getSocket(): Socket {
     return this.socket;
   }
@@ -87,6 +88,28 @@ export class SocketService {
         }
       };
       checkSocket();
+=======
+  // === NUEVO: Manejo de Estado ===
+  emitStatusChange(status: UserStatus) {
+    if (this.socket && this.socketReady) {
+        this.socket.emit('status-change', { status });
+    }
+  }
+
+  onFriendStatusChange(): Observable<{userId: string, status: UserStatus}> {
+    return new Observable((observer) => {
+        // Esperamos a que el socket esté listo
+        const checkSocket = () => {
+            if (this.socket && this.socketReady) {
+                this.socket.on('friend-status-change', (data: {userId: string, status: UserStatus}) => {
+                    observer.next(data);
+                });
+            } else {
+                setTimeout(checkSocket, 500);
+            }
+        };
+        checkSocket();
+>>>>>>> main
     });
   }
   // ==============================
@@ -107,6 +130,7 @@ export class SocketService {
   }
   onNotification(): Observable<Notification> {
     return new Observable((observer) => {
+<<<<<<< HEAD
       const checkSocket = () => {
         if (this.socket && this.socketReady) {
           this.socket.on('notification', (data: Notification) => {
@@ -132,6 +156,18 @@ export class SocketService {
         }
       };
       checkSocket();
+=======
+        const checkSocket = () => {
+            if (this.socket && this.socketReady) {
+                this.socket.on('notification', (data: Notification) => {
+                    observer.next(data);
+                });
+            } else {
+                setTimeout(checkSocket, 100);
+            }
+        };
+        checkSocket();
+>>>>>>> main
     });
   }
 }

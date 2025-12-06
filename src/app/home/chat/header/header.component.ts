@@ -47,6 +47,7 @@ export class HeaderComponent implements OnInit {
     });
   }
 
+<<<<<<< HEAD
   deleteChat() {
     if (
       confirm(
@@ -60,6 +61,18 @@ export class HeaderComponent implements OnInit {
         },
         error: (err) => console.error('Error deleting chat', err),
       });
+=======
+    deleteChat() {
+
+    if(confirm('¿Estás seguro de que quieres borrar este chat? Esta acción no se puede deshacer.')) {
+        this.groupService.deleteGroup(this.group._id!).subscribe({
+            next: () => {
+                // Redirigir a home o friends
+                this.router.navigate(['/home/']);
+            },
+            error: (err) => console.error('Error deleting chat', err)
+        });
+>>>>>>> main
     }
   }
   editGroupImage(event: Event): void {
