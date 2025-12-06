@@ -65,4 +65,15 @@ export class ModalsService {
   closeAddMembers() {
     this._openAddMembers.next(false);
   }
+
+    private _openCall = new BehaviorSubject<boolean>(false);
+  openCall$ = this._openCall.asObservable();
+
+  openCall() {
+    this._openCall.next(true);
+  }
+
+  closeCall() {
+    this._openCall.next(false);
+  }
 }

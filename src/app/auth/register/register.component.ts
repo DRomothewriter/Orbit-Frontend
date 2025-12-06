@@ -16,7 +16,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 // Importar el Servicio
-import { AuthService } from '../../shared/services/auth.service';
+import { AuthService, SignupResponse } from '../../shared/services/auth.service';
 import { TokenService } from '../../shared/services/token.service';
 import { UserService } from '../../shared/services/user.service';
 import { AuthResponse } from '../../shared/types/auth-response';
@@ -56,6 +56,8 @@ export class RegisterComponent implements OnInit {
   
   isLoading = false;
   errorMessage: string | null = null;
+  successMessage: string | null = null;
+  registeredEmail: string | null = null;
 
   registerForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
@@ -99,16 +101,18 @@ export class RegisterComponent implements OnInit {
     const { name, email, password } = this.registerForm.value;
 
     this.authService.signup(name!, email!, password!).subscribe({
-      next: (res: AuthResponse) => {
+      next: (res: SignupResponse) => {
         this.isLoading = false;
-        // Guarda el token y redirige
-        this.router.navigateByUrl('/home');
-        this.userService.setUser(res.user);
-        this.tokenService.setToken(res.token);
+        this.successMessage = res.message;
+        this.registeredEmail = email!;
+        // Redirigir a la página de verificación
+        this.router.navigate(['/verify-email'], { 
+          queryParams: { email: email } 
+        });
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.message || 'No se pudo completar el registro.';
+        this.errorMessage = err.error?.error || 'No se pudo completar el registro.';
       },
     });
   }

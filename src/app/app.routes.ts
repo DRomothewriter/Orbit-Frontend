@@ -11,13 +11,18 @@ import { FriendsListComponent } from './home/friends-panel/friends-list/friends-
 import { authGuard } from './shared/guards/auth.guard';
 
 import { RegisterComponent } from './auth/register/register.component';
-
+import { VerifyEmailComponent } from './auth/verify-email/verify-email.component';
+import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';
 
 export const routes: Routes = [
 
     { path: '', redirectTo: 'login', pathMatch: 'full' },
     { path: 'login', component:LoginComponent },
-    { path: 'register', component: RegisterComponent }, 
+    { path: 'register', component: RegisterComponent },
+    { path: 'verify-email', component: VerifyEmailComponent },
+    { path: 'forgot-password', component: ForgotPasswordComponent },
+    { path: 'reset-password', component: ResetPasswordComponent }, 
     { path: 'home', component: HomeComponent, canActivate:[authGuard], children: [
         { path:'friends', component: FriendsPanelComponent, children:[
             {path:'', component: FriendsListComponent},

@@ -12,14 +12,13 @@ import { GroupInfoModalComponent } from '../../shared/components/modals/group-in
   styleUrl: './chat.component.scss',
 })
 export class ChatComponent implements OnInit {
-  openInfo = false;
   isGroupInfoOpen = false;
-
   constructor(private modalsService: ModalsService){}
 
   ngOnInit(): void {
     this.modalsService.openGroupInfo$.subscribe(
       (val) => (this.isGroupInfoOpen = val)
     );
+
   }
 }

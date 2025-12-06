@@ -1,5 +1,9 @@
+import { NotificationType } from "./notification-type";
+
 export interface Notification {
+    _id?: string,
     receiverId: string,
-    messageId: string,
-    seen: boolean
+    type: NotificationType,
+    data: any,
+    seen: boolean,
 }

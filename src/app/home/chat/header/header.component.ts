@@ -37,7 +37,7 @@ export class HeaderComponent implements OnInit {
     const groupId = this.route.snapshot.paramMap.get('id');
     this.groupService.getGroupSummary(groupId!).subscribe((group) => {
       this.group = group;
-      if(group._id){        
+      if (group._id) {
         this.groupService.getMyGroupMember(group._id).subscribe({
           next: (response: GroupMember) => {
             this.myGroupMember = response;
@@ -47,16 +47,19 @@ export class HeaderComponent implements OnInit {
     });
   }
 
-    deleteChat() {
-
-    if(confirm('¿Estás seguro de que quieres borrar este chat? Esta acción no se puede deshacer.')) {
-        this.groupService.deleteGroup(this.group._id!).subscribe({
-            next: () => {
-                // Redirigir a home o friends
-                this.router.navigate(['/home/']);
-            },
-            error: (err) => console.error('Error deleting chat', err)
-        });
+  deleteChat() {
+    if (
+      confirm(
+        '¿Estás seguro de que quieres borrar este chat? Esta acción no se puede deshacer.'
+      )
+    ) {
+      this.groupService.deleteGroup(this.group._id!).subscribe({
+        next: () => {
+          // Redirigir a home o friends
+          this.router.navigate(['/home/']);
+        },
+        error: (err) => console.error('Error deleting chat', err),
+      });
     }
   }
   editGroupImage(event: Event): void {
@@ -77,7 +80,7 @@ export class HeaderComponent implements OnInit {
         error: (e) => {
           alert('Error al editar la imagen del grupo');
           this.group.groupImgUrl = pastImgUrl;
-          console.log('Error al editar la imagen del grupo', e)
+          console.log('Error al editar la imagen del grupo', e);
         },
       });
     }
@@ -110,11 +113,15 @@ export class HeaderComponent implements OnInit {
           alert('No se pudo editar el topic');
           this.isTopicLoading = false;
           this.group.topic = pastTopic;
-          console.log('Error al editar la imagen del grupo', e)
+          console.log('Error al editar la imagen del grupo', e);
         },
       });
     } else {
       this.editingTopic = false;
     }
+  }
+
+  startGroupCall(){
+    this.modalsService.openCall();
   }
 }

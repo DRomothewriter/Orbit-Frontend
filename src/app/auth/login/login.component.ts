@@ -40,6 +40,7 @@ import { environment } from '../../../environments/environment';
 export class LoginComponent implements OnInit {
   email: string = '';
   password: string = '';
+  errorMessage: string | null = null;
 
   constructor(
     private authService: AuthService,
@@ -59,6 +60,7 @@ export class LoginComponent implements OnInit {
   }
 
   onLogin() {
+    this.errorMessage = null;
     this.authService.login(this.email, this.password).subscribe({
       next: (res: AuthResponse) => {
         this.router.navigateByUrl('/home');
@@ -67,6 +69,15 @@ export class LoginComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error en login', err);
+        if (err.status === 403) {
+          this.errorMessage = 'Email no verificado. Por favor verifica tu correo antes de iniciar sesión.';
+          // Opcional: redirigir a verificación
+          setTimeout(() => {
+            this.router.navigate(['/verify-email'], { queryParams: { email: this.email } });
+          }, 2000);
+        } else {
+          this.errorMessage = err.error?.error || 'Credenciales inválidas';
+        }
       },
     });
   }
@@ -79,11 +90,10 @@ export class LoginComponent implements OnInit {
       .subscribe({
         next: (res: AuthResponse) => {
           this.router.navigateByUrl('/home');
-          this.userService.setUser(res.user);
           this.tokenService.setToken(res.token);
         },
-        error: () => {
-          console.error('Error en login con Google');
+        error: (e) => {
+          console.error(e);
         },
       });
   }

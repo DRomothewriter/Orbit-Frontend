@@ -6,13 +6,13 @@
     align-items: center;
     margin-bottom: 0.75rem;
     border-radius: 1rem;
-    
+    padding-left: 1rem;
     /* Efecto Glassmorphism */
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba($color-bg-main, 0.01);
     border: 1px solid rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(8px);
     transition: all 0.3s ease;
-    
+    cursor: pointer;
     &:hover {
         background: rgba(255, 255, 255, 0.05);
         border-color: rgba(255, 255, 255, 0.1);
