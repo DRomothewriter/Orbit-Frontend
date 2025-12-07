@@ -141,6 +141,8 @@ export class VideoCallComponent implements OnInit, OnDestroy, AfterViewChecked {
             if (videoElement.srcObject !== this.localStream) {
                 console.log('[VideoCall] Asignando stream local al video');
                 videoElement.srcObject = this.localStream;
+                videoElement.muted = true;
+                videoElement.volume = 0;
             }
         }
     }
