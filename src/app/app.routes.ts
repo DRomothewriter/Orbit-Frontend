@@ -16,22 +16,85 @@ import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.
 import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';
 
 export const routes: Routes = [
-
     { path: '', redirectTo: 'login', pathMatch: 'full' },
-    { path: 'login', component:LoginComponent },
+    { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
-    { path: 'verify-email', component: VerifyEmailComponent },
-    { path: 'forgot-password', component: ForgotPasswordComponent },
-    { path: 'reset-password', component: ResetPasswordComponent }, 
-    { path: 'home', component: HomeComponent, canActivate:[authGuard], children: [
-        { path:'friends', component: FriendsPanelComponent, children:[
-            {path:'', component: FriendsListComponent},
-            {path:'add-friend', component: AddFriendComponent},
-            {path:'pending', component: PendingComponent},
-        ]},
-        { path: 'community/:communityId', children: [
-            { path: 'group/:id', component: ChatComponent},
-        ]},
-        { path: ':id', component: ChatComponent},
-    ]},
+    {
+        path: 'verify-email',
+        loadComponent: () =>
+            import('./auth/verify-email/verify-email.component').then(
+                (m) => m.VerifyEmailComponent
+            ),
+    },
+    {
+        path: 'forgot-password',
+        loadComponent: () =>
+            import('./auth/forgot-password/forgot-password.component').then(
+                (m) => m.ForgotPasswordComponent
+            ),
+    },
+    {
+        path: 'reset-password',
+        loadComponent: () =>
+            import('./auth/reset-password/reset-password.component').then(
+                (m) => m.ResetPasswordComponent
+            ),
+    },
+    {
+        path: 'home',
+        loadComponent: () =>
+            import('./home/home.component').then((m) => m.HomeComponent),
+        canActivate: [authGuard],
+        children: [
+            {
+                path: 'friends',
+                loadComponent: () =>
+                    import('./home/friends-panel/friends-panel.component').then(
+                        (m) => m.FriendsPanelComponent
+                    ),
+                children: [
+                    {
+                        path: '',
+                        loadComponent: () =>
+                            import(
+                                './home/friends-panel/friends-list/friends-list.component'
+                            ).then((m) => m.FriendsListComponent),
+                    },
+                    {
+                        path: 'add-friend',
+                        loadComponent: () =>
+                            import(
+                                './home/friends-panel/add-friend/add-friend.component'
+                            ).then((m) => m.AddFriendComponent),
+                    },
+                    {
+                        path: 'pending',
+                        loadComponent: () =>
+                            import(
+                                './home/friends-panel/pending/pending.component'
+                            ).then((m) => m.PendingComponent),
+                    },
+                ],
+            },
+            {
+                path: 'community/:communityId',
+                children: [
+                    {
+                        path: 'group/:id',
+                        loadComponent: () =>
+                            import('./home/chat/chat.component').then(
+                                (m) => m.ChatComponent
+                            ),
+                    },
+                ],
+            },
+            {
+                path: ':id',
+                loadComponent: () =>
+                    import('./home/chat/chat.component').then(
+                        (m) => m.ChatComponent
+                    ),
+            },
+        ],
+    },
 ];
