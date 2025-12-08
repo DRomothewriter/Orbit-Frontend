@@ -18,11 +18,12 @@ import { ActivatedRoute } from '@angular/router';
 import { ModalsService } from '../../services/modals.service';
 import { Group } from '../../types/group';
 import { GroupService } from '../../services/group.service';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
     selector: 'app-video-call',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, MatIconModule],
     templateUrl: './video-call.component.html',
     styleUrl: './video-call.component.scss',
 })

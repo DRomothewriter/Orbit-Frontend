@@ -1,74 +1,78 @@
 <div class="video-call-container">
-  <!-- Botón para unirse si no estás en llamada -->
-  <div class="join-section" *ngIf="!isInCall">
-    <h2>Videollamada</h2>
-    <p>Room ID: {{ roomId }}</p>
-    <button class="btn-join" (click)="joinCall()">
-      Unirse a la llamada
-    </button>
-  </div>
-
-  <!-- Interfaz de la llamada activa -->
-  <div class="call-active" *ngIf="isInCall">
-    <!-- Video local -->
-    <div class="local-video-container">
-      <video 
-        #localVideo 
-        autoplay 
-        playsinline 
-        muted
-        class="local-video">
-      </video>
-      <div class="video-label">Tú</div>
+    <!-- Botón para unirse si no estás en llamada -->
+    <div class="join-section" *ngIf="!isInCall">
+        <h2>Videollamada</h2>
+        <p>Room ID: {{ roomId }}</p>
+        <button class="btn-join" (click)="joinCall()">
+            Unirse a la llamada
+        </button>
     </div>
 
-    <!-- Videos remotos -->
-    <div class="remote-videos-grid">
-      <div 
-        class="remote-video-container" 
-        *ngFor="let peer of remotePeers">
-        <video 
-          #remoteVideo
-          autoplay 
-          playsinline
-          class="remote-video"
-          [attr.data-peer-id]="peer.id">
-        </video>
-        <div class="video-label">{{ peer.id }}</div>
-      </div>
+    <!-- Interfaz de la llamada activa -->
+    <div class="call-active" *ngIf="isInCall">
+        <!-- Video local -->
+        <div class="local-video-container">
+            <video
+                #localVideo
+                autoplay
+                playsinline
+                muted
+                class="local-video"
+            ></video>
+            <div class="video-label">Tú</div>
+        </div>
 
-      <!-- Mensaje si no hay otros participantes -->
-      <div class="no-peers" *ngIf="remotePeers.length === 0">
-        <p>Esperando a otros participantes...</p>
-      </div>
+        <!-- Videos remotos -->
+        <div class="remote-videos-grid">
+            <div
+                class="remote-video-container"
+                *ngFor="let peer of remotePeers"
+            >
+                <video
+                    #remoteVideo
+                    autoplay
+                    playsinline
+                    class="remote-video"
+                    [attr.data-peer-id]="peer.id"
+                ></video>
+                <div class="video-label">{{ peer.id }}</div>
+            </div>
+
+            <!-- Mensaje si no hay otros participantes -->
+            <div class="no-peers" *ngIf="remotePeers.length === 0">
+                <p>Esperando a otros participantes...</p>
+            </div>
+        </div>
+
+        <!-- Controles -->
+        <div class="controls">
+            <button
+                class="control-btn"
+                [class.disabled]="!isAudioEnabled"
+                (click)="toggleAudio()"
+                title="Micrófono"
+            >
+                <mat-icon *ngIf="isVideoEnabled">videocam</mat-icon>
+                <mat-icon *ngIf="!isVideoEnabled">videocam_off</mat-icon>
+            </button>
+
+            <button
+                class="control-btn"
+                [class.disabled]="!isVideoEnabled"
+                (click)="toggleVideo()"
+                title="Cámara"
+            >
+                <mat-icon *ngIf="isVideoEnabled">videocam</mat-icon>
+                <mat-icon *ngIf="!isVideoEnabled">videocam_off</mat-icon>
+            </button>
+
+            <button
+                class="control-btn leave-btn"
+                (click)="leaveCall()"
+                title="Salir"
+            >
+                📞
+            </button>
+        </div>
     </div>
-
-    <!-- Controles -->
-    <div class="controls">
-      <button 
-        class="control-btn"
-        [class.disabled]="!isAudioEnabled"
-        (click)="toggleAudio()"
-        title="Micrófono">
-        <span *ngIf="isAudioEnabled">🎤</span>
-        <span *ngIf="!isAudioEnabled">🔇</span>
-      </button>
-
-      <button 
-        class="control-btn"
-        [class.disabled]="!isVideoEnabled"
-        (click)="toggleVideo()"
-        title="Cámara">
-        <span *ngIf="isVideoEnabled">📹</span>
-        <span *ngIf="!isVideoEnabled">📷</span>
-      </button>
-
-      <button 
-        class="control-btn leave-btn"
-        (click)="leaveCall()"
-        title="Salir">
-        📞
-      </button>
-    </div>
-  </div>
 </div>
