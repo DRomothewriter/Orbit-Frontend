@@ -10,6 +10,7 @@ import { AcceptfrResponse } from '../types/acceptfr-response';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { GetFriendsResponse } from '../types/get-friends-response';
 import { UserStatus } from '../types/user-status';
+import { GetReceivedRequestsResponse } from '../types/get-received-requests-response';
 
 @Injectable({
     providedIn: 'root',
@@ -146,10 +147,10 @@ export class UserService {
             );
     }
 
-    getRequestsReceived(): Observable<Friendship[]> {
+    getRequestsReceived(): Observable<GetReceivedRequestsResponse[]> {
         const headers = this.getHeaders();
 
-        return this.httpClient.get<Friendship[]>(
+        return this.httpClient.get<GetReceivedRequestsResponse[]>(
             `${environment.apiUrl}${this.endpnt}received-requests`,
             { headers }
         );

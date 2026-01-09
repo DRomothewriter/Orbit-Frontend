@@ -108,26 +108,54 @@ export class VideoCallComponent implements OnInit, OnDestroy, AfterViewChecked {
                 const peerId = videoElement.getAttribute('data-peer-id');
                 const peer = this.remotePeers.find((p) => p.id === peerId);
 
-                if (peer && peer.stream) {
-                    // Solo asignar si el stream tiene tracks de video o si cambió el stream
-                    const hasVideo = peer.stream.getVideoTracks().length > 0;
-                    const streamChanged =
-                        videoElement.srcObject !== peer.stream;
-
-                    if (streamChanged) {
+                if (peer) {
+                    if (peer.stream) {
+                        const videoTracks = peer.stream.getVideoTracks();
+                        const audioTracks = peer.stream.getAudioTracks();
+                        const streamChanged = videoElement.srcObject !== peer.stream;
+                        
                         console.log(
-                            `[VideoCall] Asignando stream a video de peer ${peerId}`,
+                            `[VideoCall] Debug peer ${peerId}:`,
                             {
-                                stream: peer.stream,
-                                videoTracks:
-                                    peer.stream.getVideoTracks().length,
-                                audioTracks:
-                                    peer.stream.getAudioTracks().length,
-                                hasVideo: hasVideo,
+                                hasStream: !!peer.stream,
+                                videoTracks: videoTracks.length,
+                                audioTracks: audioTracks.length,
+                                streamChanged,
+                                currentSrcObject: !!videoElement.srcObject,
+                                videoTrackEnabled: videoTracks[0]?.enabled,
+                                audioTrackEnabled: audioTracks[0]?.enabled,
+                                trackStates: videoTracks.concat(audioTracks).map(track => ({
+                                    kind: track.kind,
+                                    enabled: track.enabled,
+                                    readyState: track.readyState
+                                }))
                             }
                         );
-                        videoElement.srcObject = peer.stream;
+
+                        if (streamChanged || !videoElement.srcObject) {
+                            console.log(
+                                `[VideoCall] Asignando stream a video de peer ${peerId}`
+                            );
+                            videoElement.srcObject = peer.stream;
+                            
+                            // Agregar listeners para depuración
+                            videoElement.onloadedmetadata = () => {
+                                console.log(`[VideoCall] Metadata cargada para peer ${peerId}`);
+                            };
+                            
+                            videoElement.oncanplay = () => {
+                                console.log(`[VideoCall] Video puede reproducirse para peer ${peerId}`);
+                            };
+                            
+                            videoElement.onerror = (error) => {
+                                console.error(`[VideoCall] Error en video de peer ${peerId}:`, error);
+                            };
+                        }
+                    } else {
+                        console.warn(`[VideoCall] Peer ${peerId} no tiene stream`);
                     }
+                } else {
+                    console.warn(`[VideoCall] No se encontró peer para ${peerId}`);
                 }
             });
         }
@@ -244,7 +272,11 @@ export class VideoCallComponent implements OnInit, OnDestroy, AfterViewChecked {
 
             // Cuando un peer empieza a producir audio/video
             socket.on('newProducer', async (data: any) => {
-                console.log('[VideoCall] Nuevo producer:', data);
+                console.log('[VideoCall] Nuevo producer recibido:', {
+                    peerId: data.peerId,
+                    producerId: data.producerId,
+                    kind: data.kind
+                });
 
                 try {
                     await this.callService.consume(
@@ -253,6 +285,19 @@ export class VideoCallComponent implements OnInit, OnDestroy, AfterViewChecked {
                         data.kind,
                         data.peerId
                     );
+                    console.log(`[VideoCall] Consume completado para ${data.kind} de peer ${data.peerId}`);
+                    
+                    // Verificar que el peer fue actualizado correctamente
+                    const peers = this.remotePeers;
+                    const peer = peers.find(p => p.id === data.peerId);
+                    if (peer && peer.stream) {
+                        console.log(`[VideoCall] Peer ${data.peerId} tiene stream con tracks:`, {
+                            video: peer.stream.getVideoTracks().length,
+                            audio: peer.stream.getAudioTracks().length
+                        });
+                    } else {
+                        console.warn(`[VideoCall] Peer ${data.peerId} no tiene stream después de consume`);
+                    }
                 } catch (error) {
                     console.error('[VideoCall] Error consumiendo:', error);
                 }

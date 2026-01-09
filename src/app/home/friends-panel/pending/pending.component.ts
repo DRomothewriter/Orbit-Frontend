@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../../../shared/services/user.service';
-import { Friendship } from '../../../shared/types/friendship';
+import { GetReceivedRequestsResponse } from '../../../shared/types/get-received-requests-response';
 
 @Component({
   selector: 'app-pending',
@@ -9,12 +9,12 @@ import { Friendship } from '../../../shared/types/friendship';
   styleUrl: './pending.component.scss',
 })
 export class PendingComponent implements OnInit {
-  friendRequests: Friendship[] = [];
+  friendRequests: GetReceivedRequestsResponse[] = [];
   constructor(private userService: UserService) {}
 
   ngOnInit() {
     this.userService.getRequestsReceived().subscribe({
-      next: (fr: Friendship[]) => {
+      next: (fr: GetReceivedRequestsResponse[]) => {
         this.friendRequests = fr;
       },
     });
@@ -24,7 +24,7 @@ export class PendingComponent implements OnInit {
     this.userService.acceptFriendRequest(friendId).subscribe({
       next: () => {
         const index = this.friendRequests.findIndex(
-          (fr) => fr.friendId === friendId
+          (fr) => fr._id === friendId
         );
         if (index !== -1) {
           this.friendRequests.splice(index, 1);

@@ -11,14 +11,19 @@
 <ul class="users-list">
     @for(user of users; track user._id){
     <li class="user-card">
-        <div class="user-avatar">
+        <div class="avatar-container">
+            @if(user.profileImgUrl) {
+            <img [src]="user.profileImgUrl" alt="avatar" class="avatar-img" />
+            } @else {
             <img
                 [src]="
-                    
-                    'https://placehold.co/40x40/533483/ffffff?text=U'
+                    'https://placehold.co/48x48/533483/ffffff?text=' +
+                    user.username.charAt(0).toUpperCase()
                 "
-                alt="Avatar"
+                alt="avatar"
+                class="avatar-img"
             />
+            }
         </div>
         <div class="user-info">
             <span class="user-name">{{ user.username }}</span>
