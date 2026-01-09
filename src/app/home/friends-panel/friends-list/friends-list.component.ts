@@ -57,6 +57,7 @@ export class FriendsListComponent implements OnInit, OnDestroy {
   loadFriends() {
     this.userService.getMyFriends().subscribe({
       next:(friendships: GetFriendsResponse[])=> {
+        console.log("My friends: ",friendships)
         this.friends = friendships;
       }
     });

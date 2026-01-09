@@ -20,7 +20,9 @@ export class AddFriendComponent {
   onSearch() {
     if (!this.searchQuery.trim()) return;
     this.userService.searchUsers(this.searchQuery).subscribe({
-      next: (users) => this.users = users,
+      next: (users) => { 
+        this.users = users;
+      },
       error: (err) => console.error('Error al buscar usuarios', err)
     });
   }
