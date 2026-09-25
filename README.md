@@ -2,6 +2,17 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.15.
 
+## Estado de Módulos y Roadmap (v1 & Futuro)
+
+| Módulo | Estado en Release v1 | Notas y Roadmap |
+|---|---|---|
+| **Autenticación (JWT & Google OAuth)** | ✅ Activo | Flujo completo de registro, verificación de email, inicio de sesión y recuperación de contraseña. |
+| **Comunidades y Grupos** | ✅ Activo | Creación, gestión de miembros, roles y navegación lateral. |
+| **Mensajería en tiempo real** | ✅ Activo | Sockets en tiempo real con mitigación de fugas de memoria (`SocketService`). |
+| **Videollamadas (WebRTC / Mediasoup)** | ✅ Activo | Llamadas de audio y video multicanal en tiempo real. |
+| **Notificaciones** | ✅ Activo | Alertas en tiempo real con menú dropdown y marcado de vistos. |
+| **Calendario de Eventos** | ⏳ Oculto temporalmente (v1) | La interfaz (`CalendarModalComponent`) y la lógica base (`EventsService`) están implementadas operando localmente en memoria. Para el release v1 se ocultó el acceso directo desde el header (`header.component.html`) para evitar presentar una funcionalidad sin persistencia compartida. **Roadmap v2:** Se reactivará una vez integrados los endpoints de persistencia y sincronización entre usuarios en el backend. |
+
 ## Development server
 
 To start a local development server, run:
