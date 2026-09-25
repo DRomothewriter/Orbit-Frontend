@@ -64,6 +64,43 @@ export class SocketService {
     return this.socket;
   }
 
+  private createSocketListener<T, R = T>(
+    eventName: string,
+    transform?: (data: T) => R,
+    pollInterval = 100
+  ): Observable<R> {
+    return new Observable<R>((observer) => {
+      let isSubscribed = true;
+      let timeoutId: any;
+
+      const handler = (data: T) => {
+        const result = transform ? transform(data) : (data as unknown as R);
+        observer.next(result);
+      };
+
+      const checkSocket = () => {
+        if (!isSubscribed) return;
+        if (this.socket && this.socketReady) {
+          this.socket.on(eventName, handler);
+        } else {
+          timeoutId = setTimeout(checkSocket, pollInterval);
+        }
+      };
+
+      checkSocket();
+
+      return () => {
+        isSubscribed = false;
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        if (this.socket) {
+          this.socket.off(eventName, handler);
+        }
+      };
+    });
+  }
+
   // === NUEVO: Manejo de Estado === No se si sea necesario
   emitStatusChange(status: UserStatus) {
     if (this.socket && this.socketReady) {
@@ -72,66 +109,29 @@ export class SocketService {
   }
 
   onFriendStatusChange(): Observable<{ userId: string; status: UserStatus }> {
-    return new Observable((observer) => {
-      // Esperamos a que el socket esté listo
-      const checkSocket = () => {
-        if (this.socket && this.socketReady) {
-          this.socket.on(
-            'friend-status-change',
-            (data: { userId: string; status: UserStatus }) => {
-              observer.next(data);
-            }
-          );
-        } else {
-          setTimeout(checkSocket, 500);
-        }
-      };
-      checkSocket();
-    });
+    return this.createSocketListener<{ userId: string; status: UserStatus }>(
+      'friend-status-change',
+      undefined,
+      500
+    );
   }
   // ==============================
 
   onMessage(): Observable<Message> {
-    return new Observable((observer) => {
-      const checkSocket = () => {
-        if (this.socket && this.socketReady) {
-          this.socket.on('message', (data: Message) => {
-            observer.next(data);
-          });
-        } else {
-          setTimeout(checkSocket, 100);
-        }
-      };
-      checkSocket();
-    });
+    return this.createSocketListener<Message>('message');
   }
+
   onNotification(): Observable<Notification> {
-    return new Observable((observer) => {
-      const checkSocket = () => {
-        if (this.socket && this.socketReady) {
-          this.socket.on('notification', (data: Notification) => {
-            observer.next(data);
-          });
-        } else {
-          setTimeout(checkSocket, 100);
-        }
-      };
-      checkSocket();
-    });
+    return this.createSocketListener<Notification>('notification');
   }
+
   onCall(): Observable<Group> {
-    return new Observable((observer) => {
-      const checkSocket = () => {
-        if (this.socket && this.socketReady) {
-          this.socket.on('call-starting', (data: { group: Group }) => {
-            console.log('🔔 Event call-starting recibido:', data);
-            observer.next(data.group);
-          });
-        } else {
-          setTimeout(checkSocket, 100);
-        }
-      };
-      checkSocket();
-    });
+    return this.createSocketListener<{ group: Group }, Group>(
+      'call-starting',
+      (data) => {
+        console.log('🔔 Event call-starting recibido:', data);
+        return data.group;
+      }
+    );
   }
 }

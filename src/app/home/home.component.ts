@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { Router, RouterOutlet } from '@angular/router';
 
 import { GroupNavComponent } from './group-nav/group-nav.component';
@@ -38,7 +39,7 @@ import { Group } from '../shared/types/group';
     templateUrl: './home.component.html',
     styleUrl: './home.component.scss',
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
     isCreateGroupOpen = false;
     isCalendarOpen = false;
     isMyUserOpen = false;
@@ -52,6 +53,8 @@ export class HomeComponent implements OnInit {
     modalWidth = 600;
     modalHeight = 400;
     modalZIndex = 1000;
+
+    private subscriptions = new Subscription();
 
     private isDragging = false;
     private dragOffsetX = 0;
@@ -73,26 +76,40 @@ export class HomeComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.modalsService.openCreateGroup$.subscribe(
-            (val) => (this.isCreateGroupOpen = val)
+        this.subscriptions.add(
+            this.modalsService.openCreateGroup$.subscribe(
+                (val) => (this.isCreateGroupOpen = val)
+            )
         );
-        this.modalsService.openCalendar$.subscribe(
-            (val) => (this.isCalendarOpen = val)
+        this.subscriptions.add(
+            this.modalsService.openCalendar$.subscribe(
+                (val) => (this.isCalendarOpen = val)
+            )
         );
-        this.modalsService.openMyUser$.subscribe(
-            (val) => (this.isMyUserOpen = val)
+        this.subscriptions.add(
+            this.modalsService.openMyUser$.subscribe(
+                (val) => (this.isMyUserOpen = val)
+            )
         );
-        this.modalsService.openCall$.subscribe(
-            (val) => (this.isCallOpen = val)
+        this.subscriptions.add(
+            this.modalsService.openCall$.subscribe(
+                (val) => (this.isCallOpen = val)
+            )
         );
         this.sockeService.connectWithGroups();
 
         console.log('📞 Suscribiendo al evento onCall...');
-        this.sockeService.onCall().subscribe((group) => {
-            console.log('🔔 Llamada recibida:', group);
-            this.group = group;
-            this.modalsService.openCall()
-        });
+        this.subscriptions.add(
+            this.sockeService.onCall().subscribe((group) => {
+                console.log('🔔 Llamada recibida:', group);
+                this.group = group;
+                this.modalsService.openCall();
+            })
+        );
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions.unsubscribe();
     }
 
     navToFriends() {
