@@ -3,10 +3,6 @@
         <h1>Orbit</h1>
     </div>
     <div class="navbar-menu">
-        <button mat-icon-button class="nav-icon" (click)="openCalendarModal()" matTooltip="Calendario">
-            <mat-icon>calendar_month</mat-icon>
-        </button>
-        
         <!-- === BOTÓN DE NOTIFICACIONES === -->
         <div class="dropdown-container" (appClickOutside)="closeNotifications()">
             <button mat-icon-button class="nav-icon relative" (click)="toggleNotifications()" [class.active]="isNotificationsOpen">
