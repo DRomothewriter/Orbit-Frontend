@@ -14,6 +14,7 @@
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "cypress:run:headless": "cypress run --headless --browser chrome",
+    "test:workflow": "node --test tests/deploy.workflow.test.js",
     "test:all": "npm run test:unit && npm run cypress:run"
   },
   "private": true,

@@ -68,3 +68,27 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## Pipeline de CI/CD (GitHub Actions - Orbit-0018)
+
+El despliegue del frontend está completamente automatizado hacia **Amazon S3 y CloudFront** mediante GitHub Actions (`.github/workflows/deploy.yml`), eliminando por completo credenciales estáticas de AWS (`AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`):
+
+### 1. Autenticación OIDC con AWS
+GitHub Actions asume federadamente el rol IAM de menor privilegio en AWS vía OpenID Connect (`aws-actions/configure-aws-credentials@v4`), otorgando exclusivamente permisos para sincronizar en el bucket S3 del frontend e invalidar la distribución de CloudFront.
+
+### 2. Variables y Secretos Requeridos en GitHub
+Configurar los siguientes valores en el repositorio (`Settings > Secrets and variables > Actions`):
+
+#### **Variables del Repositorio (Repository Variables):**
+- `AWS_REGION`: Región principal de AWS (ej. `us-east-2`).
+- `S3_FRONTEND_BUCKET_NAME`: Nombre del bucket S3 privado de hosting estático (ej. `orbit-frontend-production-static`).
+- `CLOUDFRONT_DISTRIBUTION_ID`: Identificador de la distribución de CloudFront asociada al dominio.
+
+#### **Secretos del Repositorio (Repository Secrets):**
+- `AWS_ROLE_ARN`: ARN del rol IAM OIDC generado por Terraform (`Orbit-IaC`, ej. `arn:aws:iam::<ACCOUNT_ID>:role/orbit-github-actions-role-production`).
+
+### 3. Fases del Flujo de Trabajo
+1. **Validación de Especificación:** Ejecución de `npm run test:workflow` para comprobar que el pipeline respete los contratos de seguridad y estructura.
+2. **Build de Producción:** Compilación optimizada con Angular CLI (`npm run build -- --configuration=production`), generando los bundles en `dist/orbit-frontend/browser/`.
+3. **Sincronización a S3 con `--delete`:** Sube los nuevos chunks JS/CSS e index.html, eliminando del bucket archivos obsoletos de versiones previas.
+4. **Invalidación de CloudFront:** Dispara una invalidación inmediata en `/*` para purgar la caché de los Edge Locations de AWS, permitiendo que los usuarios obtengan instantáneamente la nueva versión sin errores 404 de hash.
