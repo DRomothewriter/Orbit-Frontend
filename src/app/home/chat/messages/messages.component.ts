@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { Message } from '../../../shared/types/message';
 import { MessageService } from '../../../shared/services/message.service';
 import { SocketService } from '../../../shared/services/socket.service';
@@ -6,6 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { UserService } from '../../../shared/services/user.service';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-messages',
@@ -14,10 +15,11 @@ import { MatIconModule } from '@angular/material/icon';
   templateUrl: './messages.component.html',
   styleUrl: './messages.component.scss',
 })
-export class MessagesComponent implements OnInit, AfterViewInit {
+export class MessagesComponent implements OnInit, AfterViewInit, OnDestroy {
   messages: Message[] = [];
   groupId: string = '';
   currentUser: string = '';
+  private messageSubscription?: Subscription;
   
   @ViewChild('lastRef') lastRef!: ElementRef<HTMLLIElement>;
 
@@ -55,7 +57,7 @@ export class MessagesComponent implements OnInit, AfterViewInit {
       },
     });
 
-    this.socketService.onMessage().subscribe({
+    this.messageSubscription = this.socketService.onMessage().subscribe({
       next: (response) => {
         if (response.groupId === this.groupId) {
           this.messages.push(response);
@@ -67,5 +69,11 @@ export class MessagesComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.scrollToBottom();
+  }
+
+  ngOnDestroy(): void {
+    if (this.messageSubscription) {
+      this.messageSubscription.unsubscribe();
+    }
   }
 }
