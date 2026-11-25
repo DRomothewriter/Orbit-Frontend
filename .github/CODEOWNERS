@@ -1,0 +1,9 @@
+# Orbit-Frontend Security & Build CODEOWNERS
+/.github/ @DRomothewriter
+/package*.json @DRomothewriter
+/angular.json @DRomothewriter
+/eslint.config.mjs @DRomothewriter
+/.zap/ @DRomothewriter
+/.coderabbit.yaml @DRomothewriter
+/sonar-project.properties @DRomothewriter
+/scripts/ @DRomothewriter
