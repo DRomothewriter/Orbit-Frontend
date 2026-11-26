@@ -5,8 +5,10 @@ import { routes } from './app.routes';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 
 import {
+  SocialAuthService,
   SocialAuthServiceConfig,
   GoogleLoginProvider,
+  SOCIAL_AUTH_CONFIG,
 } from '@abacritt/angularx-social-login';
 import { environment } from '../environments/environment';
 
@@ -15,8 +17,9 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(withFetch()),
+    SocialAuthService,
     {
-      provide: 'SocialAuthServiceConfig',
+      provide: SOCIAL_AUTH_CONFIG,
       useValue: {
         autoLogin: false,
         providers: [
@@ -31,6 +34,10 @@ export const appConfig: ApplicationConfig = {
           console.error(err);
         },
       } as SocialAuthServiceConfig,
+    },
+    {
+      provide: 'SocialAuthServiceConfig',
+      useExisting: SOCIAL_AUTH_CONFIG,
     },
   ],
 };
