@@ -202,7 +202,7 @@ test('Workflow 1: CI Dev (.github/workflows/ci-dev.yml)', async (t) => {
 
     const uploadStep = allSteps.find(
       (s) =>
-        String(s.uses ?? '').startsWith('actions/upload-artifact@v4') &&
+        String(s.uses ?? '').startsWith('actions/upload-artifact@v7') &&
         s.with?.name === 'dev-sca-secrets-reports'
     );
     assert.ok(uploadStep, 'Expected dev-sca-secrets-reports artifact upload');
@@ -259,7 +259,7 @@ test('Workflow 2: Security Main (.github/workflows/security-main.yml)', async (t
 
     const uploadStep = (job.steps ?? []).find(
       (s) =>
-        String(s.uses ?? '').startsWith('actions/upload-artifact@v4') &&
+        String(s.uses ?? '').startsWith('actions/upload-artifact@v7') &&
         s.with?.name === 'test-coverage-lcov'
     );
     assert.ok(uploadStep, 'Expected test-coverage-lcov artifact upload');
@@ -336,7 +336,7 @@ test('Workflow 2: Security Main (.github/workflows/security-main.yml)', async (t
 
     const uploadStep = (job.steps ?? []).find(
       (s) =>
-        String(s.uses ?? '').startsWith('actions/upload-artifact@v4') &&
+        String(s.uses ?? '').startsWith('actions/upload-artifact@v7') &&
         s.with?.name === 'sast-snyk-reports'
     );
     assert.ok(uploadStep, 'Expected sast-snyk-reports artifact upload');
@@ -388,7 +388,7 @@ test('Workflow 2: Security Main (.github/workflows/security-main.yml)', async (t
 
     const uploadStep = steps.find(
       (s) =>
-        String(s.uses ?? '').startsWith('actions/upload-artifact@v4') &&
+        String(s.uses ?? '').startsWith('actions/upload-artifact@v7') &&
         s.with?.name === 'sbom-and-grype-reports'
     );
     assert.ok(uploadStep, 'Expected sbom-and-grype-reports artifact upload');
@@ -460,7 +460,7 @@ test('Workflow 2: Security Main (.github/workflows/security-main.yml)', async (t
 
     const uploadStep = steps.find(
       (s) =>
-        String(s.uses ?? '').startsWith('actions/upload-artifact@v4') &&
+        String(s.uses ?? '').startsWith('actions/upload-artifact@v7') &&
         s.with?.name === 'dast-owasp-zap-xml'
     );
     assert.ok(uploadStep, 'Expected dast-owasp-zap-xml artifact upload');
@@ -491,7 +491,7 @@ test('Workflow 3: Release & Production Deploy (.github/workflows/release.yml)', 
     const scripts = normalizeWs(collectJobScripts(buildJob));
 
     const checkoutStep = steps.find((s) =>
-      String(s.uses ?? '').startsWith('actions/checkout@v4')
+      String(s.uses ?? '').startsWith('actions/checkout@v7')
     );
     assert.equal(checkoutStep?.with?.['fetch-depth'], 0);
 
@@ -547,7 +547,7 @@ test('Workflow 3: Release & Production Deploy (.github/workflows/release.yml)', 
 
     const uploadStep = steps.find(
       (s) =>
-        String(s.uses ?? '').startsWith('actions/upload-artifact@v4') &&
+        String(s.uses ?? '').startsWith('actions/upload-artifact@v7') &&
         s.with?.['retention-days'] === 90
     );
     assert.ok(uploadStep, 'Expected 90-day release artifact upload');
@@ -572,9 +572,9 @@ test('Workflow 3: Release & Production Deploy (.github/workflows/release.yml)', 
     assert.match(scripts, /sha256sum/);
 
     const awsCredsStep = steps.find((s) =>
-      String(s.uses ?? '').startsWith('aws-actions/configure-aws-credentials@v4')
+      String(s.uses ?? '').startsWith('aws-actions/configure-aws-credentials@v5')
     );
-    assert.ok(awsCredsStep, 'Expected aws-actions/configure-aws-credentials@v4');
+    assert.ok(awsCredsStep, 'Expected aws-actions/configure-aws-credentials@v5');
     assert.ok(serialized.includes('AWS_ROLE_ARN'));
     assert.ok(serialized.includes('S3_FRONTEND_BUCKET_NAME'));
     assert.ok(serialized.includes('CLOUDFRONT_DISTRIBUTION_ID'));

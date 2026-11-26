@@ -52,13 +52,13 @@ test('Orbit Frontend Production Deployment Workflow (.github/workflows/release.y
     assert.doesNotMatch(content, /aws-secret-access-key/i, 'No debe configurar aws-secret-access-key');
   });
 
-  await t.test('Authenticates to AWS using aws-actions/configure-aws-credentials@v4 with OIDC role assumption', () => {
-    assert.match(content, /uses:\s*aws-actions\/configure-aws-credentials@v4/, 'Debe usar configure-aws-credentials@v4');
+  await t.test('Authenticates to AWS using aws-actions/configure-aws-credentials@v5 with OIDC role assumption', () => {
+    assert.match(content, /uses:\s*aws-actions\/configure-aws-credentials@v5/, 'Debe usar configure-aws-credentials@v5');
     assert.match(content, /role-to-assume:/, 'Debe especificar role-to-assume para OIDC');
   });
 
-  await t.test('Uses modern official GitHub actions (@v4)', () => {
-    assert.match(content, /uses:\s*actions\/checkout@v4/, 'Debe usar actions/checkout@v4');
+  await t.test('Uses modern official GitHub actions (@v4+)', () => {
+    assert.match(content, /uses:\s*actions\/checkout@v7/, 'Debe usar actions/checkout@v7');
     assert.match(content, /uses:\s*actions\/setup-node@v4/, 'Debe usar actions/setup-node@v4');
   });
 
