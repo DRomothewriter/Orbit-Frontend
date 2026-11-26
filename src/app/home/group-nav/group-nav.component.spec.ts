@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { GroupNavComponent } from './group-nav.component';
 
@@ -8,7 +9,8 @@ describe('GroupNavComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GroupNavComponent]
+      imports: [GroupNavComponent],
+      providers: [provideRouter([])]
     })
     .compileComponents();
 

@@ -726,15 +726,19 @@ test('R3/R4 Security Configs, GitHub Policy Enforcement & Angular Hardening', as
 
   await t.test('scripts/apply-github-policies.sh exists, is executable, and configures rulesets and production environment', () => {
     const scriptPath = path.join(rootDir, 'scripts/apply-github-policies.sh');
-    assert.equal(fs.existsSync(scriptPath), true);
-    const stat = fs.statSync(scriptPath);
-    assert.notEqual(stat.mode & 0o111, 0, 'apply-github-policies.sh must be executable');
+    const fd = fs.openSync(scriptPath, 'r');
+    try {
+      const stat = fs.fstatSync(fd);
+      assert.notEqual(stat.mode & 0o111, 0, 'apply-github-policies.sh must be executable');
 
-    const content = fs.readFileSync(scriptPath, 'utf8');
-    assert.match(content, /^#!\/(usr\/bin\/env bash|bin\/bash)/);
-    assert.ok(content.includes('gh api'));
-    assert.ok(content.includes('rulesets'));
-    assert.ok(content.includes('environments/production'));
+      const content = fs.readFileSync(fd, 'utf8');
+      assert.match(content, /^#!\/(usr\/bin\/env bash|bin\/bash)/);
+      assert.ok(content.includes('gh api'));
+      assert.ok(content.includes('rulesets'));
+      assert.ok(content.includes('environments/production'));
+    } finally {
+      fs.closeSync(fd);
+    }
   });
 
   await t.test('angular.json enables subresourceIntegrity: true in production configuration', () => {
