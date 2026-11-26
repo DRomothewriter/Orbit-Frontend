@@ -66,6 +66,9 @@ export default tseslint.config(
     extends: [
       ...angular.configs.templateRecommended,
     ],
-    rules: {},
+    rules: {
+      // Suppress non-security template style rule introduced in angular-eslint 22
+      '@angular-eslint/template/prefer-control-flow': 'off',
+    },
   }
 );
