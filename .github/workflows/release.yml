@@ -165,7 +165,7 @@ jobs:
             "$TARBALL"
 
       - name: Generate GitHub Build Provenance Attestation (SLSA)
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: orbit-frontend-${{ steps.meta.outputs.release_tag }}.tar.gz
 
