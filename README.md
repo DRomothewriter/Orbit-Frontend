@@ -69,26 +69,51 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
 
-## Pipeline de CI/CD (GitHub Actions - Orbit-0018)
+## Arquitectura DevSecOps y CI/CD (GitHub Actions)
 
-El despliegue del frontend está completamente automatizado hacia **Amazon S3 y CloudFront** mediante GitHub Actions (`.github/workflows/deploy.yml`), eliminando por completo credenciales estáticas de AWS (`AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`):
+`Orbit-Frontend` implementa una arquitectura **DevSecOps** progresiva (*Shift-Left Security*) alineada al flujo de ramas:
 
-### 1. Autenticación OIDC con AWS
-GitHub Actions asume federadamente el rol IAM de menor privilegio en AWS vía OpenID Connect (`aws-actions/configure-aws-credentials@v4`), otorgando exclusivamente permisos para sincronizar en el bucket S3 del frontend e invalidar la distribución de CloudFront.
+```text
+feature / bug / docs ──▶ dev ──▶ main ──▶ release (aprobación manual en environment: production)
+```
 
-### 2. Variables y Secretos Requeridos en GitHub
-Configurar los siguientes valores en el repositorio (`Settings > Secrets and variables > Actions`):
+Se eliminó el despliegue automático al hacer `push` a `main` (`deploy.yml`) y todos los pipelines aplican política **fail-gate en severidades `HIGH` y `CRITICAL`**, usando autenticación federada vía **AWS OIDC** (sin credenciales estáticas `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`).
 
-#### **Variables del Repositorio (Repository Variables):**
-- `AWS_REGION`: Región principal de AWS (ej. `us-east-2`).
-- `S3_FRONTEND_BUCKET_NAME`: Nombre del bucket S3 privado de hosting estático (ej. `orbit-frontend-production-static`).
-- `CLOUDFRONT_DISTRIBUTION_ID`: Identificador de la distribución de CloudFront asociada al dominio.
+### 1. Workflows de Seguridad y Despliegue
 
-#### **Secretos del Repositorio (Repository Secrets):**
-- `AWS_ROLE_ARN`: ARN del rol IAM OIDC generado por Terraform (`Orbit-IaC`, ej. `arn:aws:iam::<ACCOUNT_ID>:role/orbit-github-actions-role-production`).
+| Workflow | Trigger | Controles ejecutados |
+|---|---|---|
+| **`.github/workflows/ci-dev.yml`** | `pull_request` hacia `dev` | Validación de rama origen (bloquea `main → dev`, verifica prefijo), `npm run lint:security`, build de Angular (`npm run build`), **TruffleHog** (`--only-verified`), **Dependency Review** (`high`), `npm audit --omit=dev --audit-level=high` y **Snyk Open Source**. |
+| **`.github/workflows/security-main.yml`** | `pull_request` hacia `main`, `push` a `main` (sin deploy), `workflow_dispatch` | Verifica origen `dev`, pruebas unitarias + cobertura **LCOV** (`npm run test:unit`), **SonarCloud** (`sonar.qualitygate.wait=true`), **CodeQL** (`javascript-typescript`, `security-extended`), **Snyk Code**, **Syft** (SBOM) + **Grype** (`severity-cutoff: high`) y **DAST OWASP ZAP Baseline** (`zap-baseline.py` con `.zap/rules.tsv`). |
+| **`.github/workflows/release.yml`** | `release: [published]` y `workflow_dispatch` | Validación de tag **SemVer** y ancestro en `origin/main`, build de producción con **SRI** (*Subresource Integrity*), empaquetado reproducible `.tar.gz`, **Syft + Grype**, firma y verificación **Cosign Keyless (OIDC)**, **GitHub Build Provenance & SBOM Attestations**, `SHA256SUMS.txt` y despliegue a **Amazon S3 + CloudFront** vía **AWS OIDC** tras aprobación manual en `environment: production`. |
 
-### 3. Fases del Flujo de Trabajo
-1. **Validación de Especificación:** Ejecución de `npm run test:workflow` para comprobar que el pipeline respete los contratos de seguridad y estructura.
-2. **Build de Producción:** Compilación optimizada con Angular CLI (`npm run build -- --configuration=production`), generando los bundles en `dist/orbit-frontend/browser/`.
-3. **Sincronización a S3 con `--delete`:** Sube los nuevos chunks JS/CSS e index.html, eliminando del bucket archivos obsoletos de versiones previas.
-4. **Invalidación de CloudFront:** Dispara una invalidación inmediata en `/*` para purgar la caché de los Edge Locations de AWS, permitiendo que los usuarios obtengan instantáneamente la nueva versión sin errores 404 de hash.
+### 2. Scripts de Seguridad y Validación Local
+
+- `npm run lint:security` — Ejecuta ESLint con reglas de seguridad (`eslint-plugin-security` y `angular-eslint`) sobre `src/**/*.ts` y `src/**/*.html`.
+- `npm run audit:ci` — Audita dependencias de producción (`npm audit --omit=dev --audit-level=high`).
+- `npm run test:workflow` — Valida los contratos de seguridad y estructura de los workflows (`node --test tests/deploy.workflow.test.js`).
+
+### 3. Variables y Secretos Requeridos en GitHub
+
+Configurar en `Settings → Secrets and variables → Actions`:
+
+- **Secretos requeridos (Repository Secrets):**
+  - `AWS_ROLE_ARN` — ARN del rol IAM federado por OIDC para sincronización en S3 e invalidación de CloudFront.
+  - `SONAR_TOKEN` — Token de proyecto/usuario en SonarCloud.
+  - `SNYK_TOKEN` — Token de API de Snyk (Snyk Open Source y Snyk Code).
+- **Variables del Repositorio (Repository Variables):**
+  - `AWS_REGION` — Región principal de AWS (ej. `us-east-2`).
+  - `S3_FRONTEND_BUCKET_NAME` — Nombre del bucket S3 privado de hosting estático.
+  - `CLOUDFRONT_DISTRIBUTION_ID` — Identificador de la distribución de CloudFront asociada al dominio.
+  - `SONAR_ORGANIZATION` — Organización en SonarCloud (ej. `dromothewriter`).
+  - `SONAR_PROJECT_KEY` — Key del proyecto en SonarCloud (ej. `DRomothewriter_Orbit-Frontend`).
+
+### 4. GitHub Policy Enforcement
+
+Las políticas de gobierno del repositorio (`.github/CODEOWNERS`, `.github/dependabot.yml`, `.github/rulesets/` para `main`, `dev` y tags `v*`, `environment: production` con aprobación manual y alertas de seguridad) se aplican de forma idempotente mediante `scripts/apply-github-policies.sh`:
+
+```bash
+# Requiere GitHub CLI autenticado con permisos de administrador del repositorio
+gh auth login
+./scripts/apply-github-policies.sh DRomothewriter/Orbit-Frontend
+```

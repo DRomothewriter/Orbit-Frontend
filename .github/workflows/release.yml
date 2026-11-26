@@ -1,0 +1,278 @@
+name: Release, Supply Chain Security & Production Deploy
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'SemVer tag to build and release (e.g. v1.0.1)'
+        required: true
+        type: string
+      deploy_to_production:
+        description: 'Deploy signed frontend bundle to S3 + CloudFront after manual approval'
+        required: false
+        type: boolean
+        default: true
+
+concurrency:
+  group: orbit-frontend-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build-sign-attest:
+    name: Build, Sign (Cosign) & Attest Release
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      attestations: write
+    outputs:
+      release_tag: ${{ steps.meta.outputs.release_tag }}
+    steps:
+      - name: Checkout repository with full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify commit belongs to origin/main and validate SemVer tag
+        id: meta
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_TAG_EVENT: ${{ github.event.release.tag_name }}
+          RELEASE_TAG_INPUT: ${{ inputs.release_tag }}
+          TARGET_SHA: ${{ github.sha }}
+        run: |
+          git fetch origin main --tags
+
+          if [ "$EVENT_NAME" = "release" ]; then
+            TAG="$RELEASE_TAG_EVENT"
+          else
+            TAG="$RELEASE_TAG_INPUT"
+          fi
+
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Tag inválido '$TAG'. Debe cumplir el formato SemVer ^v[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$"
+            exit 1
+          fi
+
+          TAG_SHA="$(git rev-parse --verify "refs/tags/${TAG}^{commit}" 2>/dev/null || true)"
+          if [ -z "$TAG_SHA" ]; then
+            echo "::error::El tag '$TAG' no existe en el repositorio."
+            exit 1
+          fi
+
+          if ! git merge-base --is-ancestor "$TAG_SHA" origin/main; then
+            echo "::error::El commit del tag '$TAG' ($TAG_SHA) no es ancestro de origin/main."
+            exit 1
+          fi
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "Checking out tag '$TAG' at commit $TAG_SHA..."
+            git checkout --detach "$TAG_SHA"
+          elif [ "$TAG_SHA" != "$TARGET_SHA" ]; then
+            echo "::error::El tag '$TAG' ($TAG_SHA) no coincide con el commit del evento ($TARGET_SHA)."
+            exit 1
+          fi
+
+          echo "release_tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Angular application (Production)
+        run: npm run build -- --configuration=production
+
+      - name: Package reproducible release tarball
+        env:
+          RELEASE_TAG: ${{ steps.meta.outputs.release_tag }}
+        run: |
+          tar --sort=name --mtime='UTC 2020-01-01' --owner=0 --group=0 --numeric-owner \
+            -czf "orbit-frontend-${RELEASE_TAG}.tar.gz" \
+            -C dist/orbit-frontend/browser .
+
+      - name: Generate CycloneDX SBOM with Syft
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: sbom-cyclonedx-${{ steps.meta.outputs.release_tag }}.json
+
+      - name: Generate SPDX SBOM with Syft
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: spdx-json
+          output-file: sbom-spdx-${{ steps.meta.outputs.release_tag }}.json
+
+      - name: Grype pre-signing vulnerability gate (HIGH/CRITICAL)
+        id: grype-release
+        uses: anchore/scan-action@v6
+        with:
+          path: .
+          fail-build: true
+          severity-cutoff: high
+          only-fixed: true
+          output-format: json
+
+      - name: Save Grype release JSON report
+        if: always()
+        env:
+          GRYPE_JSON: ${{ steps.grype-release.outputs.json }}
+          RELEASE_TAG: ${{ steps.meta.outputs.release_tag }}
+        run: |
+          if [ -n "$GRYPE_JSON" ] && [ -f "$GRYPE_JSON" ]; then
+            cp "$GRYPE_JSON" "grype-release-${RELEASE_TAG}.json"
+          fi
+
+      - name: Upload Grype diagnostic report on failure
+        if: failure() && steps.meta.outputs.release_tag != '' && hashFiles('grype-release-*.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-grype-diagnostic-${{ steps.meta.outputs.release_tag }}
+          path: |
+            grype-release-${{ steps.meta.outputs.release_tag }}.json
+            sbom-cyclonedx-${{ steps.meta.outputs.release_tag }}.json
+            sbom-spdx-${{ steps.meta.outputs.release_tag }}.json
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign and verify release tarball with Cosign Keyless (OIDC)
+        env:
+          RELEASE_TAG: ${{ steps.meta.outputs.release_tag }}
+          REPO: ${{ github.repository }}
+        run: |
+          TARBALL="orbit-frontend-${RELEASE_TAG}.tar.gz"
+          BUNDLE="${TARBALL}.sigstore.json"
+          cosign sign-blob --yes --bundle "$BUNDLE" "$TARBALL"
+          cosign verify-blob \
+            --bundle "$BUNDLE" \
+            --certificate-identity-regexp="^https://github\.com/${REPO}/\.github/workflows/release\.yml@refs/.*$" \
+            --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+            "$TARBALL"
+
+      - name: Generate GitHub Build Provenance Attestation (SLSA)
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: orbit-frontend-${{ steps.meta.outputs.release_tag }}.tar.gz
+
+      - name: Generate GitHub SBOM Attestation
+        uses: actions/attest-sbom@v2
+        with:
+          subject-path: orbit-frontend-${{ steps.meta.outputs.release_tag }}.tar.gz
+          sbom-path: sbom-cyclonedx-${{ steps.meta.outputs.release_tag }}.json
+
+      - name: Generate SHA256SUMS.txt for supply-chain bundle
+        env:
+          RELEASE_TAG: ${{ steps.meta.outputs.release_tag }}
+        run: |
+          sha256sum \
+            "orbit-frontend-${RELEASE_TAG}.tar.gz" \
+            "orbit-frontend-${RELEASE_TAG}.tar.gz.sigstore.json" \
+            "sbom-cyclonedx-${RELEASE_TAG}.json" \
+            "sbom-spdx-${RELEASE_TAG}.json" \
+            "grype-release-${RELEASE_TAG}.json" > SHA256SUMS.txt
+
+      - name: Upload 90-day supply-chain bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-supply-chain-bundle-${{ steps.meta.outputs.release_tag }}
+          path: |
+            orbit-frontend-${{ steps.meta.outputs.release_tag }}.tar.gz
+            orbit-frontend-${{ steps.meta.outputs.release_tag }}.tar.gz.sigstore.json
+            sbom-cyclonedx-${{ steps.meta.outputs.release_tag }}.json
+            sbom-spdx-${{ steps.meta.outputs.release_tag }}.json
+            grype-release-${{ steps.meta.outputs.release_tag }}.json
+            SHA256SUMS.txt
+          retention-days: 90
+
+      - name: Attach supply-chain assets to GitHub Release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.meta.outputs.release_tag }}
+        run: |
+          gh release upload "$RELEASE_TAG" \
+            "orbit-frontend-${RELEASE_TAG}.tar.gz" \
+            "orbit-frontend-${RELEASE_TAG}.tar.gz.sigstore.json" \
+            "sbom-cyclonedx-${RELEASE_TAG}.json" \
+            "sbom-spdx-${RELEASE_TAG}.json" \
+            "grype-release-${RELEASE_TAG}.json" \
+            SHA256SUMS.txt \
+            --clobber
+
+  deploy-production:
+    name: Deploy to S3 & CloudFront Production (Manual Approval)
+    needs: build-sign-attest
+    if: github.event_name == 'release' || inputs.deploy_to_production == true
+    environment: production
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Download release supply-chain bundle artifact
+        uses: actions/download-artifact@v4.1.3
+        with:
+          name: release-supply-chain-bundle-${{ needs.build-sign-attest.outputs.release_tag }}
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Pre-deploy checksum and Cosign Keyless verification
+        env:
+          RELEASE_TAG: ${{ needs.build-sign-attest.outputs.release_tag }}
+          REPO: ${{ github.repository }}
+        run: |
+          sha256sum -c SHA256SUMS.txt
+          TARBALL="orbit-frontend-${RELEASE_TAG}.tar.gz"
+          BUNDLE="${TARBALL}.sigstore.json"
+          echo "Verifying cryptographic signature for ${TARBALL}..."
+          cosign verify-blob \
+            --bundle "$BUNDLE" \
+            --certificate-identity-regexp="^https://github\.com/${REPO}/\.github/workflows/release\.yml@refs/.*$" \
+            --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+            "$TARBALL"
+
+      - name: Extract verified production bundle
+        env:
+          RELEASE_TAG: ${{ needs.build-sign-attest.outputs.release_tag }}
+        run: |
+          mkdir -p deploy-dist
+          tar -xzf "orbit-frontend-${RELEASE_TAG}.tar.gz" -C deploy-dist
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-2' }}
+          role-session-name: GitHubActions-OrbitFrontend-${{ github.run_id }}
+
+      - name: Deploy verified static assets to S3
+        env:
+          S3_BUCKET: ${{ secrets.S3_FRONTEND_BUCKET_NAME || vars.S3_FRONTEND_BUCKET_NAME }}
+        run: |
+          echo "Synchronizing verified Angular bundles to S3 bucket: $S3_BUCKET"
+          aws s3 sync deploy-dist/ "s3://$S3_BUCKET/" --delete
+
+      - name: Invalidate CloudFront distribution cache
+        env:
+          DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID || vars.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          echo "Invalidating CloudFront distribution: $DISTRIBUTION_ID"
+          aws cloudfront create-invalidation \
+            --distribution-id "$DISTRIBUTION_ID" \
+            --paths "/*"

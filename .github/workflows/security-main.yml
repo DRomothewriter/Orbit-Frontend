@@ -1,0 +1,389 @@
+name: Security Main Gate
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-source-branch:
+    name: Verify PR originates from dev
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Reject PRs not originating from dev
+        if: github.head_ref != 'dev'
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          echo "::error::Solo se permite abrir Pull Requests hacia 'main' desde la rama 'dev'. Rama actual: '${HEAD_REF}'."
+          exit 1
+
+      - name: Confirm valid PR source branch
+        if: github.head_ref == 'dev'
+        run: echo "Rama origen válida ('dev')."
+
+  unit-tests:
+    name: Unit Tests & Coverage
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run workflow and security policy tests
+        run: node --test tests/*.test.js
+
+      - name: Run Angular headless unit tests with coverage
+        run: |
+          npx ng test --watch=false --browsers=ChromeHeadless --code-coverage
+          if [ -f coverage/orbit-frontend/lcov.info ] && [ ! -f coverage/lcov.info ]; then
+            cp coverage/orbit-frontend/lcov.info coverage/lcov.info
+          fi
+
+      - name: Upload test coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-coverage-lcov
+          path: coverage/
+          retention-days: 14
+          if-no-files-found: error
+
+  sast-sonarcloud:
+    name: SAST - SonarCloud Quality Gate
+    needs: unit-tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Checkout repository with full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download coverage artifact
+        uses: actions/download-artifact@v4.1.3
+        with:
+          name: test-coverage-lcov
+          path: coverage
+
+      - name: SonarCloud Scan & Quality Gate
+        uses: SonarSource/sonarqube-scan-action@v6.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION || 'dromothewriter' }}
+            -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY || 'DRomothewriter_Orbit-Frontend' }}
+            -Dsonar.qualitygate.wait=true
+
+  sast-codeql:
+    name: SAST - CodeQL (javascript-typescript)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          queries: security-extended
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: '/language:javascript-typescript'
+
+  sast-snyk:
+    name: SAST - Snyk Code
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies and Snyk CLI
+        run: |
+          npm ci
+          npm install -g snyk
+
+      - name: Run Snyk Code (SAST)
+        id: snyk-code
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk code test --severity-threshold=high --sarif-file-output=snyk-code.sarif
+
+      - name: Upload Snyk Code SARIF to GitHub Security
+        if: always() && hashFiles('snyk-code.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk-code.sarif
+          category: snyk-code
+
+      - name: Upload Snyk reports artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sast-snyk-reports
+          path: snyk-code.sarif
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Enforce Snyk HIGH/CRITICAL fail-gate
+        if: steps.snyk-code.outcome == 'failure'
+        run: |
+          echo "::error::Snyk Code detectó hallazgos HIGH o CRITICAL."
+          exit 1
+
+  sbom-grype:
+    name: SBOM & SCA - Syft & Grype
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies and build production bundle
+        run: |
+          npm ci
+          npm run build -- --configuration=production
+
+      - name: Generate CycloneDX SBOM with Syft
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: sbom-cyclonedx.json
+
+      - name: Generate SPDX SBOM with Syft
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: spdx-json
+          output-file: sbom-spdx.json
+
+      - name: Scan workspace with Grype (HIGH/CRITICAL gate, SARIF)
+        id: grype-sarif
+        uses: anchore/scan-action@v6
+        with:
+          path: .
+          fail-build: true
+          severity-cutoff: high
+          only-fixed: true
+          output-format: sarif
+
+      - name: Export Grype JSON report
+        id: grype-json
+        if: always()
+        uses: anchore/scan-action@v6
+        with:
+          path: .
+          fail-build: true
+          severity-cutoff: high
+          only-fixed: true
+          output-format: json
+
+      - name: Collect Grype SARIF and JSON outputs
+        if: always()
+        env:
+          GRYPE_SARIF: ${{ steps.grype-sarif.outputs.sarif }}
+          GRYPE_JSON: ${{ steps.grype-json.outputs.json }}
+        run: |
+          if [ -n "$GRYPE_SARIF" ] && [ -f "$GRYPE_SARIF" ]; then
+            cp "$GRYPE_SARIF" grype-results.sarif
+          fi
+          if [ -n "$GRYPE_JSON" ] && [ -f "$GRYPE_JSON" ]; then
+            cp "$GRYPE_JSON" grype-report.json
+          fi
+
+      - name: Upload Grype SARIF to GitHub Security
+        if: always() && hashFiles('grype-results.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: grype-results.sarif
+          category: grype
+
+      - name: Upload SBOM & Grype reports artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-and-grype-reports
+          path: |
+            sbom-cyclonedx.json
+            sbom-spdx.json
+            grype-report.json
+            grype-results.sarif
+          retention-days: 30
+          if-no-files-found: warn
+
+  dast-owasp-zap:
+    name: DAST - OWASP ZAP Baseline Scan
+    needs: sbom-grype
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies and build Angular production bundle
+        run: |
+          npm ci
+          npm run build -- --configuration=production
+
+      - name: Start ephemeral SPA static server on 127.0.0.1:4200
+        run: |
+          nohup node -e "
+            const http = require('node:http');
+            const fs = require('node:fs');
+            const path = require('node:path');
+            const distDir = path.resolve('dist/orbit-frontend/browser');
+            const mimeTypes = {
+              '.html': 'text/html; charset=utf-8',
+              '.js': 'application/javascript; charset=utf-8',
+              '.css': 'text/css; charset=utf-8',
+              '.json': 'application/json; charset=utf-8',
+              '.svg': 'image/svg+xml',
+              '.png': 'image/png',
+              '.ico': 'image/x-icon',
+              '.woff2': 'font/woff2'
+            };
+            const server = http.createServer((req, res) => {
+              const reqPath = (req.url || '/').split('?')[0];
+              let filePath = path.join(distDir, reqPath === '/' ? 'index.html' : reqPath);
+              if (!filePath.startsWith(distDir) || !fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+                filePath = path.join(distDir, 'index.html');
+              }
+              const ext = path.extname(filePath);
+              res.writeHead(200, { 'Content-Type': mimeTypes[ext] || 'application/octet-stream' });
+              fs.createReadStream(filePath).pipe(res);
+            });
+            server.listen(4200, '127.0.0.1', () => {
+              console.log('Orbit Frontend SPA server listening on http://127.0.0.1:4200');
+            });
+          " > /tmp/orbit-frontend-dast.log 2>&1 &
+          echo $! > /tmp/orbit-frontend-dast.pid
+
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4200/ > /dev/null 2>&1; then
+              echo "Orbit Frontend está listo en http://127.0.0.1:4200/"
+              break
+            fi
+            if [ "$i" -eq 30 ]; then
+              echo "::error::Orbit Frontend no respondió en http://127.0.0.1:4200/ a tiempo."
+              cat /tmp/orbit-frontend-dast.log
+              exit 1
+            fi
+            sleep 1
+          done
+
+      - name: Run OWASP ZAP Baseline Scan
+        env:
+          WORKSPACE_DIR: ${{ github.workspace }}
+        run: |
+          set +e
+          docker run --rm --network host \
+            -u "$(id -u):$(id -g)" \
+            -e HOME=/tmp \
+            -e _JAVA_OPTIONS="-Duser.home=/tmp" \
+            -v "${WORKSPACE_DIR}:/zap/wrk:rw" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py \
+            -t http://127.0.0.1:4200 \
+            -j \
+            -c .zap/rules.tsv \
+            -x zap-report.xml \
+            -r zap-report.html \
+            -w zap-report.md
+          ZAP_EXIT=$?
+          set -e
+
+          if [ "$ZAP_EXIT" -eq 2 ]; then
+            echo "::warning::OWASP ZAP Baseline Scan finalizó con alertas WARN (sin alertas HIGH/FAIL)."
+          elif [ "$ZAP_EXIT" -ne 0 ]; then
+            echo "::error::OWASP ZAP Baseline Scan falló (código $ZAP_EXIT)."
+            exit "$ZAP_EXIT"
+          fi
+
+      - name: Stop ephemeral SPA static server
+        if: always()
+        run: |
+          if [ -f /tmp/orbit-frontend-dast.pid ]; then
+            kill "$(cat /tmp/orbit-frontend-dast.pid)" || true
+          fi
+
+      - name: Publish OWASP ZAP summary to step summary
+        if: always()
+        run: |
+          if [ -f zap-report.md ]; then
+            cat zap-report.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No zap-report.md generated." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload OWASP ZAP reports (XML, HTML, MD)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dast-owasp-zap-xml
+          path: |
+            zap-report.xml
+            zap-report.html
+            zap-report.md
+          retention-days: 30
+          if-no-files-found: warn
