@@ -117,7 +117,7 @@ jobs:
 
       - name: Grype pre-signing vulnerability gate (HIGH/CRITICAL)
         id: grype-release
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         with:
           path: .
           fail-build: true

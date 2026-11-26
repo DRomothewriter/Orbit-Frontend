@@ -213,7 +213,7 @@ jobs:
 
       - name: Scan workspace with Grype (HIGH/CRITICAL gate, SARIF)
         id: grype-sarif
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         with:
           path: .
           fail-build: true
@@ -224,7 +224,7 @@ jobs:
       - name: Export Grype JSON report
         id: grype-json
         if: always()
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         with:
           path: .
           fail-build: true
