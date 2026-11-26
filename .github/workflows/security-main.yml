@@ -340,6 +340,7 @@ jobs:
           docker run --rm --network host \
             -u "$(id -u):$(id -g)" \
             -e HOME=/tmp \
+            -e _JAVA_OPTIONS="-Duser.home=/tmp" \
             -v "${WORKSPACE_DIR}:/zap/wrk:rw" \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
