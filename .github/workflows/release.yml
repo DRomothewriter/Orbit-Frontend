@@ -137,7 +137,7 @@ jobs:
 
       - name: Upload Grype diagnostic report on failure
         if: failure() && steps.meta.outputs.release_tag != '' && hashFiles('grype-release-*.json') != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-grype-diagnostic-${{ steps.meta.outputs.release_tag }}
           path: |
@@ -187,7 +187,7 @@ jobs:
             "grype-release-${RELEASE_TAG}.json" > SHA256SUMS.txt
 
       - name: Upload 90-day supply-chain bundle artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-supply-chain-bundle-${{ steps.meta.outputs.release_tag }}
           path: |

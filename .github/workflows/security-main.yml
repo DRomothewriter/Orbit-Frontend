@@ -65,7 +65,7 @@ jobs:
           fi
 
       - name: Upload test coverage artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-coverage-lcov
           path: coverage/
@@ -163,7 +163,7 @@ jobs:
 
       - name: Upload Snyk reports artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sast-snyk-reports
           path: snyk-code.sarif
@@ -254,7 +254,7 @@ jobs:
 
       - name: Upload SBOM & Grype reports artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sbom-and-grype-reports
           path: |
@@ -378,7 +378,7 @@ jobs:
 
       - name: Upload OWASP ZAP reports (XML, HTML, MD)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dast-owasp-zap-xml
           path: |
