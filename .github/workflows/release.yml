@@ -35,7 +35,7 @@ jobs:
       release_tag: ${{ steps.meta.outputs.release_tag }}
     steps:
       - name: Checkout repository with full history
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -117,7 +117,7 @@ jobs:
 
       - name: Grype pre-signing vulnerability gate (HIGH/CRITICAL)
         id: grype-release
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         with:
           path: .
           fail-build: true
@@ -137,7 +137,7 @@ jobs:
 
       - name: Upload Grype diagnostic report on failure
         if: failure() && steps.meta.outputs.release_tag != '' && hashFiles('grype-release-*.json') != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-grype-diagnostic-${{ steps.meta.outputs.release_tag }}
           path: |
@@ -165,7 +165,7 @@ jobs:
             "$TARBALL"
 
       - name: Generate GitHub Build Provenance Attestation (SLSA)
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: orbit-frontend-${{ steps.meta.outputs.release_tag }}.tar.gz
 
@@ -187,7 +187,7 @@ jobs:
             "grype-release-${RELEASE_TAG}.json" > SHA256SUMS.txt
 
       - name: Upload 90-day supply-chain bundle artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-supply-chain-bundle-${{ steps.meta.outputs.release_tag }}
           path: |
@@ -255,7 +255,7 @@ jobs:
           tar -xzf "orbit-frontend-${RELEASE_TAG}.tar.gz" -C deploy-dist
 
       - name: Configure AWS credentials via OIDC
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION || 'us-east-2' }}
