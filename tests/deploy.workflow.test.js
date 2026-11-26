@@ -1,20 +1,42 @@
 const test = require('node:test');
-const assert = require('node:assert');
+const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const yaml = require('js-yaml');
 
-test('Orbit-0018: GitHub Actions Frontend Deployment Workflow (.github/workflows/deploy.yml)', async (t) => {
-  const workflowPath = path.resolve(__dirname, '../.github/workflows/deploy.yml');
+const rootDir = path.resolve(__dirname, '..');
 
-  await t.test('Workflow file exists in .github/workflows/deploy.yml', () => {
-    assert.strictEqual(fs.existsSync(workflowPath), true, 'El archivo deploy.yml debe existir');
+test('Orbit Frontend Production Deployment Workflow (.github/workflows/release.yml)', async (t) => {
+  const legacyDeployPath = path.join(rootDir, '.github/workflows/deploy.yml');
+  const releasePath = path.join(rootDir, '.github/workflows/release.yml');
+
+  await t.test('Legacy .github/workflows/deploy.yml no longer exists', () => {
+    assert.equal(fs.existsSync(legacyDeployPath), false, 'deploy.yml debe haber sido eliminado');
   });
 
-  const content = fs.existsSync(workflowPath) ? fs.readFileSync(workflowPath, 'utf8') : '';
+  await t.test('Workflow file exists in .github/workflows/release.yml and is valid YAML', () => {
+    assert.equal(fs.existsSync(releasePath), true, 'El archivo release.yml debe existir');
+    const parsed = yaml.load(fs.readFileSync(releasePath, 'utf8'));
+    assert.ok(parsed && typeof parsed === 'object');
+  });
 
-  await t.test('Workflow triggers on push to main and manual dispatch (workflow_dispatch)', () => {
-    assert.match(content, /branches:\s*(\[\s*main\s*\]|- main)/, 'Debe ejecutarse en push a main');
-    assert.match(content, /workflow_dispatch:/, 'Debe soportar disparo manual vía workflow_dispatch');
+  const content = fs.existsSync(releasePath) ? fs.readFileSync(releasePath, 'utf8') : '';
+  const parsed = content ? yaml.load(content) : {};
+  const deployJob = parsed?.jobs?.['deploy-production'];
+
+  await t.test('Workflow triggers on release published and workflow_dispatch (no auto-deploy on push to main)', () => {
+    assert.equal(parsed?.on?.push, undefined, 'No debe auto-desplegar en push a main');
+    assert.ok(parsed?.on?.release?.types?.includes('published'), 'Debe ejecutarse en release published');
+    assert.notEqual(parsed?.on?.workflow_dispatch, undefined, 'Debe soportar workflow_dispatch');
+  });
+
+  await t.test('deploy-production targets environment: production', () => {
+    assert.ok(deployJob, 'Debe existir el job deploy-production');
+    const envName =
+      typeof deployJob.environment === 'string'
+        ? deployJob.environment
+        : deployJob.environment?.name;
+    assert.equal(envName, 'production', 'deploy-production debe usar environment: production');
   });
 
   await t.test('Configures least-privilege OIDC permissions (id-token: write, contents: read)', () => {
@@ -45,14 +67,49 @@ test('Orbit-0018: GitHub Actions Frontend Deployment Workflow (.github/workflows
     assert.match(content, /(npm run build|ng build)/, 'Debe compilar la app de Angular');
   });
 
+  await t.test('Verifies Cosign signature before deploying to production', () => {
+    const stepRuns = (deployJob?.steps ?? []).map((s) => s.run ?? '');
+    const cosignStepIndex = stepRuns.findIndex((r) => /cosign\s+verify-blob\b/.test(r));
+    const s3SyncStepIndex = stepRuns.findIndex((r) => /aws\s+s3\s+sync\b/.test(r));
+
+    assert.ok(cosignStepIndex !== -1, 'deploy-production debe verificar firma con cosign verify-blob');
+    assert.ok(s3SyncStepIndex !== -1, 'deploy-production debe ejecutar aws s3 sync');
+    if (cosignStepIndex === s3SyncStepIndex) {
+      const sameStep = stepRuns[cosignStepIndex];
+      assert.ok(
+        sameStep.search(/cosign\s+verify-blob\b/) < sameStep.search(/aws\s+s3\s+sync\b/),
+        'cosign verify-blob debe ejecutarse antes de aws s3 sync'
+      );
+    } else {
+      assert.ok(
+        cosignStepIndex < s3SyncStepIndex,
+        'El step de cosign verify-blob debe ejecutarse antes del step de aws s3 sync'
+      );
+    }
+  });
+
   await t.test('Synchronizes compiled browser assets to S3 with --delete flag', () => {
-    assert.match(content, /aws s3 sync dist\/orbit-frontend\/browser\//, 'Debe sincronizar dist/orbit-frontend/browser/');
-    assert.match(content, /--delete/, 'Debe incluir el flag --delete para limpiar assets obsoletos');
+    const deployScripts = (deployJob?.steps ?? [])
+      .map((s) => s.run ?? '')
+      .join('\n')
+      .replace(/\\\r?\n/g, ' ');
+    assert.match(
+      deployScripts,
+      /aws\s+s3\s+sync\b[^\n;|&]*\s--delete(?:\s|$)/,
+      'El comando aws s3 sync debe incluir el flag --delete para limpiar assets obsoletos'
+    );
   });
 
   await t.test('Invalidates CloudFront distribution cache for /* paths', () => {
-    assert.match(content, /aws cloudfront create-invalidation/, 'Debe ejecutar invalidación de CloudFront');
-    assert.match(content, /--paths\s+["']?\/\*["']?/, 'Debe invalidar la ruta /*');
+    const deployScripts = (deployJob?.steps ?? [])
+      .map((s) => s.run ?? '')
+      .join('\n')
+      .replace(/\\\r?\n/g, ' ');
+    assert.match(
+      deployScripts,
+      /aws\s+cloudfront\s+create-invalidation\b[^\n;|&]*\s--paths\s+(?:"\/\*"|'\/\*'|\/\*(?=\s|$))/,
+      'aws cloudfront create-invalidation debe recibir exactamente --paths "/*"'
+    );
   });
 
   await t.test('Defines concurrency group to prevent overlapping production deployments', () => {
