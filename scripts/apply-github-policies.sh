@@ -78,6 +78,19 @@ ensure_branch_policy() {
 ensure_branch_policy "main" "branch"
 ensure_branch_policy "v*" "tag"
 
+reconcile_branch_policies() {
+  local stale_ids
+  stale_ids="$(gh api "/repos/${REPO}/environments/production/deployment-branch-policies" \
+    --jq '.branch_policies[] | select((.name == "main" and .type == "branch") or (.name == "v*" and .type == "tag") | not) | .id' || true)"
+
+  for policy_id in $stale_ids; do
+    echo "Eliminando política obsoleta de deployment branch/tag (ID: ${policy_id})..."
+    gh api --method DELETE "/repos/${REPO}/environments/production/deployment-branch-policies/${policy_id}" >/dev/null
+  done
+}
+
+reconcile_branch_policies
+
 echo "Habilitando alertas de vulnerabilidades de Dependabot y seguridad del repositorio..."
 gh api --method PUT "/repos/${REPO}/vulnerability-alerts" >/dev/null 2>&1 || \
   echo "Aviso: no se pudieron habilitar vulnerability-alerts automáticamente (verifica permisos de admin)."

@@ -134,14 +134,15 @@ jobs:
             exit "$AUDIT_EXIT"
           fi
 
-      - name: Determine Snyk SCA gate for Dependabot PRs
+      - name: Determine Snyk SCA gate for Dependabot and fork PRs
         id: snyk-gate
         env:
           ACTOR: ${{ github.actor }}
+          IS_FORK: ${{ github.event.pull_request.head.repo.fork == true || github.event.pull_request.head.repo.full_name != github.repository }}
           HAS_TOKEN: ${{ secrets.SNYK_TOKEN != '' }}
         run: |
-          if [ "$ACTOR" = "dependabot[bot]" ] && [ "$HAS_TOKEN" != "true" ]; then
-            echo "::warning::SNYK_TOKEN no está disponible para dependabot[bot]; se omite Snyk SCA y se mantienen Dependency Review y npm audit."
+          if { [ "$ACTOR" = "dependabot[bot]" ] || [ "$IS_FORK" = "true" ]; } && [ "$HAS_TOKEN" != "true" ]; then
+            echo "::warning::SNYK_TOKEN no está disponible para PRs de dependabot[bot] o forks; se omite Snyk SCA y se mantienen Dependency Review y npm audit."
             echo "run_snyk=false" >> "$GITHUB_OUTPUT"
           else
             echo "run_snyk=true" >> "$GITHUB_OUTPUT"

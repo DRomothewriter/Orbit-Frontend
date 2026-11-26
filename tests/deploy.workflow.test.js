@@ -68,20 +68,48 @@ test('Orbit Frontend Production Deployment Workflow (.github/workflows/release.y
   });
 
   await t.test('Verifies Cosign signature before deploying to production', () => {
-    const deployScripts = (deployJob?.steps ?? []).map((s) => s.run ?? '').join('\n');
-    assert.match(deployScripts, /cosign\s+verify-blob\b/, 'deploy-production debe verificar firma con cosign verify-blob');
+    const stepRuns = (deployJob?.steps ?? []).map((s) => s.run ?? '');
+    const cosignStepIndex = stepRuns.findIndex((r) => /cosign\s+verify-blob\b/.test(r));
+    const s3SyncStepIndex = stepRuns.findIndex((r) => /aws\s+s3\s+sync\b/.test(r));
+
+    assert.ok(cosignStepIndex !== -1, 'deploy-production debe verificar firma con cosign verify-blob');
+    assert.ok(s3SyncStepIndex !== -1, 'deploy-production debe ejecutar aws s3 sync');
+    if (cosignStepIndex === s3SyncStepIndex) {
+      const sameStep = stepRuns[cosignStepIndex];
+      assert.ok(
+        sameStep.search(/cosign\s+verify-blob\b/) < sameStep.search(/aws\s+s3\s+sync\b/),
+        'cosign verify-blob debe ejecutarse antes de aws s3 sync'
+      );
+    } else {
+      assert.ok(
+        cosignStepIndex < s3SyncStepIndex,
+        'El step de cosign verify-blob debe ejecutarse antes del step de aws s3 sync'
+      );
+    }
   });
 
   await t.test('Synchronizes compiled browser assets to S3 with --delete flag', () => {
-    const deployScripts = (deployJob?.steps ?? []).map((s) => s.run ?? '').join('\n');
-    assert.match(deployScripts, /aws\s+s3\s+sync/, 'Debe sincronizar assets a S3');
-    assert.match(deployScripts, /--delete/, 'Debe incluir el flag --delete para limpiar assets obsoletos');
+    const deployScripts = (deployJob?.steps ?? [])
+      .map((s) => s.run ?? '')
+      .join('\n')
+      .replace(/\\\r?\n/g, ' ');
+    assert.match(
+      deployScripts,
+      /aws\s+s3\s+sync\b[^\n;|&]*\s--delete(?:\s|$)/,
+      'El comando aws s3 sync debe incluir el flag --delete para limpiar assets obsoletos'
+    );
   });
 
   await t.test('Invalidates CloudFront distribution cache for /* paths', () => {
-    const deployScripts = (deployJob?.steps ?? []).map((s) => s.run ?? '').join('\n');
-    assert.match(deployScripts, /aws\s+cloudfront\s+create-invalidation/, 'Debe ejecutar invalidación de CloudFront');
-    assert.match(deployScripts, /--paths\s+["']?\/\*["']?/, 'Debe invalidar la ruta /*');
+    const deployScripts = (deployJob?.steps ?? [])
+      .map((s) => s.run ?? '')
+      .join('\n')
+      .replace(/\\\r?\n/g, ' ');
+    assert.match(
+      deployScripts,
+      /aws\s+cloudfront\s+create-invalidation\b[^\n;|&]*\s--paths\s+(?:"\/\*"|'\/\*'|\/\*(?=\s|$))/,
+      'aws cloudfront create-invalidation debe recibir exactamente --paths "/*"'
+    );
   });
 
   await t.test('Defines concurrency group to prevent overlapping production deployments', () => {

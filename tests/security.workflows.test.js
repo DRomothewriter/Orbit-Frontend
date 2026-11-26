@@ -67,14 +67,36 @@ test('Workflow 1: CI Dev (.github/workflows/ci-dev.yml)', async (t) => {
     );
     assert.doesNotMatch(raw, /permissions:\s*write-all/i);
 
-    const allPermissions = { ...(parsed.permissions ?? {}) };
-    for (const [, job] of allJobs(parsed)) {
-      Object.assign(allPermissions, job.permissions ?? {});
+    const allowedPermissions = new Map([
+      ['contents', 'read'],
+      ['pull-requests', 'read'],
+      ['security-events', 'write'],
+    ]);
+
+    for (const [perm, level] of Object.entries(parsed.permissions ?? {})) {
+      assert.equal(
+        allowedPermissions.get(perm),
+        level,
+        `ci-dev.yml workflow permission "${perm}: ${level}" is not allowed`
+      );
     }
-    assert.equal(allPermissions.contents, 'read');
-    assert.equal(allPermissions['pull-requests'], 'read');
-    assert.equal(allPermissions['security-events'], 'write');
-    assert.equal(allPermissions['id-token'], undefined);
+
+    for (const [jobId, job] of allJobs(parsed)) {
+      const effective = job.permissions ?? parsed.permissions ?? {};
+      assert.equal(effective['id-token'], undefined, `ci-dev.yml job "${jobId}" must not request id-token`);
+      assert.equal(effective.contents, 'read', `ci-dev.yml job "${jobId}" must have contents: read`);
+      for (const [perm, level] of Object.entries(effective)) {
+        assert.equal(
+          allowedPermissions.get(perm),
+          level,
+          `ci-dev.yml job "${jobId}" permission "${perm}: ${level}" is not allowed`
+        );
+      }
+    }
+
+    const scaPerms = parsed.jobs?.['sca-audit']?.permissions ?? parsed.permissions ?? {};
+    assert.equal(scaPerms['pull-requests'], 'read');
+    assert.equal(scaPerms['security-events'], 'write');
   });
 
   await t.test('Blocks main -> dev, validates branch prefixes, runs npm ci, build, and lint:security', () => {
@@ -134,14 +156,49 @@ test('Workflow 1: CI Dev (.github/workflows/ci-dev.yml)', async (t) => {
     assert.ok(String(snykStep.with?.args ?? '').includes('--severity-threshold=high'));
     assert.ok(String(snykStep.with?.args ?? '').includes('.sarif'));
     assert.notEqual(snykStep['continue-on-error'], true);
-    assert.ok(snykStep.if, 'Snyk step must have an if condition gating dependabot[bot] without SNYK_TOKEN');
+    assert.match(
+      String(snykStep.if ?? ''),
+      /steps\.snyk-gate\.outputs\.run_snyk\s*==\s*'true'/,
+      "Snyk step must gate on steps.snyk-gate.outputs.run_snyk == 'true'"
+    );
+    assert.doesNotMatch(String(snykStep.if ?? ''), /run_snyk\s*==\s*'false'/);
     assert.ok(serialized.includes('dependabot[bot]'));
     assert.ok(serialized.includes('SNYK_TOKEN'));
+
+    const snykGateStep = allSteps.find((s) => s.id === 'snyk-gate');
+    assert.ok(snykGateStep, 'Expected snyk-gate step');
+    const runSnykGate = (actor, hasToken) => {
+      const outFile = path.join(
+        require('node:os').tmpdir(),
+        `snyk-gate-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}.out`
+      );
+      try {
+        const res = spawnSync('bash', ['-c', snykGateStep.run], {
+          env: {
+            PATH: process.env.PATH,
+            ACTOR: actor,
+            HAS_TOKEN: String(hasToken),
+            GITHUB_OUTPUT: outFile,
+          },
+          encoding: 'utf8',
+        });
+        assert.equal(res.status, 0, `snyk-gate failed: ${res.stderr}`);
+        return fs.readFileSync(outFile, 'utf8').trim();
+      } finally {
+        if (fs.existsSync(outFile)) fs.unlinkSync(outFile);
+      }
+    };
+    assert.equal(runSnykGate('developer', 'true'), 'run_snyk=true');
+    assert.equal(runSnykGate('developer', 'false'), 'run_snyk=true');
+    assert.equal(runSnykGate('dependabot[bot]', 'true'), 'run_snyk=true');
+    assert.equal(runSnykGate('dependabot[bot]', 'false'), 'run_snyk=false');
 
     const sarifStep = allSteps.find((s) =>
       String(s.uses ?? '').startsWith('github/codeql-action/upload-sarif@v3')
     );
     assert.ok(sarifStep, 'Expected github/codeql-action/upload-sarif@v3 step');
+    assert.match(String(sarifStep.if ?? ''), /\balways\(\)/);
+    assert.doesNotMatch(String(sarifStep.if ?? ''), /\bsuccess\(\)/);
 
     const uploadStep = allSteps.find(
       (s) =>
@@ -149,6 +206,8 @@ test('Workflow 1: CI Dev (.github/workflows/ci-dev.yml)', async (t) => {
         s.with?.name === 'dev-sca-secrets-reports'
     );
     assert.ok(uploadStep, 'Expected dev-sca-secrets-reports artifact upload');
+    assert.match(String(uploadStep.if ?? ''), /\balways\(\)/);
+    assert.doesNotMatch(String(uploadStep.if ?? ''), /\bsuccess\(\)/);
     assert.equal(uploadStep.with?.['retention-days'], 14);
   });
 });
@@ -176,7 +235,11 @@ test('Workflow 2: Security Main (.github/workflows/security-main.yml)', async (t
     assert.ok(prEntry, 'Expected a job verifying PR originates from dev');
 
     const [, job] = prEntry;
-    assert.match(JSON.stringify(job), /github\.head_ref\s*!=\s*['"]?dev/);
+    const rejectStep = (job.steps ?? []).find((s) =>
+      /github\.head_ref\s*!=\s*['"]dev['"]/.test(String(s.if ?? ''))
+    );
+    assert.ok(rejectStep, "verify-source-branch must reject github.head_ref != 'dev' (exact 'dev')");
+    assert.match(String(rejectStep.run ?? ''), /exit\s+1/);
   });
 
   await t.test('Runs Angular headless unit tests with coverage and node --test tests/*.test.js, uploading test-coverage-lcov (14 days)', () => {
@@ -268,6 +331,8 @@ test('Workflow 2: Security Main (.github/workflows/security-main.yml)', async (t
       String(s.uses ?? '').startsWith('github/codeql-action/upload-sarif@v3')
     );
     assert.ok(sarifStep, 'Expected SARIF upload in Snyk Code job');
+    assert.match(String(sarifStep.if ?? ''), /\balways\(\)/);
+    assert.doesNotMatch(String(sarifStep.if ?? ''), /\bsuccess\(\)/);
 
     const uploadStep = (job.steps ?? []).find(
       (s) =>
@@ -275,6 +340,8 @@ test('Workflow 2: Security Main (.github/workflows/security-main.yml)', async (t
         s.with?.name === 'sast-snyk-reports'
     );
     assert.ok(uploadStep, 'Expected sast-snyk-reports artifact upload');
+    assert.match(String(uploadStep.if ?? ''), /\balways\(\)/);
+    assert.doesNotMatch(String(uploadStep.if ?? ''), /\bsuccess\(\)/);
     assert.equal(uploadStep.with?.['retention-days'], 30);
   });
 
@@ -286,6 +353,11 @@ test('Workflow 2: Security Main (.github/workflows/security-main.yml)', async (t
     assert.ok(sbomEntry, 'Expected Syft + Grype job');
 
     const [, job] = sbomEntry;
+    assert.notEqual(
+      job['continue-on-error'],
+      true,
+      'Grype job in security-main.yml must not set continue-on-error: true'
+    );
     const steps = job.steps ?? [];
     const formats = steps
       .filter((s) => String(s.uses ?? '').startsWith('anchore/sbom-action'))
@@ -293,11 +365,26 @@ test('Workflow 2: Security Main (.github/workflows/security-main.yml)', async (t
     assert.ok(formats.includes('cyclonedx-json'), 'Must generate cyclonedx-json SBOM');
     assert.ok(formats.includes('spdx-json'), 'Must generate spdx-json SBOM');
 
-    const grypeStep = steps.find((s) => String(s.uses ?? '').startsWith('anchore/scan-action'));
-    assert.ok(grypeStep, 'Expected anchore/scan-action (Grype)');
+    const grypeSteps = steps.filter((s) => String(s.uses ?? '').startsWith('anchore/scan-action'));
+    assert.ok(grypeSteps.length > 0, 'Expected anchore/scan-action (Grype)');
+    for (const gStep of grypeSteps) {
+      assert.notEqual(
+        gStep['continue-on-error'],
+        true,
+        'Grype step in security-main.yml must not set continue-on-error: true'
+      );
+    }
+    const grypeStep = grypeSteps[0];
     assert.equal(grypeStep.with?.['fail-build'], true);
     assert.equal(grypeStep.with?.['severity-cutoff'], 'high');
     assert.equal(grypeStep.with?.['only-fixed'], true);
+
+    const grypeSarifStep = steps.find((s) =>
+      String(s.uses ?? '').startsWith('github/codeql-action/upload-sarif@v3')
+    );
+    assert.ok(grypeSarifStep, 'Expected SARIF upload in Syft + Grype job');
+    assert.match(String(grypeSarifStep.if ?? ''), /\balways\(\)/);
+    assert.doesNotMatch(String(grypeSarifStep.if ?? ''), /\bsuccess\(\)/);
 
     const uploadStep = steps.find(
       (s) =>
@@ -305,6 +392,8 @@ test('Workflow 2: Security Main (.github/workflows/security-main.yml)', async (t
         s.with?.name === 'sbom-and-grype-reports'
     );
     assert.ok(uploadStep, 'Expected sbom-and-grype-reports artifact upload');
+    assert.match(String(uploadStep.if ?? ''), /\balways\(\)/);
+    assert.doesNotMatch(String(uploadStep.if ?? ''), /\bsuccess\(\)/);
     assert.equal(uploadStep.with?.['retention-days'], 30);
   });
 
@@ -375,7 +464,8 @@ test('Workflow 2: Security Main (.github/workflows/security-main.yml)', async (t
         s.with?.name === 'dast-owasp-zap-xml'
     );
     assert.ok(uploadStep, 'Expected dast-owasp-zap-xml artifact upload');
-    assert.match(String(uploadStep.if ?? ''), /always\(\)/);
+    assert.match(String(uploadStep.if ?? ''), /\balways\(\)/);
+    assert.doesNotMatch(String(uploadStep.if ?? ''), /\bsuccess\(\)/);
     assert.equal(uploadStep.with?.['retention-days'], 30);
   });
 });
@@ -421,6 +511,11 @@ test('Workflow 3: Release & Production Deploy (.github/workflows/release.yml)', 
     assert.ok(buildEntry);
 
     const [, buildJob] = buildEntry;
+    assert.notEqual(
+      buildJob['continue-on-error'],
+      true,
+      'Build/Grype job in release.yml must not set continue-on-error: true'
+    );
     const steps = buildJob.steps ?? [];
     const scripts = normalizeWs(collectJobScripts(buildJob));
 
@@ -428,6 +523,11 @@ test('Workflow 3: Release & Production Deploy (.github/workflows/release.yml)', 
 
     const grypeStep = steps.find((s) => String(s.uses ?? '').startsWith('anchore/scan-action'));
     assert.ok(grypeStep, 'Expected Grype scan in release.yml');
+    assert.notEqual(
+      grypeStep['continue-on-error'],
+      true,
+      'Grype step in release.yml must not set continue-on-error: true'
+    );
     assert.equal(grypeStep.with?.['only-fixed'], true);
     assert.equal(grypeStep.with?.['severity-cutoff'], 'high');
     assert.equal(grypeStep.with?.['fail-build'], true);
@@ -510,17 +610,35 @@ test('R3/R4 Security Configs, GitHub Policy Enforcement & Angular Hardening', as
 
   await t.test('.github/CODEOWNERS protects critical security, workflow, and build files', () => {
     const content = readText('.github/CODEOWNERS');
-    for (const pattern of [
-      '.github/',
-      'angular.json',
-      'package*.json',
-      '.zap/',
-      '.coderabbit.yaml',
-      'sonar-project.properties',
-    ]) {
-      assert.ok(content.includes(pattern), `CODEOWNERS must protect ${pattern}`);
+    const activeLines = content
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0 && !l.startsWith('#'));
+
+    const requiredPatterns = [
+      '/.github/',
+      '/package*.json',
+      '/angular.json',
+      '/eslint.config.mjs',
+      '/.zap/',
+      '/.coderabbit.yaml',
+      '/sonar-project.properties',
+      '/scripts/',
+    ];
+
+    for (const pattern of requiredPatterns) {
+      const matchingLine = activeLines.find((line) => {
+        const tokens = line.split(/\s+/);
+        return (
+          tokens[0] === pattern &&
+          tokens.slice(1).some((t) => /^@[A-Za-z0-9_-]+(?:\/[A-Za-z0-9_-]+)?$/.test(t))
+        );
+      });
+      assert.ok(
+        matchingLine,
+        `CODEOWNERS must protect ${pattern} in an active non-comment line with at least one @owner`
+      );
     }
-    assert.match(content, /@[A-Za-z0-9_-]+/);
   });
 
   await t.test('.github/dependabot.yml configures version 2 for npm and github-actions targeting dev', () => {
@@ -553,7 +671,23 @@ test('R3/R4 Security Configs, GitHub Policy Enforcement & Angular Hardening', as
     const mainContexts = (mainChecksRule.parameters?.required_status_checks ?? []).map((c) =>
       typeof c === 'string' ? c : c.context
     );
+    assert.ok(mainContexts.length > 0, 'main-ruleset required_status_checks must be non-empty');
     const securityMainJobNames = Object.values(securityMain.jobs ?? {}).map((j) => j.name);
+    const expectedMainJobNames = [
+      'Verify PR originates from dev',
+      'Unit Tests & Coverage',
+      'SAST - SonarCloud Quality Gate',
+      'SAST - CodeQL (javascript-typescript)',
+      'SAST - Snyk Code',
+      'SBOM & SCA - Syft & Grype',
+      'DAST - OWASP ZAP Baseline Scan',
+    ];
+    for (const expectedName of expectedMainJobNames) {
+      assert.ok(
+        mainContexts.includes(expectedName),
+        `main-ruleset must require job "${expectedName}"`
+      );
+    }
     for (const ctx of mainContexts) {
       assert.ok(securityMainJobNames.includes(ctx), `main-ruleset context "${ctx}" must match security-main.yml job name`);
     }
@@ -568,7 +702,19 @@ test('R3/R4 Security Configs, GitHub Policy Enforcement & Angular Hardening', as
     const devContexts = (devChecksRule.parameters?.required_status_checks ?? []).map((c) =>
       typeof c === 'string' ? c : c.context
     );
+    assert.ok(devContexts.length > 0, 'dev-ruleset required_status_checks must be non-empty');
     const ciDevJobNames = Object.values(ciDev.jobs ?? {}).map((j) => j.name);
+    const expectedDevJobNames = [
+      'Validate Source Branch, Security Lint & Angular Build',
+      'Secret Scanning (TruffleHog)',
+      'SCA (npm audit, Dependency Review & Snyk)',
+    ];
+    for (const expectedName of expectedDevJobNames) {
+      assert.ok(
+        devContexts.includes(expectedName),
+        `dev-ruleset must require job "${expectedName}"`
+      );
+    }
     for (const ctx of devContexts) {
       assert.ok(ciDevJobNames.includes(ctx), `dev-ruleset context "${ctx}" must match ci-dev.yml job name`);
     }
@@ -606,5 +752,26 @@ test('R3/R4 Security Configs, GitHub Policy Enforcement & Angular Hardening', as
     const pkg = readJson('package.json');
     assert.ok(pkg.scripts?.['lint:security'], 'package.json must define lint:security');
     assert.ok(pkg.scripts?.['audit:ci'], 'package.json must define audit:ci');
+  });
+
+  await t.test('No GitHub Actions expression injection (${{ github.* }} or ${{ inputs.* }}) in any run: step', () => {
+    for (const wfPath of [
+      '.github/workflows/ci-dev.yml',
+      '.github/workflows/security-main.yml',
+      '.github/workflows/release.yml',
+    ]) {
+      const { parsed } = readYaml(wfPath);
+      for (const [jobId, job] of allJobs(parsed)) {
+        for (const step of job.steps ?? []) {
+          if (typeof step.run === 'string') {
+            assert.doesNotMatch(
+              step.run,
+              /\$\{\{\s*(github|inputs)\.[^}]*\}\}/,
+              `${wfPath} job "${jobId}" step "${step.name ?? '(unnamed)'}" must not interpolate github.* or inputs.* directly in run:`
+            );
+          }
+        }
+      }
+    }
   });
 });

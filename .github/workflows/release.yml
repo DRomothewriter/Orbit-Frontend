@@ -47,11 +47,7 @@ jobs:
           RELEASE_TAG_INPUT: ${{ inputs.release_tag }}
           TARGET_SHA: ${{ github.sha }}
         run: |
-          git fetch origin main
-          if ! git merge-base --is-ancestor "$TARGET_SHA" origin/main; then
-            echo "::error::El commit $TARGET_SHA no es ancestro de origin/main."
-            exit 1
-          fi
+          git fetch origin main --tags
 
           if [ "$EVENT_NAME" = "release" ]; then
             TAG="$RELEASE_TAG_EVENT"
@@ -61,6 +57,25 @@ jobs:
 
           if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
             echo "::error::Tag inválido '$TAG'. Debe cumplir el formato SemVer ^v[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$"
+            exit 1
+          fi
+
+          TAG_SHA="$(git rev-parse --verify "refs/tags/${TAG}^{commit}" 2>/dev/null || true)"
+          if [ -z "$TAG_SHA" ]; then
+            echo "::error::El tag '$TAG' no existe en el repositorio."
+            exit 1
+          fi
+
+          if ! git merge-base --is-ancestor "$TAG_SHA" origin/main; then
+            echo "::error::El commit del tag '$TAG' ($TAG_SHA) no es ancestro de origin/main."
+            exit 1
+          fi
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "Checking out tag '$TAG' at commit $TAG_SHA..."
+            git checkout --detach "$TAG_SHA"
+          elif [ "$TAG_SHA" != "$TARGET_SHA" ]; then
+            echo "::error::El tag '$TAG' ($TAG_SHA) no coincide con el commit del evento ($TARGET_SHA)."
             exit 1
           fi
 
@@ -119,6 +134,18 @@ jobs:
           if [ -n "$GRYPE_JSON" ] && [ -f "$GRYPE_JSON" ]; then
             cp "$GRYPE_JSON" "grype-release-${RELEASE_TAG}.json"
           fi
+
+      - name: Upload Grype diagnostic report on failure
+        if: failure() && steps.meta.outputs.release_tag != '' && hashFiles('grype-release-*.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-grype-diagnostic-${{ steps.meta.outputs.release_tag }}
+          path: |
+            grype-release-${{ steps.meta.outputs.release_tag }}.json
+            sbom-cyclonedx-${{ steps.meta.outputs.release_tag }}.json
+            sbom-spdx-${{ steps.meta.outputs.release_tag }}.json
+          retention-days: 30
+          if-no-files-found: warn
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
