@@ -59,6 +59,7 @@ export default tseslint.config(
       '@angular-eslint/no-output-native': 'off',
       '@angular-eslint/component-class-suffix': 'off',
       '@angular-eslint/directive-class-suffix': 'off',
+      '@angular-eslint/prefer-on-push-component-change-detection': 'off',
     },
   },
   {

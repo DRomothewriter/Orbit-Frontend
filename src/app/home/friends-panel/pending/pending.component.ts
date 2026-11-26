@@ -1,23 +1,32 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { finalize } from 'rxjs';
 import { UserService } from '../../../shared/services/user.service';
 import { GetReceivedRequestsResponse } from '../../../shared/types/get-received-requests-response';
+import { OrbitLoaderComponent } from '../../../shared/components/orbit-loader/orbit-loader.component';
+import { OrbitAvatarPipe } from '../../../shared/pipes/orbit-avatar.pipe';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-pending',
-  imports: [],
+  imports: [OrbitLoaderComponent, OrbitAvatarPipe],
   templateUrl: './pending.component.html',
   styleUrl: './pending.component.scss',
 })
 export class PendingComponent implements OnInit {
   friendRequests: GetReceivedRequestsResponse[] = [];
+  isLoading = false;
   constructor(private userService: UserService) {}
 
   ngOnInit() {
-    this.userService.getRequestsReceived().subscribe({
-      next: (fr: GetReceivedRequestsResponse[]) => {
-        this.friendRequests = fr;
-      },
-    });
+    this.isLoading = true;
+    this.userService
+      .getRequestsReceived()
+      .pipe(finalize(() => (this.isLoading = false)))
+      .subscribe({
+        next: (fr: GetReceivedRequestsResponse[]) => {
+          this.friendRequests = fr;
+        },
+      });
   }
 
   acceptFriendRequest(friendId: string) {
@@ -32,7 +41,10 @@ export class PendingComponent implements OnInit {
 
         alert('Friend Request accepted');
       },
-      error: (err) => {},
+      error: (err) => {
+        console.error('Error accepting friend request:', err);
+        alert('No se pudo aceptar la solicitud de amistad.');
+      },
     });
   }
 }

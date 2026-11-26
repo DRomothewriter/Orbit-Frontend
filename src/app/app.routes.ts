@@ -17,6 +17,11 @@ import { ResetPasswordComponent } from './auth/reset-password/reset-password.com
 
 export const routes: Routes = [
     { path: '', redirectTo: 'login', pathMatch: 'full' },
+    {
+        path: 'about',
+        loadComponent: () =>
+            import('./about/about.component').then((m) => m.AboutComponent),
+    },
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
     {
@@ -97,4 +102,5 @@ export const routes: Routes = [
             },
         ],
     },
+    { path: '**', redirectTo: 'login' },
 ];

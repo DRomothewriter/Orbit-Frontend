@@ -1,30 +1,39 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { finalize } from 'rxjs';
 import { UserService } from '../../../shared/services/user.service';
 import { User } from '../../../shared/types/user';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { OrbitLoaderComponent } from '../../../shared/components/orbit-loader/orbit-loader.component';
+import { OrbitAvatarPipe } from '../../../shared/pipes/orbit-avatar.pipe';
 
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-add-friend',
   templateUrl: './add-friend.component.html',
   styleUrl: './add-friend.component.scss',
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule, OrbitLoaderComponent, OrbitAvatarPipe]
 })
 export class AddFriendComponent {
   searchQuery = '';
   users: User[] = [];
+  isLoading = false;
 
   constructor(private userService: UserService) {}
 
   onSearch() {
     if (!this.searchQuery.trim()) return;
-    this.userService.searchUsers(this.searchQuery).subscribe({
-      next: (users) => { 
-        this.users = users;
-      },
-      error: (err) => console.error('Error al buscar usuarios', err)
-    });
+    this.isLoading = true;
+    this.userService
+      .searchUsers(this.searchQuery)
+      .pipe(finalize(() => (this.isLoading = false)))
+      .subscribe({
+        next: (users) => {
+          this.users = users;
+        },
+        error: (err) => console.error('Error al buscar usuarios', err),
+      });
   }
 
   sendFriendRequest(userId: string) {

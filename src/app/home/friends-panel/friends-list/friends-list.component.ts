@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon'; 
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip'; 
@@ -9,17 +9,21 @@ import { GroupService } from '../../../shared/services/group.service';
 import { SocketService } from '../../../shared/services/socket.service'; // Importar
 import { Router } from '@angular/router';
 import { Group } from '../../../shared/types/group';
-import { Subscription } from 'rxjs'; // Importar para limpiar suscripción
+import { Subscription, finalize } from 'rxjs'; // Importar para limpiar suscripción
+import { OrbitLoaderComponent } from '../../../shared/components/orbit-loader/orbit-loader.component';
+import { OrbitAvatarPipe } from '../../../shared/pipes/orbit-avatar.pipe';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-friends-list',
   standalone: true,
-  imports: [MatIconModule, CommonModule, MatButtonModule, MatTooltipModule],
+  imports: [MatIconModule, CommonModule, MatButtonModule, MatTooltipModule, OrbitLoaderComponent, OrbitAvatarPipe],
   templateUrl: './friends-list.component.html',
   styleUrl: './friends-list.component.scss'
 })
 export class FriendsListComponent implements OnInit, OnDestroy {
   friends: GetFriendsResponse[] = [];
+  isLoading = false;
   private statusSubscription?: Subscription;
 
   constructor(
@@ -35,14 +39,18 @@ export class FriendsListComponent implements OnInit, OnDestroy {
       // Suscribirse a cambios de estado en tiempo real
       this.statusSubscription = this.socketService.onFriendStatusChange().subscribe({
           next: (data) => {
-              // Buscar al amigo y actualizar su estado
-              const friendIndex = this.friends.findIndex(f => f.friendId._id === data.userId);
-              if (friendIndex !== -1) {
-                  // Creamos una copia para detectar cambios (inmutabilidad)
-                  const updatedFriend = { ...this.friends[friendIndex] };
-                  updatedFriend.friendId.status = data.status;
-                  this.friends[friendIndex] = updatedFriend;
-              }
+              this.friends = this.friends.map((friendship) => {
+                  if (friendship.friendId._id !== data.userId) {
+                      return friendship;
+                  }
+                  return {
+                      ...friendship,
+                      friendId: {
+                          ...friendship.friendId,
+                          status: data.status,
+                      },
+                  };
+              });
           }
       });
   }
@@ -55,12 +63,15 @@ export class FriendsListComponent implements OnInit, OnDestroy {
   }
 
   loadFriends() {
-    this.userService.getMyFriends().subscribe({
-      next:(friendships: GetFriendsResponse[])=> {
-        console.log("My friends: ",friendships)
-        this.friends = friendships;
-      }
-    });
+    this.isLoading = true;
+    this.userService
+      .getMyFriends()
+      .pipe(finalize(() => (this.isLoading = false)))
+      .subscribe({
+        next: (friendships: GetFriendsResponse[]) => {
+          this.friends = friendships;
+        },
+      });
   }
 
   startChat(friendData: GetFriendsResponse) {
@@ -88,7 +99,13 @@ export class FriendsListComponent implements OnInit, OnDestroy {
 
     this.groupService.createGroup(newGroup, [friendId]).subscribe({
         next: (group) => this.enterChat(group),
-        error: (err) => alert('No se pudo crear el chat. Intenta de nuevo.')
+        error: (err) => {
+            if (err?.status === 409 && err?.error?.existingGroup) {
+                this.enterChat(err.error.existingGroup);
+                return;
+            }
+            alert('No se pudo crear el chat. Intenta de nuevo.');
+        }
     });
   }
 

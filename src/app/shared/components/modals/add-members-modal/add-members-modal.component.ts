@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { UserService } from '../../../services/user.service';
 import { GetFriendsResponse } from '../../../types/get-friends-response';
 import { User } from '../../../types/user';
@@ -7,11 +7,13 @@ import { GroupService } from '../../../services/group.service';
 import { ModalsService } from '../../../services/modals.service';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { GetGroupMembersResponse } from '../../../types/get-group-members-response';
+import { OrbitAvatarPipe } from '../../../pipes/orbit-avatar.pipe';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-add-members-modal',
   standalone: true,
-  imports: [MatCheckboxModule],
+  imports: [MatCheckboxModule, OrbitAvatarPipe],
   templateUrl: './add-members-modal.component.html',
   styleUrl: './add-members-modal.component.scss'
 })
@@ -58,6 +60,11 @@ export class AddMembersModalComponent implements OnInit{
         }, 1500)
         this.newGroupMembers.emit();
         this.closeModal();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error('Error adding group members:', err);
+        alert('No se pudieron agregar los miembros.');
       }
     })
   }

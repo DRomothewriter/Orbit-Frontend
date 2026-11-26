@@ -1,92 +1,121 @@
-<div class="login-container">
-    <div class="login-card glass-card">
-        <div class="card-content">
-            <div class="form-column">
-                <div class="form-header">
-                    <h1>Orbit</h1>
-                    <p>Bienvenido de nuevo!</p>
-                </div>
+<main class="auth-shell">
+    <section class="auth-form-pane">
+        <button
+            type="button"
+            class="auth-theme-toggle"
+            (click)="themeService.toggleTheme()"
+            [attr.aria-label]="themeService.isTwilight() ? 'Cambiar a Noche Profunda' : 'Cambiar a Cielo Estrellado'"
+            [attr.aria-pressed]="themeService.isTwilight()"
+        >
+            <mat-icon aria-hidden="true">{{ themeService.isTwilight() ? 'dark_mode' : 'auto_awesome' }}</mat-icon>
+            <span>{{ themeService.isTwilight() ? 'Noche Profunda' : 'Cielo Estrellado' }}</span>
+        </button>
 
-                <form class="login-form" (ngSubmit)="onLogin()">
-                    <!-- Mensaje de error -->
-                    @if(errorMessage) {
-                        <div class="alert alert-error">
-                            <mat-icon>error</mat-icon>
-                            {{ errorMessage }}
-                        </div>
-                    }
+        <div class="auth-form-inner">
+            <div class="brand-lockup">
+                <img src="assets/orbit-emblem.svg" alt="" aria-hidden="true" class="brand-emblem" />
+                <span class="brand-name">Orbit</span>
+            </div>
 
-                    <mat-form-field>
-                        <mat-label>Correo electrónico</mat-label>
-                        <input
-                            matInput
-                            type="email"
-                            placeholder="usuario@ejemplo.com"
-                            [(ngModel)]="email"
-                            name="email"
-                        />
-                    </mat-form-field>
+            <header class="form-header">
+                <h1>Bienvenido de nuevo</h1>
+                <p>Retoma tus conversaciones, comunidades y llamadas en tiempo real.</p>
+            </header>
 
-                    <mat-form-field>
-                        <mat-label>Contraseña</mat-label>
-                        <input
-                            matInput
-                            type="password"
-                            [(ngModel)]="password"
-                            name="password"
-                            s
-                        />
-                    </mat-form-field>
-
-                    <div class="form-actions">
-                        <a
-                            routerLink="/forgot-password"
-                            class="accent-link"
-                            >¿Olvidaste tu contraseña?</a
-                        >
+            <form class="login-form" (ngSubmit)="onLogin()">
+                @if (errorMessage) {
+                    <div class="alert alert-error" role="alert" aria-live="polite">
+                        <mat-icon aria-hidden="true">error_outline</mat-icon>
+                        <span>{{ errorMessage }}</span>
                     </div>
+                }
 
-                    <button
-                        mat-raised-button
-                        class="accent-button login-button"
-                    >
-                        Iniciar Sesión
-                    </button>
-                </form>
+                <mat-form-field>
+                    <mat-label>Correo electrónico</mat-label>
+                    <input
+                        matInput
+                        type="email"
+                        inputmode="email"
+                        autocomplete="email"
+                        spellcheck="false"
+                        placeholder="nombre@dominio.com"
+                        [(ngModel)]="email"
+                        name="email"
+                        required
+                    />
+                </mat-form-field>
 
-                <div class="divider">o</div>
+                <mat-form-field>
+                    <mat-label>Contraseña</mat-label>
+                    <input
+                        matInput
+                        type="password"
+                        autocomplete="current-password"
+                        [(ngModel)]="password"
+                        name="password"
+                        required
+                    />
+                </mat-form-field>
 
-                <div class="social-buttons">
-                    <asl-google-signin-button
-                        type="standard"
-                        size="large"
-                        theme="filled_black"
-                        text="continue_with"
-                        shape="circle"
-                    >
-                    </asl-google-signin-button>
+                <div class="form-actions">
+                    <a routerLink="/forgot-password" class="accent-link">
+                        ¿Olvidaste tu contraseña?
+                    </a>
                 </div>
 
-                <p class="register-link">
-                    ¿No tienes una cuenta?
-                    <a routerLink="/register" class="accent-link"
-                        >Regístrate aquí</a
-                    >
-                </p>
+                <button
+                    type="submit"
+                    mat-raised-button
+                    class="accent-button login-button"
+                    [disabled]="isLoading"
+                >
+                    @if (isLoading) {
+                    <app-orbit-loader variant="comet" size="xs" />
+                    <span>Iniciando órbita...</span>
+                    } @else { Iniciar Sesión }
+                </button>
+            </form>
+
+            <div class="divider" aria-hidden="true">o continúa con</div>
+
+            <div class="social-buttons">
+                <asl-google-signin-button
+                    type="standard"
+                    size="large"
+                    theme="filled_black"
+                    text="continue_with"
+                    shape="rectangular"
+                ></asl-google-signin-button>
             </div>
 
-            <div class="welcome-column">
-                <img
-                    src="https://placehold.co/200x200/111827/533483?text=Orbit&font=poppins"
-                    alt="Orbit Logo"
-                    class="welcome-logo"
-                />
-                <h2>Conecta y Colabora sin Límites</h2>
-                <p>
-                    La plataforma todo-en-uno para comunicación de equipos,
-                    gestión de proyectos y productividad.
-                </p>
-            </div>
+            <p class="register-link">
+                ¿Aún no tienes cuenta?
+                <a routerLink="/register" class="accent-link">Crear una cuenta</a>
+            </p>
         </div>
-    </div>
-</div>
+    </section>
+
+    <aside class="observatory-pane" aria-label="Ilustración astronómica de Orbit">
+        <img
+            [src]="themeService.isTwilight() ? 'assets/orbit-sky-starlight.webp' : 'assets/orbit-observatory-hero.webp'"
+            [alt]="themeService.isTwilight() ? 'Vía Láctea luminosa pintada al óleo en crepúsculo estrellado' : 'Horizonte planetario bajo una nebulosa amatista pintada al óleo'"
+            class="observatory-art"
+        />
+        <div class="observatory-vignette" aria-hidden="true"></div>
+
+        <div class="observatory-meta" aria-hidden="true">
+            <span>ORBIT</span>
+            <span>RA 21h 42m · DEC +44° 18'</span>
+        </div>
+
+        <div class="observatory-caption">
+            <p class="observatory-eyebrow">Comunicación en tiempo real</p>
+            <h2>
+                Conversaciones en <em>órbita</em>, con la calma de un cielo nocturno.
+            </h2>
+            <p class="observatory-copy">
+                Canales claros, videollamadas de baja latencia y comunidades diseñadas para pensar y colaborar sin distracciones.
+            </p>
+        </div>
+    </aside>
+</main>

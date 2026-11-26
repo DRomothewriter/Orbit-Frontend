@@ -6,7 +6,7 @@ import { UserService } from '../../shared/services/user.service';
 import { TokenService } from '../../shared/services/token.service';
 import { NotificationsService } from '../../shared/services/notifications.service';
 import { SocialAuthService } from '@abacritt/angularx-social-login';
-import { Router } from '@angular/router';
+import { provideRouter } from '@angular/router';
 
 describe('HeaderComponent (TDD - Ticket Orbit-0009)', () => {
   let component: HeaderComponent;
@@ -35,11 +35,6 @@ describe('HeaderComponent (TDD - Ticket Orbit-0009)', () => {
     logout: jasmine.createSpy('logout'),
   };
 
-  const mockRouter = {
-    navigate: jasmine.createSpy('navigate'),
-    navigateByUrl: jasmine.createSpy('navigateByUrl'),
-  };
-
   const mockSocialAuthService = {
     signOut: jasmine.createSpy('signOut'),
   };
@@ -54,10 +49,10 @@ describe('HeaderComponent (TDD - Ticket Orbit-0009)', () => {
     await TestBed.configureTestingModule({
       imports: [HeaderComponent],
       providers: [
+        provideRouter([]),
         { provide: ModalsService, useValue: mockModalsService },
         { provide: UserService, useValue: mockUserService },
         { provide: TokenService, useValue: mockTokenService },
-        { provide: Router, useValue: mockRouter },
         { provide: SocialAuthService, useValue: mockSocialAuthService },
         { provide: NotificationsService, useValue: mockNotificationsService },
       ],
@@ -90,5 +85,24 @@ describe('HeaderComponent (TDD - Ticket Orbit-0009)', () => {
     ).find((el) => el.textContent?.trim() === 'notifications');
 
     expect(notificationsIcon).toBeTruthy();
+  });
+
+  it('should render the Orbit navbar brand as a clickable link to /about with cursor pointer', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    const brandLink = compiled.querySelector('a.navbar-brand') as HTMLAnchorElement | null;
+
+    expect(brandLink).toBeTruthy();
+    expect(brandLink?.getAttribute('href')).toBe('/about');
+    expect(getComputedStyle(brandLink!).cursor).toBe('pointer');
+  });
+
+  it('should call modalsService.openMyUser with click coordinates when clicking user profile', () => {
+    mockModalsService.openMyUser.calls.reset();
+    const compiled = fixture.nativeElement as HTMLElement;
+    const profileBtn = compiled.querySelector('button.user-profile') as HTMLButtonElement;
+
+    profileBtn.dispatchEvent(new MouseEvent('click', { clientX: 980, clientY: 36, bubbles: true }));
+
+    expect(mockModalsService.openMyUser).toHaveBeenCalledWith({ x: 980, y: 36 });
   });
 });

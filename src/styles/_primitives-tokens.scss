@@ -1,0 +1,62 @@
+// Capa 1 (ui-ux-pro-max): Tokens Primitivos — Nocturnal Observatory & Starlight Twilight
+// Fuente única de verdad para valores crudos.
+
+:root {
+  // Nocturne Neutrals (Modo Noche Profunda)
+  --p-void-950: #08070d;
+  --p-void-900: #0e0c17;
+  --p-void-850: #13101f;
+  --p-void-800: #1a162b;
+  --p-void-750: #231e38;
+  --p-void-700: #2d2747;
+
+  // Twilight Neutrals (Modo Cielo Estrellado — más luminoso y rico en estrellas)
+  --p-twilight-950: #131026;
+  --p-twilight-900: #1b1636;
+  --p-twilight-850: #231d45;
+  --p-twilight-800: #2d2656;
+  --p-twilight-750: #383069;
+  --p-twilight-700: #453c7d;
+
+  // Starlight Neutrals (Texto marfil estelar y lila plateado)
+  --p-star-50: #faf7f2;
+  --p-star-100: #f4f0e8;
+  --p-star-200: #e2daf0;
+  --p-star-300: #bfb6d4;
+  --p-star-400: #a49ac0;
+  --p-star-500: #867ea0;
+
+  // Orbit Amethyst (10% Acento — fiel al morado original de Orbit #6d28d9 / #8b5cf6)
+  --p-amethyst-700: #5b21b6;
+  --p-amethyst-600: #6d28d9;
+  --p-amethyst-500: #7c3aed;
+  --p-amethyst-400: #a78bfa;
+  --p-amethyst-300: #c4b5fd;
+  --p-amethyst-200: #ddd6fe;
+
+  // Semántica Celestial
+  --p-aurora-500: #34d399;
+  --p-solar-500: #f59e0b;
+  --p-nova-500: #f43f5e;
+  --p-nova-600: #e11d48;
+  --p-celestial-400: #38bdf8;
+
+  // Escala espacial (base 4px)
+  --p-space-1: 4px;
+  --p-space-2: 8px;
+  --p-space-3: 12px;
+  --p-space-4: 16px;
+  --p-space-5: 20px;
+  --p-space-6: 24px;
+  --p-space-8: 32px;
+  --p-space-10: 40px;
+  --p-space-12: 48px;
+
+  // Radios concéntricos
+  --p-radius-sm: 6px;
+  --p-radius-md: 8px;
+  --p-radius-lg: 12px;
+  --p-radius-xl: 16px;
+  --p-radius-2xl: 20px;
+  --p-radius-full: 9999px;
+}

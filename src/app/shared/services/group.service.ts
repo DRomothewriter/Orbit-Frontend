@@ -7,6 +7,7 @@ import { GroupMember } from '../types/group-member';
 import { TokenService } from './token.service';
 import { DeleteGroupResponse } from '../types/delete-group-response';
 import { GetGroupMembersResponse } from '../types/get-group-members-response';
+import { Message } from '../types/message';
 import { ActivatedRoute } from '@angular/router';
 
 @Injectable({
@@ -36,8 +37,12 @@ export class GroupService {
     clearGroupSummary() {
         this.groupSummary.next({ topic: '' }); // Restablece el estado inicial
     }
+    clearGroups() {
+        this.myGroups.next([]);
+        this.clearGroupSummary();
+    }
     getGroupSummary(groupId?: string): Observable<Group> {
-        if (!this.groupSummary.value._id && groupId) {
+        if (groupId && this.groupSummary.value._id !== groupId) {
             const headers = this.getHeaders();
             this.httpClient
                 .get<Group>(`${environment.apiUrl}${this.endpnt}${groupId}`, {
@@ -45,7 +50,7 @@ export class GroupService {
                 })
                 .subscribe({
                     next: (group) => {
-                        this.updateGroupSummary(group);
+                        this.groupSummary.next(group);
                     },
                 });
         }
@@ -108,8 +113,12 @@ export class GroupService {
             )
             .pipe(
                 tap((response) => {
-                    console.log('group:', response);
-                    this.myGroups.next([...this.myGroups.value, response]);
+                    const exists = this.myGroups.value.some(
+                        (g) => g._id === response._id
+                    );
+                    if (!exists) {
+                        this.myGroups.next([response, ...this.myGroups.value]);
+                    }
                 })
             );
     }
@@ -211,7 +220,7 @@ export class GroupService {
         const headers = this.getHeaders();
         return this.httpClient
             .delete<GroupMember>(
-                `${environment.apiUrl}${this.endpnt}${groupId}leave-group`,
+                `${environment.apiUrl}${this.endpnt}${groupId}/leave-group`,
                 { headers }
             )
             .pipe(
@@ -225,4 +234,56 @@ export class GroupService {
     }
 
     //Funcion de respuesta para cuando nos agregar a un grupo y estamos online (socket)
+    markGroupAsRead(groupId: string): Observable<any> {
+        const headers = this.getHeaders();
+        return this.httpClient.put(
+            `${environment.apiUrl}${this.endpnt}${groupId}/read`,
+            {},
+            { headers }
+        );
+    }
+
+    clearUnreadCount(groupId: string): void {
+        const updated = this.myGroups.value.map((group) =>
+            group._id === groupId ? { ...group, unreadCount: 0 } : group
+        );
+        this.myGroups.next(updated);
+    }
+
+    addGroupFromNotification(group: Group, activeCommunityId: string): void {
+        if (!group?._id) return;
+        const groupCommunityId = group.communityId || '';
+        if (groupCommunityId !== (activeCommunityId || '')) return;
+
+        const current = this.myGroups.value;
+        if (!current.some((g) => g._id === group._id)) {
+            this.myGroups.next([group, ...current]);
+        }
+    }
+
+    applyIncomingMessage(
+        message: Message,
+        activeGroupId: string,
+        currentUserId: string
+    ): void {
+        const groups = this.myGroups.value;
+        const targetIndex = groups.findIndex((g) => g._id === message.groupId);
+        if (targetIndex === -1) return;
+
+        const target = groups[targetIndex];
+        const isCurrentGroup = message.groupId === activeGroupId;
+        const isOwnMessage =
+            Boolean(currentUserId) && message.userId === currentUserId;
+        const nextUnread =
+            isCurrentGroup || isOwnMessage ? 0 : (target.unreadCount ?? 0) + 1;
+
+        const updatedGroup: Group = {
+            ...target,
+            lastMessage: message,
+            unreadCount: nextUnread,
+        };
+
+        const remaining = groups.filter((_, idx) => idx !== targetIndex);
+        this.myGroups.next([updatedGroup, ...remaining]);
+    }
 }

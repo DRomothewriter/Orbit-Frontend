@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { finalize } from 'rxjs';
 import { GetGroupMembersResponse } from '../../../types/get-group-members-response';
 import { ModalsService } from '../../../services/modals.service';
 import { GroupService } from '../../../services/group.service';
@@ -9,14 +10,19 @@ import { GroupMember } from '../../../types/group-member';
 import { FormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
 import { MemberGroupOptionsModalComponent } from '../member-group-options-modal/member-group-options-modal.component';
+import { OrbitLoaderComponent } from '../../orbit-loader/orbit-loader.component';
+import { OrbitAvatarPipe } from '../../../pipes/orbit-avatar.pipe';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-group-info-modal',
   imports: [
     AddMembersModalComponent,
     FormsModule,
     MatIcon,
     MemberGroupOptionsModalComponent,
+    OrbitLoaderComponent,
+    OrbitAvatarPipe,
   ],
   standalone: true,
   templateUrl: './group-info-modal.component.html',
@@ -37,6 +43,7 @@ export class GroupInfoModalComponent implements OnInit {
 
   isTopicLoading = false;
   isTopicSuccess = false;
+  isLoadingMembers = false;
 
   myGroupMember: GroupMember = {} as GroupMember;
 
@@ -50,11 +57,15 @@ export class GroupInfoModalComponent implements OnInit {
 
   ngOnInit(): void {
     this.groupId = this.route.snapshot.paramMap.get('id')!;
-    this.groupService.getGroupMembers(this.groupId!).subscribe({
-      next: (response) => {
-        this.groupMembers = response;
-      },
-    });
+    this.isLoadingMembers = true;
+    this.groupService
+      .getGroupMembers(this.groupId!)
+      .pipe(finalize(() => (this.isLoadingMembers = false)))
+      .subscribe({
+        next: (response) => {
+          this.groupMembers = response;
+        },
+      });
 
     this.groupService.getGroupSummary().subscribe((group) => {
       this.group = group;

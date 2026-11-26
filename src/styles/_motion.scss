@@ -1,0 +1,166 @@
+// Orbit Motion System — Coreografía Astronómica (ui-ux-pro-max + taste-skill + web-design-guidelines)
+
+:root {
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-orbital: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 120ms;
+  --dur-base: 180ms;
+  --dur-slow: 280ms;
+  --dur-reveal: 460ms;
+}
+
+@keyframes orbitFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes orbitFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes orbitModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes orbitPopoverIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes orbitPopoverOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.95);
+  }
+}
+
+@keyframes orbitDropdownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Mensaje individual en tiempo real */
+@keyframes orbitMessageIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 1. Emergencia suave desde el Hoyo Negro (Chat -> Mensajes) */
+@keyframes orbitEmergeFromSingularity {
+  0% {
+    opacity: 0;
+    transform: translate(var(--emerge-x, 0px), var(--emerge-y, 18px)) scale(0.84);
+    filter: blur(5px);
+  }
+  65% {
+    opacity: 1;
+    filter: blur(0.4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* 2. Cascada Orbital (Eclipse Skeletons -> Lista de Grupos) */
+@keyframes orbitCascadeX {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 3. Florecimiento de Constelación (Constellation -> Amigos) */
+@keyframes orbitConstellationBloom {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 4. Fijación de Señal (Pulsar -> Solicitudes Pendientes) */
+@keyframes orbitSignalLock {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+    box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.45);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    box-shadow: none;
+  }
+}
+
+/* 5. Enfoque Óptico de Telescopio (Astrolabe -> Resultados de Búsqueda) */
+@keyframes orbitOpticalFocus {
+  from {
+    opacity: 0;
+    filter: blur(5px);
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

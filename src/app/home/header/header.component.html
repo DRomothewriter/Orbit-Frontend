@@ -1,55 +1,89 @@
-<nav class="navbar">
-    <div class="navbar-brand">
+<nav class="navbar" aria-label="Navegación principal">
+    <a class="navbar-brand" routerLink="/about" aria-label="Sobre Orbit — Ir a la página de presentación">
+        <img src="assets/orbit-emblem.svg" alt="" aria-hidden="true" class="brand-emblem" />
         <h1>Orbit</h1>
-    </div>
+    </a>
+
     <div class="navbar-menu">
-        <!-- === BOTÓN DE NOTIFICACIONES === -->
+        <!-- Selector de atmósfera astronómica (Noche Profunda / Cielo Estrellado) -->
+        <button
+            type="button"
+            class="theme-toggle-btn"
+            (click)="toggleTheme()"
+            [attr.aria-label]="themeService.isTwilight() ? 'Cambiar a Noche Profunda' : 'Cambiar a Cielo Estrellado'"
+            [attr.aria-pressed]="themeService.isTwilight()"
+            [title]="themeService.isTwilight() ? 'Cambiar a Noche Profunda' : 'Cambiar a Cielo Estrellado'"
+        >
+            <mat-icon aria-hidden="true">{{ themeService.isTwilight() ? 'dark_mode' : 'auto_awesome' }}</mat-icon>
+            <span class="theme-toggle-label">{{ themeService.isTwilight() ? 'Noche' : 'Estrellado' }}</span>
+        </button>
+
+        <!-- Notificaciones -->
         <div class="dropdown-container" (appClickOutside)="closeNotifications()">
-            <button mat-icon-button class="nav-icon relative" (click)="toggleNotifications()" [class.active]="isNotificationsOpen">
-                <mat-icon>notifications</mat-icon>
-                @if(notifications.length > 0) {
-                    <span class="badge">{{ notifications.length }}</span>
+            <button
+                type="button"
+                mat-icon-button
+                class="nav-icon relative"
+                (click)="toggleNotifications()"
+                [class.active]="isNotificationsOpen"
+                aria-label="Notificaciones"
+                [attr.aria-expanded]="isNotificationsOpen"
+            >
+                <mat-icon aria-hidden="true">notifications</mat-icon>
+                @if (notifications.length > 0) {
+                    <span class="badge" aria-label="Notificaciones sin leer">{{ notifications.length }}</span>
                 }
             </button>
 
-            <!-- Panel de Notificaciones -->
-            @if(isNotificationsOpen) {
-                <div class="notifications-dropdown glass-card">
+            @if (isNotificationsOpen) {
+                <div class="notifications-dropdown glass-card" role="region" aria-label="Panel de notificaciones">
                     <div class="dropdown-header">
                         <span>Notificaciones</span>
-                        @if(notifications.length > 0){ 
-                            <button class="mark-read" (click)="markAsRead()">Limpiar todo</button> 
+                        @if (notifications.length > 0) {
+                            <button type="button" class="mark-read" (click)="markAsRead()">Limpiar todo</button>
                         }
                     </div>
-                    
+
                     <div class="notifications-list">
-                        @for(notification of notifications; track notification._id) {
-                            <!-- Tipo: Mensaje -->
-                            @if(notification.type === NotificationType.MESSAGE) {
-                                @if(notification.data.messageType === MessageType.TEXT ){
+                        @for (notification of notifications; track notification._id) {
+                            @if (notification.type === NotificationType.MESSAGE) {
+                                @if (notification.data.messageType === MessageType.TEXT) {
                                     <div class="notification-item message">
                                         <div class="notif-avatar">
-                                            <img [src]="notification.data.avatar" alt="Avatar">
-                                            <div class="icon-badge msg"><mat-icon>chat</mat-icon></div>
+                                            @if (notification.data.avatar) {
+                                                <img [src]="notification.data.avatar" [alt]="notification.data.username || 'Avatar'" />
+                                            } @else {
+                                                <div class="avatar-fallback" aria-hidden="true">{{ (notification.data.username || 'M')[0] | uppercase }}</div>
+                                            }
+                                            <div class="icon-badge msg" aria-hidden="true"><mat-icon>chat</mat-icon></div>
                                         </div>
                                         <div class="notif-content">
                                             <p class="title"><strong>{{ notification.data.username }}</strong></p>
-                                            <p class="text">{{ notification.data.text | slice:0:10}}</p>
+                                            <p class="text">{{ notification.data.text | slice:0:40 }}</p>
                                             <span class="time">{{ notification.data.timestamp | date:'shortTime' }}</span>
                                         </div>
                                     </div>
+                                } @else if (notification.data.messageType === MessageType.IMAGE) {
+                                    <div class="notification-item message">
+                                        <div class="notif-avatar">
+                                            <div class="avatar-fallback" aria-hidden="true">I</div>
+                                            <div class="icon-badge msg" aria-hidden="true"><mat-icon>image</mat-icon></div>
+                                        </div>
+                                        <div class="notif-content">
+                                            <p class="title"><strong>{{ notification.data.username || 'Mensaje' }}</strong></p>
+                                            <p class="text">Envió una imagen</p>
+                                        </div>
+                                    </div>
                                 }
-                                @else if(notification.data.messageType === MessageType.IMAGE ){
-                                    Image
-                                }
-                            }
-
-                            <!-- Tipo: Solicitud de Amistad -->
-                            @else if(notification.type === NotificationType.FRIEND_REQUEST) {
+                            } @else if (notification.type === NotificationType.FRIEND_REQUEST) {
                                 <div class="notification-item request">
                                     <div class="notif-avatar">
-                                        <img [src]="notification.data.friendId?.profileImgUrl || 'https://placehold.co/40x40/533483/ffffff?text=U'" alt="Avatar">
-                                        <div class="icon-badge"><mat-icon>person_add</mat-icon></div>
+                                        @if (notification.data.friendId?.profileImgUrl) {
+                                            <img [src]="notification.data.friendId?.profileImgUrl" alt="Avatar" />
+                                        } @else {
+                                            <div class="avatar-fallback" aria-hidden="true">{{ (notification.data.userId?.username || 'U')[0] | uppercase }}</div>
+                                        }
+                                        <div class="icon-badge" aria-hidden="true"><mat-icon>person_add</mat-icon></div>
                                     </div>
                                     <div class="notif-content">
                                         <p class="message">
@@ -57,11 +91,15 @@
                                         </p>
                                     </div>
                                 </div>
-                            }@else if(notification.type === NotificationType.FRIEND_REQUEST_ACCEPTED){
+                            } @else if (notification.type === NotificationType.FRIEND_REQUEST_ACCEPTED) {
                                 <div class="notification-item request">
                                     <div class="notif-avatar">
-                                        <img [src]="notification.data.friendId?.profileImgUrl || 'https://placehold.co/40x40/533483/ffffff?text=U'" alt="Avatar">
-                                        <div class="icon-badge"><mat-icon>person_add</mat-icon></div>
+                                        @if (notification.data.friendId?.profileImgUrl) {
+                                            <img [src]="notification.data.friendId?.profileImgUrl" alt="Avatar" />
+                                        } @else {
+                                            <div class="avatar-fallback" aria-hidden="true">{{ (notification.data.userId?.username || 'U')[0] | uppercase }}</div>
+                                        }
+                                        <div class="icon-badge" aria-hidden="true"><mat-icon>how_to_reg</mat-icon></div>
                                     </div>
                                     <div class="notif-content">
                                         <p class="message">
@@ -69,79 +107,101 @@
                                         </p>
                                     </div>
                                 </div>
-                            }
-
-                            @else if(notification.type === NotificationType.ADDED_TO_GROUP){
-                                <!-- Revisar si es un grupo de community -->
+                            } @else if (notification.type === NotificationType.ADDED_TO_GROUP) {
                                 <div class="notification-item request">
                                     <div class="notif-avatar">
-                                        <img [src]="notification.data.groupImgUrl || 'https://placehold.co/40x40/533483/ffffff?text=U'" alt="Avatar">
-                                        <div class="icon-badge"><mat-icon>person_add</mat-icon></div>
+                                        @if (notification.data.groupImgUrl) {
+                                            <img [src]="notification.data.groupImgUrl" alt="Avatar del grupo" />
+                                        } @else {
+                                            <div class="avatar-fallback" aria-hidden="true">{{ (notification.data.topic || 'G')[0] | uppercase }}</div>
+                                        }
+                                        <div class="icon-badge" aria-hidden="true"><mat-icon>group_add</mat-icon></div>
                                     </div>
                                     <div class="notif-content">
                                         <p class="message">
-                                            Fuiste agregado al grupo <strong>{{ notification.data.topic || 'Grupo' }}</strong> 
+                                            Fuiste agregado al grupo <strong>{{ notification.data.topic || 'Grupo' }}</strong>
                                         </p>
                                     </div>
                                 </div>
                             }
-
                         } @empty {
                             <div class="empty-state">
-                                <mat-icon>notifications_off</mat-icon>
-                                <p>No tienes notificaciones nuevas</p>
+                                <mat-icon aria-hidden="true">notifications_none</mat-icon>
+                                <p>Cielo despejado — sin notificaciones nuevas</p>
                             </div>
                         }
                     </div>
                 </div>
             }
         </div>
-        
-        <!-- Botón de Configuración -->
+
+        <!-- Configuración -->
         <div class="dropdown-container" (appClickOutside)="closeSettings()">
-            <button mat-icon-button class="nav-icon" (click)="toggleSettings()" [class.active]="isSettingsOpen">
-                <mat-icon>settings</mat-icon>
+            <button
+                type="button"
+                mat-icon-button
+                class="nav-icon"
+                (click)="toggleSettings()"
+                [class.active]="isSettingsOpen"
+                aria-label="Configuración"
+                [attr.aria-expanded]="isSettingsOpen"
+            >
+                <mat-icon aria-hidden="true">settings</mat-icon>
             </button>
 
-            @if(isSettingsOpen) {
-                <div class="settings-dropdown glass-card">
+            @if (isSettingsOpen) {
+                <div class="settings-dropdown glass-card" role="menu" aria-label="Menú de configuración">
                     <div class="dropdown-header">Configuración</div>
                     <ul>
-                        <li (click)="handleSettingClick('Cuenta')">
-                            <mat-icon>person</mat-icon>
-                            <span>Cuenta</span>
+                        <li>
+                            <button type="button" class="menu-item-btn" role="menuitem" (click)="handleSettingClick('Cuenta')">
+                                <mat-icon aria-hidden="true">person</mat-icon>
+                                <span>Cuenta</span>
+                            </button>
                         </li>
-                        <li (click)="handleSettingClick('Apariencia')">
-                            <mat-icon>palette</mat-icon>
-                            <span>Apariencia</span>
+                        <li>
+                            <button type="button" class="menu-item-btn" role="menuitem" (click)="handleSettingClick('Apariencia')">
+                                <mat-icon aria-hidden="true">palette</mat-icon>
+                                <span>Apariencia</span>
+                            </button>
                         </li>
-                        <li (click)="handleSettingClick('Notificaciones')">
-                            <mat-icon>notifications_active</mat-icon>
-                            <span>Notificaciones</span>
+                        <li>
+                            <button type="button" class="menu-item-btn" role="menuitem" (click)="handleSettingClick('Notificaciones')">
+                                <mat-icon aria-hidden="true">notifications_active</mat-icon>
+                                <span>Notificaciones</span>
+                            </button>
                         </li>
-                        <li (click)="handleSettingClick('Idioma')">
-                            <mat-icon>language</mat-icon>
-                            <span>Idioma</span>
+                        <li>
+                            <button type="button" class="menu-item-btn" role="menuitem" (click)="handleSettingClick('Idioma')">
+                                <mat-icon aria-hidden="true">language</mat-icon>
+                                <span>Idioma</span>
+                            </button>
                         </li>
-                        <!-- Botón de Cerrar Sesión REAL -->
-                        <li class="danger" (click)="handleLogout()">
-                            <mat-icon>logout</mat-icon>
-                            <span>Cerrar Sesión</span>
+                        <li>
+                            <button type="button" class="menu-item-btn danger" role="menuitem" (click)="handleLogout()">
+                                <mat-icon aria-hidden="true">logout</mat-icon>
+                                <span>Cerrar Sesión</span>
+                            </button>
                         </li>
                     </ul>
                 </div>
             }
         </div>
 
-        <div class="user-profile" (click)="openMyuserModal()">
+        <button
+            type="button"
+            class="user-profile"
+            (click)="openMyuserModal($event)"
+            aria-label="Abrir perfil de usuario"
+        >
             <div class="avatar-container">
                 <img
-                    [src]="user.profileImgUrl || 'https://placehold.co/40x40/533483/ffffff?text=U'"
-                    alt="Usuario"
+                    [src]="user.profileImgUrl | orbitAvatar:(user._id || user.username)"
+                    [alt]="user.username || 'Usuario'"
                     class="profile-pic"
                 />
-                <span class="status-indicator" [ngClass]="user.status || 'offline'"></span>
+                <span class="status-indicator" [ngClass]="user.status || 'offline'" aria-hidden="true"></span>
             </div>
-        </div>
+        </button>
     </div>
 </nav>

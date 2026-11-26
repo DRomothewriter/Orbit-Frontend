@@ -1,5 +1,6 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 import {
   FormControl,
   FormGroup,
@@ -29,7 +30,9 @@ import {
 
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
+import { ThemeService } from '../../shared/services/theme.service';
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-register',
   standalone: true,
   imports: [
@@ -46,13 +49,15 @@ import { HttpClient } from '@angular/common/http';
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
 })
-export class RegisterComponent implements OnInit {
+export class RegisterComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private tokenService = inject(TokenService);
   private userService = inject(UserService);
   private router = inject(Router);
   private googleAuthService = inject(SocialAuthService);
   private httpClient = inject(HttpClient);
+  public themeService = inject(ThemeService);
+  private authSub?: Subscription;
   
   isLoading = false;
   errorMessage: string | null = null;
@@ -68,11 +73,14 @@ export class RegisterComponent implements OnInit {
     ]),
   });
   ngOnInit(): void {
-    this.googleAuthService.authState.subscribe((user: SocialUser) => {
+    this.authSub = this.googleAuthService.authState.subscribe((user: SocialUser) => {
       if (user) {
         this.onGoogleSignIn(user);
       }
     });
+  }
+  ngOnDestroy(): void {
+    this.authSub?.unsubscribe();
   }
   //Es lo mismo que el login
   onGoogleSignIn(user: SocialUser): void {
@@ -82,9 +90,11 @@ export class RegisterComponent implements OnInit {
       })
       .subscribe({
         next: (res: AuthResponse) => {
-          this.router.navigateByUrl('/home');
-          this.userService.setUser(res.user);
           this.tokenService.setToken(res.token);
+          if (res.user) {
+            this.userService.setUser(res.user);
+          }
+          this.router.navigateByUrl('/home');
         },
         error: () => {
           console.error('Error en login con Google');

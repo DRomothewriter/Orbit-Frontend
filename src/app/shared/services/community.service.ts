@@ -35,6 +35,10 @@ export class CommunityService {
   cleanCommunitySummary(){
     this.communitySummary.next({communityName: ''});
   }
+  clearCommunities(){
+    this.myCommunities.next([]);
+    this.cleanCommunitySummary();
+  }
   getCommunitySummary(): Observable<Community> {
     // if (!this.communitySummary.value._id && communityId) {
     //   const headers = this.getHeaders();

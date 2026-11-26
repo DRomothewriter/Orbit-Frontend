@@ -1,7 +1,20 @@
 <div class="modal-overlay" (click)="close.emit()">
-    <nav class="modal-content" [ngStyle]="{ left: position.x + 'px', top: position.y + 'px', position: 'fixed' }" (click)="$event.stopPropagation()">
-        <button>User Info</button>
-        <button (click)="removeMember()">Remove member</button>
-        <button (click)="makeAdmin()">Make admin</button>
+    <nav
+        class="modal-content"
+        role="menu"
+        aria-label="Opciones del miembro"
+        [ngStyle]="{ left: position.x + 'px', top: position.y + 'px', position: 'fixed' }"
+        (click)="$event.stopPropagation()"
+    >
+        <button type="button" role="menuitem" class="menu-option">
+            Ver perfil
+        </button>
+        <button type="button" role="menuitem" class="menu-option" (click)="makeAdmin()">
+            Hacer administrador
+        </button>
+        <div class="menu-divider" aria-hidden="true"></div>
+        <button type="button" role="menuitem" class="menu-option danger" (click)="removeMember()">
+            Quitar del grupo
+        </button>
     </nav>
 </div>

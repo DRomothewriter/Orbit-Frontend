@@ -1,0 +1,48 @@
+// Capa 3 (ui-ux-pro-max): Tokens de Componente
+
+:root,
+[data-theme='dark'] {
+  // Botones
+  --btn-primary-bg: var(--orbit-accent);
+  --btn-primary-bg-hover: var(--orbit-accent-hover);
+  --btn-primary-bg-active: var(--orbit-accent-pressed);
+  --btn-primary-text: var(--orbit-text-primary);
+  --btn-radius: var(--radius-md);
+
+  // Inputs y Composer
+  --input-bg: rgba(22, 18, 38, 0.62);
+  --input-border: var(--orbit-border-default);
+  --input-border-focus: var(--orbit-accent-border);
+  --input-ring-focus: 0 0 0 3px var(--orbit-accent-ring);
+
+  // Mensajes de Chat (velos translúcidos sobre el cielo nocturno)
+  --chat-bubble-in-bg: rgba(26, 22, 43, 0.72);
+  --chat-bubble-in-border: var(--orbit-border-subtle);
+  --chat-bubble-out-bg: rgba(88, 38, 184, 0.56);
+  --chat-bubble-out-bg-hover: rgba(109, 40, 217, 0.68);
+  --chat-bubble-out-border: rgba(167, 139, 250, 0.36);
+
+  // Modales y Overlays
+  --modal-backdrop: rgba(6, 5, 11, 0.68);
+  --modal-bg: rgba(22, 18, 38, 0.84);
+  --modal-border: var(--orbit-border-default);
+  --modal-radius: var(--radius-xl);
+
+  // Dock de Videollamada
+  --call-dock-bg: rgba(14, 12, 23, 0.78);
+  --call-dock-border: var(--orbit-border-default);
+}
+
+[data-theme='twilight'] {
+  --input-bg: rgba(36, 30, 72, 0.58);
+
+  --chat-bubble-in-bg: rgba(42, 35, 84, 0.66);
+  --chat-bubble-in-border: var(--orbit-border-default);
+  --chat-bubble-out-bg: rgba(124, 58, 237, 0.58);
+  --chat-bubble-out-bg-hover: rgba(139, 92, 246, 0.70);
+  --chat-bubble-out-border: rgba(221, 214, 254, 0.44);
+
+  --modal-backdrop: rgba(16, 12, 36, 0.58);
+  --modal-bg: rgba(34, 28, 68, 0.80);
+  --call-dock-bg: rgba(28, 23, 58, 0.76);
+}

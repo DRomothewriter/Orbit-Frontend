@@ -1,4 +1,5 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, OnDestroy, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { MessageService } from '../../../shared/services/message.service';
 import { Message } from '../../../shared/types/message';
 import { UserService } from '../../../shared/services/user.service';
@@ -12,16 +13,18 @@ import { MatIconModule } from '@angular/material/icon'; // Importación vital
 import { CreateEventModalComponent } from '../../../shared/components/modals/create-event-modal/create-event-modal.component';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-input',
   standalone: true,
   imports: [FormsModule, CommonModule, MatIconModule, CreateEventModalComponent], // Agregado aquí
   templateUrl: './input.component.html',
   styleUrl: './input.component.scss',
 })
-export class InputComponent implements OnInit {
+export class InputComponent implements OnInit, OnDestroy {
   message: string = '';
   user: User;
   groupId: string = '';
+  private subscriptions = new Subscription();
 
   imageFile: File | null = null;
   imagePreview: string | null = null;
@@ -38,29 +41,50 @@ export class InputComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe({
-      next: (params) => {
-        const groupId = params.get('id')!;
-        this.groupId = groupId;
-      },
-    });
-    this.userService.getMyUser().subscribe({
-      next: (user) => {
-        this.user = user;
-      },
-    });
+    this.subscriptions.add(
+      this.route.paramMap.subscribe({
+        next: (params) => {
+          const groupId = params.get('id')!;
+          this.groupId = groupId;
+        },
+      })
+    );
+    this.subscriptions.add(
+      this.userService.currentUser$.subscribe({
+        next: (user) => {
+          this.user = user;
+        },
+      })
+    );
+    this.subscriptions.add(this.userService.getMyUser().subscribe());
+  }
+
+  ngOnDestroy(): void {
+    if (this.imagePreview) {
+      URL.revokeObjectURL(this.imagePreview);
+    }
+    this.subscriptions.unsubscribe();
   }
 
   handleImage(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
+      if (this.imagePreview) {
+        URL.revokeObjectURL(this.imagePreview);
+      }
       this.imageFile = input.files[0];
       this.imagePreview = URL.createObjectURL(this.imageFile);
     }
   }
   removeImage() {
+    if (this.imagePreview) {
+      URL.revokeObjectURL(this.imagePreview);
+    }
     this.imageFile = null;
     this.imagePreview = null;
+    if (this.imageInput?.nativeElement) {
+      this.imageInput.nativeElement.value = '';
+    }
   }
 
   openEventModal() {
@@ -109,7 +133,10 @@ export class InputComponent implements OnInit {
           this.message = '';
           this.removeImage();
         },
-        error: (err) => console.error('Error sending image:', err),
+        error: (err) => {
+          console.error('Error sending image:', err);
+          alert('No se pudo enviar la imagen. Verifica la conexión o el archivo.');
+        },
       });
     } else {
       const messageData: Message = {
@@ -128,4 +155,5 @@ export class InputComponent implements OnInit {
   }
 
   @ViewChild('messageInput') messageInput!: ElementRef;
+  @ViewChild('imageInput') imageInput?: ElementRef<HTMLInputElement>;
 }

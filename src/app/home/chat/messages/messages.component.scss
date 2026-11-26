@@ -1,174 +1,217 @@
-@use "../../../../colors" as *;
+@use '../../../../colors' as *;
+
 :host {
-    margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 100%;
+  position: relative;
 }
+
+.messages-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 100%;
+}
+
+.singularity-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transition: opacity 420ms var(--ease-out-expo);
+
+  &.exiting {
+    opacity: 0;
+  }
+}
+
 .messages-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding-bottom: 1rem;
-    height: 100%;
-    overflow-y: auto;
+  list-style: none;
+  margin: auto 0 0 0;
+  padding: 0 0 var(--space-3) 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  overflow: visible;
+  overflow-anchor: none;
+
+  &.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  /* Transición suave: los mensajes emergen desde el centro del hoyo negro */
+  &.is-revealing .message-card {
+    --emerge-x: 44px;
+    --emerge-y: -16px;
+    transform-origin: center center;
+    animation: orbitEmergeFromSingularity 540ms var(--ease-orbital) both;
+
+    &.my-message {
+      --emerge-x: -44px;
+      --emerge-y: -16px;
+    }
+  }
 }
 
 .message-card {
-    background: rgba($color-bg-card, 0.6);
-    backdrop-filter: blur(5px);
-    border-radius: 18px 18px 18px 4px;
-    padding: 0.75rem 1.25rem;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    color: $color-text-main;
-    display: flex;
-    flex-direction: column;
-    max-width: 75%;
-    width: fit-content;
-    align-self: flex-start;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    position: relative;
-    transition: transform 0.2s;
+  background: var(--chat-bubble-in-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 12px 12px 12px 4px;
+  padding: 9px 14px;
+  color: var(--orbit-text-primary);
+  display: flex;
+  flex-direction: column;
+  max-width: min(68%, 62ch);
+  width: fit-content;
+  align-self: flex-start;
+  border: 1px solid var(--chat-bubble-in-border);
+  position: relative;
+  animation: orbitMessageIn var(--dur-base) var(--ease-out-expo);
+  transition: background-color var(--dur-fast) var(--ease-standard);
+
+  &:hover {
+    background: var(--orbit-bg-hover);
+  }
+
+  .message-header {
+    font-size: var(--text-caption);
+    font-weight: 600;
+    color: var(--orbit-accent-text);
+    margin-bottom: 3px;
+  }
+
+  .message-text {
+    font-size: var(--text-body);
+    word-break: break-word;
+    color: var(--orbit-text-primary);
+    line-height: 1.55;
+  }
+
+  img {
+    max-width: 100%;
+    max-height: 360px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    margin: 6px 0 4px;
+    border: 1px solid var(--orbit-border-subtle);
+  }
+
+  .message-footer {
+    font-family: var(--orbit-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 10.5px;
+    color: var(--orbit-text-muted);
+    margin-top: 4px;
+    align-self: flex-end;
+  }
+
+  &.my-message {
+    background: var(--chat-bubble-out-bg);
+    align-self: flex-end;
+    border: 1px solid var(--chat-bubble-out-border);
+    border-radius: 12px 12px 4px 12px;
 
     &:hover {
-        background: rgba($color-bg-card, 0.8);
+      background: var(--chat-bubble-out-bg-hover);
     }
 
     .message-header {
-        font-size: 0.8rem;
-        font-weight: 700;
-        color: $color-primary-light;
-        margin-bottom: 0.25rem;
-        opacity: 0.9;
+      display: none;
     }
 
     .message-text {
-        font-size: 1rem;
-        word-break: break-word;
-        color: rgba(255, 255, 255, 0.95);
-        line-height: 1.5;
-    }
-
-    img {
-        max-width: 100%;
-        border-radius: 12px;
-        margin-top: 0.5rem;
-        margin-bottom: 0.5rem;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--orbit-text-primary);
     }
 
     .message-footer {
-        font-size: 0.7rem;
-        color: rgba(255, 255, 255, 0.5);
-        margin-top: 4px;
-        align-self: flex-end;
+      color: rgba(244, 240, 232, 0.62);
     }
+  }
 
-    /* Estilos para mensajes PROPIOS */
-    &.my-message {
-        background: linear-gradient(
-            135deg,
-            rgba($color-primary, 0.9) 0%,
-            rgba($color-secondary, 0.9) 100%
-        );
-        align-self: flex-end;
-        border: none;
-        border-radius: 18px 18px 4px 18px;
-        box-shadow: 0 4px 15px rgba($color-primary, 0.2);
+  &.event-message {
+    background: var(--orbit-bg-elevated);
+    border: 1px solid var(--orbit-accent-border);
+    width: 100%;
+    min-width: 280px;
+    max-width: 420px;
 
-        .message-header {
-            display: none;
+    .event-card {
+      display: flex;
+      gap: var(--space-3);
+      align-items: center;
+      padding: 4px 0;
+
+      .event-icon {
+        background: var(--orbit-accent-soft);
+        width: 42px;
+        height: 42px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--orbit-accent-border);
+        flex-shrink: 0;
+
+        mat-icon {
+          color: var(--orbit-accent-text);
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+
+      .event-details {
+        flex: 1;
+        min-width: 0;
+
+        h4 {
+          margin: 0 0 2px 0;
+          color: var(--orbit-text-primary);
+          font-size: var(--text-body);
+          font-weight: 600;
         }
 
-        .message-text {
-            color: #ffffff;
+        .event-date {
+          margin: 0 0 var(--space-2) 0;
+          color: var(--orbit-text-secondary);
+          font-size: var(--text-caption);
+          display: flex;
+          align-items: center;
+          gap: 5px;
+
+          mat-icon {
+            font-size: 14px;
+            width: 14px;
+            height: 14px;
+          }
         }
 
-        .message-footer {
-            color: rgba(255, 255, 255, 0.7);
-        }
+        .join-btn {
+          background: var(--btn-primary-bg);
+          border: none;
+          color: var(--btn-primary-text);
+          padding: 5px 12px;
+          border-radius: var(--radius-sm);
+          font-size: var(--text-caption);
+          cursor: pointer;
+          font-weight: 600;
+          transition: background-color var(--dur-fast) var(--ease-standard);
 
-        &.event-message {
-            background: linear-gradient(
-                135deg,
-                rgba($color-primary, 0.95) 0%,
-                rgba($color-secondary, 0.95) 100%
-            );
-            .event-card .event-icon {
-                background: rgba(255, 255, 255, 0.2);
-                mat-icon {
-                    color: white;
-                }
-            }
+          &:hover {
+            background: var(--btn-primary-bg-hover);
+          }
         }
+      }
     }
-
-    /* Estilo especial para EVENTOS */
-    &.event-message {
-        background: rgba($color-primary, 0.15);
-        border: 1px solid rgba($color-primary-light, 0.3);
-        width: 100%;
-        min-width: 280px;
-
-        .event-card {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            padding: 0.5rem 0;
-
-            .event-icon {
-                background: $color-bg-main;
-                width: 48px;
-                height: 48px;
-                border-radius: 12px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border: 1px solid rgba($color-primary-light, 0.2);
-                mat-icon {
-                    color: $color-primary-light;
-                    font-size: 24px;
-                }
-            }
-
-            .event-details {
-                flex: 1;
-                h4 {
-                    margin: 0 0 0.25rem 0;
-                    color: white;
-                    font-size: 1rem;
-                    font-weight: 600;
-                }
-
-                .event-date {
-                    margin: 0 0 0.5rem 0;
-                    color: rgba(255, 255, 255, 0.8);
-                    font-size: 0.85rem;
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    mat-icon {
-                        font-size: 16px;
-                        width: 16px;
-                        height: 16px;
-                    }
-                }
-
-                .join-btn {
-                    background: $color-primary;
-                    border: none;
-                    color: white;
-                    padding: 0.35rem 1rem;
-                    border-radius: 6px;
-                    font-size: 0.8rem;
-                    cursor: pointer;
-                    font-weight: 500;
-                    transition: background 0.2s;
-                    &:hover {
-                        background: $color-primary-light;
-                    }
-                }
-            }
-        }
-    }
+  }
 }

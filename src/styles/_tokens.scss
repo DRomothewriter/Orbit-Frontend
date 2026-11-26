@@ -1,0 +1,130 @@
+// Capa 2 (ui-ux-pro-max): Tokens Semánticos — Regla 70 / 20 / 10
+// Soporta 2 atmósferas astronómicas:
+//   - [data-theme="dark"] (default): Noche Profunda — obsidiana amatista translúcida
+//   - [data-theme="twilight"]: Cielo Estrellado — crepúsculo luminoso con más luz y estrellas
+
+:root,
+[data-theme='dark'] {
+  // === ATMÓSFERA Y FONDO ASTRONÓMICO ===
+  --orbit-sky-image: url('/assets/orbit-sky-ambient.webp');
+  --orbit-sky-opacity: 0.48;
+  --orbit-sky-filter: brightness(0.95) saturate(1.05);
+
+  // === 70% SUPERFICIES BASE (Translúcidas para dejar respirar el cielo pintado) ===
+  --orbit-bg-canvas: var(--p-void-950);
+  --orbit-bg-sidebar: rgba(14, 12, 23, 0.56);
+  --orbit-bg-rail: rgba(8, 7, 13, 0.64);
+  --orbit-bg-topbar: rgba(10, 9, 18, 0.62);
+  --orbit-bg-surface: rgba(19, 16, 31, 0.34);
+  --orbit-bg-elevated: rgba(26, 22, 43, 0.72);
+  --orbit-bg-hover: rgba(45, 39, 71, 0.52);
+  --orbit-bg-active: rgba(56, 48, 88, 0.68);
+  --orbit-auth-pane-bg: rgba(10, 8, 18, 0.70);
+
+  // === 20% ESTRUCTURA, RETÍCULAS HAIRLINE Y JERARQUÍA DE TEXTO ===
+  --orbit-border-subtle: rgba(226, 218, 240, 0.09);
+  --orbit-border-default: rgba(226, 218, 240, 0.15);
+  --orbit-border-strong: rgba(226, 218, 240, 0.26);
+
+  --orbit-text-primary: var(--p-star-100);
+  --orbit-text-secondary: var(--p-star-300);
+  --orbit-text-muted: var(--p-star-500);
+
+  // === 10% ACENTO ORBIT AMETHYST (Morado original refinado) ===
+  --orbit-accent: var(--p-amethyst-600);
+  --orbit-accent-hover: var(--p-amethyst-500);
+  --orbit-accent-pressed: var(--p-amethyst-700);
+  --orbit-accent-text: var(--p-amethyst-400);
+  --orbit-accent-soft: rgba(124, 58, 237, 0.20);
+  --orbit-accent-border: rgba(167, 139, 250, 0.45);
+  --orbit-accent-ring: rgba(139, 92, 246, 0.30);
+
+  // Semántica
+  --orbit-success: var(--p-aurora-500);
+  --orbit-success-soft: rgba(52, 211, 153, 0.14);
+  --orbit-warning: var(--p-solar-500);
+  --orbit-warning-soft: rgba(245, 158, 11, 0.14);
+  --orbit-danger: var(--p-nova-500);
+  --orbit-danger-hover: var(--p-nova-600);
+  --orbit-danger-soft: rgba(244, 63, 94, 0.16);
+  --orbit-info: var(--p-celestial-400);
+
+  // Tipografía
+  --orbit-font-display: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --orbit-font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --orbit-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --text-hero: clamp(1.85rem, 2.4vw, 2.35rem);
+  --text-display: 1.75rem;
+  --text-h1: 1.25rem;
+  --text-h2: 0.9375rem;
+  --text-body: 0.875rem;
+  --text-ui: 0.8125rem;
+  --text-caption: 0.75rem;
+  --text-micro: 0.6875rem;
+
+  // Espaciado y Radios
+  --space-1: var(--p-space-1);
+  --space-2: var(--p-space-2);
+  --space-3: var(--p-space-3);
+  --space-4: var(--p-space-4);
+  --space-5: var(--p-space-5);
+  --space-6: var(--p-space-6);
+  --space-8: var(--p-space-8);
+  --space-10: var(--p-space-10);
+  --space-12: var(--p-space-12);
+
+  --radius-sm: var(--p-radius-sm);
+  --radius-md: var(--p-radius-md);
+  --radius-lg: var(--p-radius-lg);
+  --radius-xl: var(--p-radius-xl);
+  --radius-2xl: var(--p-radius-2xl);
+  --radius-full: var(--p-radius-full);
+
+  // Sombras atmosféricas
+  --shadow-sm: 0 1px 2px rgba(4, 3, 8, 0.40);
+  --shadow-md: 0 10px 30px rgba(4, 3, 8, 0.48);
+  --shadow-lg: 0 24px 60px rgba(4, 3, 8, 0.65);
+
+  // Dimensiones del Workspace
+  --orbit-topbar-h: 52px;
+  --orbit-rail-w: 64px;
+  --orbit-sidebar-w: 268px;
+}
+
+/* === MODO CIELO ESTRELLADO ("Modo claro" astronómico luminoso) === */
+[data-theme='twilight'] {
+  --orbit-sky-image: url('/assets/orbit-sky-starlight.webp');
+  --orbit-sky-opacity: 0.72;
+  --orbit-sky-filter: brightness(1.06) contrast(1.02);
+
+  --orbit-bg-canvas: var(--p-twilight-950);
+  --orbit-bg-sidebar: rgba(29, 23, 56, 0.48);
+  --orbit-bg-rail: rgba(22, 18, 44, 0.56);
+  --orbit-bg-topbar: rgba(25, 20, 50, 0.54);
+  --orbit-bg-surface: rgba(35, 29, 69, 0.24);
+  --orbit-bg-elevated: rgba(45, 38, 86, 0.66);
+  --orbit-bg-hover: rgba(74, 62, 134, 0.46);
+  --orbit-bg-active: rgba(91, 76, 160, 0.60);
+  --orbit-auth-pane-bg: rgba(24, 19, 48, 0.56);
+
+  --orbit-border-subtle: rgba(244, 238, 255, 0.14);
+  --orbit-border-default: rgba(244, 238, 255, 0.22);
+  --orbit-border-strong: rgba(244, 238, 255, 0.34);
+
+  --orbit-text-primary: var(--p-star-50);
+  --orbit-text-secondary: var(--p-star-200);
+  --orbit-text-muted: var(--p-star-400);
+
+  --orbit-accent: var(--p-amethyst-500);
+  --orbit-accent-hover: #8b5cf6;
+  --orbit-accent-pressed: var(--p-amethyst-600);
+  --orbit-accent-text: var(--p-amethyst-300);
+  --orbit-accent-soft: rgba(167, 139, 250, 0.24);
+  --orbit-accent-border: rgba(196, 181, 253, 0.54);
+  --orbit-accent-ring: rgba(167, 139, 250, 0.36);
+
+  --shadow-sm: 0 2px 6px rgba(10, 7, 24, 0.32);
+  --shadow-md: 0 12px 32px rgba(10, 7, 24, 0.40);
+  --shadow-lg: 0 24px 60px rgba(10, 7, 24, 0.52);
+}

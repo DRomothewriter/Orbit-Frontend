@@ -1,5 +1,5 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { SocketService } from './socket.service';
 import { TokenService } from './token.service';
 import { GroupService } from './group.service';
@@ -182,5 +182,35 @@ describe('SocketService (TDD - Memory Leak Mitigation)', () => {
       // Listener must never have been registered on the socket
       expect(mockSocket.on).not.toHaveBeenCalled();
     }));
+  });
+
+  describe('Connection lifecycle & memory safety (Refactor TDD)', () => {
+    it('should reset socketReady to false when disconnect() is called', () => {
+      (service as any).socketReady = true;
+      service.disconnect();
+      expect(mockSocket.disconnect).toHaveBeenCalled();
+      expect((service as any).socketReady).toBeFalse();
+    });
+
+    it('should only subscribe once to getMyUser() when connectWithGroups() is called', () => {
+      const userSubject = new BehaviorSubject({
+        _id: 'user-1',
+        username: 'testuser',
+        email: 'test@example.com',
+      });
+      mockUserService.getMyUser.and.returnValue(userSubject.asObservable());
+      mockGroupService.getAllMyGroups.calls.reset();
+
+      service.connectWithGroups();
+      expect(mockGroupService.getAllMyGroups).toHaveBeenCalledTimes(1);
+
+      // Emitting a profile update must NOT trigger another connectWithGroups/getAllMyGroups call
+      userSubject.next({
+        _id: 'user-1',
+        username: 'updateduser',
+        email: 'test@example.com',
+      });
+      expect(mockGroupService.getAllMyGroups).toHaveBeenCalledTimes(1);
+    });
   });
 });

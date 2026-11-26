@@ -1,68 +1,66 @@
 @use '../../../../colors' as *;
 
 nav {
-    display: flex;
-    align-items: center; /* Centra verticalmente los botones y el input */
-    gap: 0.75rem;
-    padding: 1rem 1.5rem; /* Espaciado interno para que no se vea aplastado */
-    margin-bottom: 1.5rem; /* Separación con el contenido de abajo */
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 56px;
+  padding: 0 var(--space-5);
+  margin-bottom: var(--space-3);
+  background: var(--orbit-bg-topbar);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--orbit-border-subtle);
 
-    /* Estilos Glassmorphism */
-    background: rgba(31, 41, 55, 0.4); /* Más transparente */
-    backdrop-filter: blur(16px); /* El truco del vidrio */
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-    border-radius: 16px;
+  button {
+    background: transparent;
+    border: none;
+    color: var(--orbit-text-secondary);
+    font-weight: 500;
+    font-size: var(--text-ui);
+    border-radius: var(--radius-md);
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: background-color var(--dur-fast) var(--ease-standard),
+      color var(--dur-fast) var(--ease-standard);
 
-    button {
-        background: transparent;
-        border: none;
-        color: $color-text-secondary;
-        font-weight: 600;
-        font-size: 0.95rem;
-        border-radius: 0.75rem;
-        padding: 0.65rem 1.5rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        position: relative;
-        letter-spacing: 0.01em;
-
-        &:hover {
-            background: rgba($color-primary-light, 0.15);
-            color: $color-text-main;
-            transform: translateY(-1px);
-        }
-
-        &:focus,
-        &.active {
-            background: linear-gradient(90deg, rgba($color-primary, 0.8) 0%, rgba($color-secondary, 0.8) 100%);
-            color: $color-text-main;
-            outline: none;
-            box-shadow: 0 2px 12px rgba($color-primary, 0.2);
-        }
+    &:hover {
+      background: var(--orbit-bg-hover);
+      color: var(--orbit-text-primary);
     }
 
-    input[type="text"] {
-        background: rgba($color-bg-main, 0.4);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 0.75rem;
-        color: $color-text-main;
-        padding: 0.65rem 1.25rem;
-        font-size: 0.95rem;
-        margin-left: auto;
-        min-width: 220px;
-        transition: all 0.3s ease;
-
-        &::placeholder {
-            color: $color-text-secondary;
-        }
-
-        &:focus {
-            border-color: rgba($color-primary-light, 0.5);
-            background: rgba($color-bg-main, 0.6);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba($color-primary-light, 0.1);
-        }
+    &:focus-visible {
+      outline: 2px solid var(--orbit-accent-text);
+      outline-offset: 2px;
     }
+
+    &.active {
+      background: var(--orbit-accent-soft);
+      color: var(--orbit-text-primary);
+      font-weight: 600;
+    }
+  }
+
+  input[type='text'] {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: var(--radius-md);
+    color: var(--orbit-text-primary);
+    padding: 7px 12px;
+    font-size: var(--text-ui);
+    margin-left: auto;
+    min-width: 220px;
+    transition: border-color var(--dur-fast) var(--ease-standard),
+      box-shadow var(--dur-fast) var(--ease-standard);
+
+    &::placeholder {
+      color: var(--orbit-text-muted);
+    }
+
+    &:focus-visible {
+      border-color: var(--input-border-focus);
+      outline: none;
+      box-shadow: var(--input-ring-focus);
+    }
+  }
 }

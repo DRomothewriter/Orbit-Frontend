@@ -1,6 +1,16 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
+export interface AvatarPreviewData {
+  url: string;
+  title: string;
+}
+
+export interface ModalAnchor {
+  x: number;
+  y: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -38,7 +48,11 @@ export class ModalsService {
   private _openMyUser = new BehaviorSubject<boolean>(false);
   openMyUser$ = this._openMyUser.asObservable();
 
-  openMyUser() {
+  private _myUserAnchor = new BehaviorSubject<ModalAnchor | null>(null);
+  myUserAnchor$ = this._myUserAnchor.asObservable();
+
+  openMyUser(anchor?: ModalAnchor) {
+    this._myUserAnchor.next(anchor ?? null);
     this._openMyUser.next(true);
   }
   closeMyUser() {
@@ -75,5 +89,27 @@ export class ModalsService {
 
   closeCall() {
     this._openCall.next(false);
+  }
+
+  private _avatarPreview = new BehaviorSubject<AvatarPreviewData | null>(null);
+  avatarPreview$ = this._avatarPreview.asObservable();
+
+  openAvatarPreview(url: string, title: string) {
+    this._avatarPreview.next({ url, title });
+  }
+
+  closeAvatarPreview() {
+    this._avatarPreview.next(null);
+  }
+
+  closeAll() {
+    this._openCreateGroup.next(false);
+    this._openCreateCommunity.next(false);
+    this._openCalendar.next(false);
+    this._openMyUser.next(false);
+    this._openGroupInfo.next(false);
+    this._openAddMembers.next(false);
+    this._openCall.next(false);
+    this._avatarPreview.next(null);
   }
 }

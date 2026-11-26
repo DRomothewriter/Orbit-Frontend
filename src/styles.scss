@@ -1,173 +1,222 @@
-/* --- Importaciones de Angular Material --- */
-@use "@angular/material" as mat;
-@use "./colors" as *;
+/* --- Orbit Global Styles — Nocturnal Observatory & Starlight Twilight --- */
+@use '@angular/material' as mat;
+@use './colors' as *;
+@use './styles/primitives-tokens';
+@use './styles/tokens';
+@use './styles/components-tokens';
+@use './styles/motion';
+
 @include mat.core();
 
-h1, h2, h3 {
-    letter-spacing: 0.05em; 
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3); 
-    margin: 0;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 html {
-    height: 100%;
+  height: 100%;
+  color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body {
-    min-height: 100vh;
-    margin: 0;
-    font-family: "Poppins", sans-serif;
-    background-color: #0f111a; 
-    color: $color-text-main;
-    position: relative;
-    overflow: hidden; 
-    box-sizing: border-box;
-    z-index: 0;
+  min-height: 100dvh;
+  margin: 0;
+  font-family: var(--orbit-font-sans);
+  font-size: var(--text-body);
+  line-height: 1.5;
+  background-color: var(--orbit-bg-canvas);
+  color: var(--orbit-text-primary);
+  overflow: hidden;
+  position: relative;
+  z-index: 0;
+  transition: background-color var(--dur-slow) var(--ease-standard),
+    color var(--dur-slow) var(--ease-standard);
 
-    &::before, &::after {
-        content: '';
-        position: fixed; 
-        border-radius: 50%;
-        filter: blur(100px); 
-        z-index: -1;
-        opacity: 0.6;
-        will-change: transform;
-        animation: float 20s infinite alternate ease-in-out;
-    }
-
-    &::before {
-        width: 60vw;
-        height: 60vw;
-        background: radial-gradient(circle, $color-primary 20%, transparent 70%);
-        top: -20%;
-        left: -20%;
-    }
-
-
-    &::after {
-        width: 70vw;
-        height: 70vw;
-        background: radial-gradient(circle, $color-secondary 20%, transparent 70%);
-        bottom: -20%;
-        right: -20%;
-        animation-delay: -10s; 
-    }
+  /* Lienzo astronómico impresionista unificado visible tras los paneles translúcidos */
+  &::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: var(--orbit-sky-image);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: var(--orbit-sky-opacity);
+    filter: var(--orbit-sky-filter);
+    pointer-events: none;
+    z-index: -1;
+    transition: opacity var(--dur-slow) var(--ease-standard),
+      filter var(--dur-slow) var(--ease-standard);
+  }
 }
 
-@keyframes float {
-    0% { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(30px, 50px) scale(1.1); }
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--orbit-font-sans);
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--orbit-text-primary);
 }
 
-@keyframes float-reverse {
-    0% { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(-50px, -30px) scale(1.05); }
+button,
+input,
+textarea {
+  font-family: inherit;
+}
+
+/* web-design-guidelines: Indicador :focus-visible nítido en todo control */
+:focus-visible {
+  outline: 2px solid var(--orbit-accent-text);
+  outline-offset: 2px;
+}
+
+/* Scrollbars nocturnos discretos */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(226, 218, 240, 0.16);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(226, 218, 240, 0.28);
 }
 
 .glass-card {
-    background: rgba($color-text-main, 0.03);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-radius: 1.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: var(--modal-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--modal-border);
+  box-shadow: var(--shadow-md);
 }
 
+/* Botón primario sólido Orbit Amethyst */
 .accent-button {
-    background-color: $color-primary !important;
-    color: $color-text-main !important;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba($color-primary, 0.4); 
+  background-color: var(--btn-primary-bg) !important;
+  color: var(--btn-primary-text) !important;
+  border-radius: var(--btn-radius) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), var(--shadow-sm) !important;
+  transition: background-color var(--dur-fast) var(--ease-standard),
+    transform var(--dur-fast) var(--ease-standard),
+    box-shadow var(--dur-fast) var(--ease-standard);
 
-    &:hover {
-        background-color: $color-primary-light !important;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba($color-primary-light, 0.5);
-    }
-    
-    &:active {
-        transform: translateY(0);
-    }
+  &:hover:not(:disabled) {
+    background-color: var(--btn-primary-bg-hover) !important;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.985);
+    background-color: var(--btn-primary-bg-active) !important;
+  }
+
+  &:disabled {
+    background-color: rgba(226, 218, 240, 0.09) !important;
+    color: var(--orbit-text-muted) !important;
+    box-shadow: none !important;
+  }
 }
 
 .accent-link {
-    font-size: 0.875rem;
-    color: $color-primary-light;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    position: relative;
-    
-    &::after {
-        content: '';
-        position: absolute;
-        width: 0;
-        height: 1px;
-        bottom: -2px;
-        left: 0;
-        background-color: $color-primary-light;
-        transition: width 0.3s;
-    }
+  font-size: var(--text-ui);
+  color: var(--orbit-accent-text);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--dur-fast) var(--ease-standard);
 
-    &:hover::after {
-        width: 100%;
-    }
+  &:hover {
+    color: var(--orbit-text-primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
 }
 
 .divider {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    margin: 1.5rem 0;
-    color:$color-text-secondary;
-    font-size: 0.85rem;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin: var(--space-5) 0;
+  color: var(--orbit-text-muted);
+  font-size: var(--text-micro);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 
-    &::before, &::after {
-        content: "";
-        height: 1px;
-        flex-grow: 1;
-        background: linear-gradient(90deg, transparent, $color-border, transparent); 
-    }
+  &::before,
+  &::after {
+    content: '';
+    height: 1px;
+    flex-grow: 1;
+    background: var(--orbit-border-subtle);
+  }
 }
 
+/* Angular Material Form Fields — Translúcidos y legibles en ambos temas */
 .mat-mdc-form-field.mat-mdc-form-field {
-    width: 100%;
-    
+  width: 100%;
+
+  .mdc-notched-outline > * {
+    border-color: var(--input-border) !important;
+    transition: border-color var(--dur-fast) var(--ease-standard);
+  }
+
+  .mdc-text-field--outlined:not(.mdc-text-field--disabled):hover .mdc-notched-outline > * {
+    border-color: var(--orbit-border-strong) !important;
+  }
+
+  .mdc-text-field--filled {
+    background-color: var(--input-bg) !important;
+    border-radius: var(--radius-md) !important;
+    border: 1px solid var(--input-border);
+    transition: border-color var(--dur-fast) var(--ease-standard),
+      box-shadow var(--dur-fast) var(--ease-standard);
+  }
+
+  .mat-mdc-input-element {
+    color: var(--orbit-text-primary) !important;
+    caret-color: var(--orbit-accent-text);
+    font-size: var(--text-body);
+  }
+
+  .mdc-floating-label {
+    color: var(--orbit-text-secondary) !important;
+    font-size: var(--text-ui);
+  }
+
+  &.mat-focused {
     .mdc-notched-outline > * {
-        border-color: $color-border !important;
+      border-color: var(--orbit-accent-text) !important;
+      border-width: 1.5px !important;
     }
-    
+
     .mdc-text-field--filled {
-        background-color: rgba(0, 0, 0, 0.25) !important;
-        border-radius: 8px 8px 0 0;
+      background-color: var(--orbit-bg-hover) !important;
+      border-color: var(--input-border-focus);
+      box-shadow: var(--input-ring-focus);
     }
-    
-    .mat-mdc-input-element {
-        color: $color-text-main !important;
-        caret-color: $color-primary-light;
-    }
-    
+
     .mdc-floating-label {
-        color: $color-text-secondary !important;
+      color: var(--orbit-accent-text) !important;
     }
-    
-    &.mat-focused {
-        .mdc-notched-outline > * {
-            border-color: $color-primary-light !important;
-            border-width: 2px;
-        }
-        .mdc-text-field--filled {
-            background-color: rgba(0, 0, 0, 0.35) !important;
-        }
-        .mdc-floating-label {
-            color: $color-primary-light !important;
-        }
-    }
-    
-    .mdc-line-ripple {
-        display: none;
-    }
+  }
+
+  .mdc-line-ripple {
+    display: none;
+  }
 }

@@ -1,0 +1,127 @@
+<div class="about-shell">
+  <header class="about-topbar">
+    <a class="about-brand" routerLink="/about" aria-label="Orbit">
+      <img src="assets/orbit-emblem.svg" alt="" aria-hidden="true" class="brand-emblem" />
+      <span class="brand-name">Orbit</span>
+    </a>
+
+    <div class="about-topbar-actions">
+      <button
+        type="button"
+        class="about-theme-toggle"
+        (click)="themeService.toggleTheme()"
+        [attr.aria-label]="themeService.isTwilight() ? 'Cambiar a Noche Profunda' : 'Cambiar a Cielo Estrellado'"
+        [attr.aria-pressed]="themeService.isTwilight()"
+      >
+        <mat-icon aria-hidden="true">{{ themeService.isTwilight() ? 'dark_mode' : 'auto_awesome' }}</mat-icon>
+        <span>{{ themeService.isTwilight() ? 'Noche Profunda' : 'Cielo Estrellado' }}</span>
+      </button>
+
+      @if (isAuthenticated) {
+        <a routerLink="/home" mat-raised-button class="accent-button topbar-cta">
+          <mat-icon aria-hidden="true">arrow_back</mat-icon>
+          <span>Ir al Workspace</span>
+        </a>
+      } @else {
+        <a routerLink="/login" class="topbar-link">Iniciar Sesión</a>
+        <a routerLink="/register" mat-raised-button class="accent-button topbar-cta">
+          Crear Cuenta
+        </a>
+      }
+    </div>
+  </header>
+
+  <main class="about-main">
+    <section class="hero-section">
+      <div class="hero-copy">
+        <span class="hero-eyebrow">ORBIT · SOBRE NOSOTROS</span>
+        <h1>
+          Orbit: conversaciones en <em>órbita</em>, con la calma de un cielo nocturno.
+        </h1>
+        <p class="hero-subtitle">
+          Una plataforma de comunicación en tiempo real diseñada para equipos, comunidades y amistades que buscan claridad, baja latencia y una estética serena libre de distracciones.
+        </p>
+
+        <div class="hero-actions">
+          @if (isAuthenticated) {
+            <a routerLink="/home" mat-raised-button class="accent-button hero-primary-cta">
+              <mat-icon aria-hidden="true">rocket_launch</mat-icon>
+              <span>Volver al Workspace</span>
+            </a>
+          } @else {
+            <a routerLink="/register" mat-raised-button class="accent-button hero-primary-cta">
+              <span>Comenzar en Orbit</span>
+              <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+            </a>
+            <a routerLink="/login" class="hero-secondary-cta">
+              Ya tengo cuenta
+            </a>
+          }
+        </div>
+      </div>
+
+      <div class="hero-visual glass-card">
+        <img
+          [src]="themeService.isTwilight() ? 'assets/orbit-sky-starlight.webp' : 'assets/orbit-observatory-hero.webp'"
+          [alt]="themeService.isTwilight() ? 'Vía Láctea luminosa en crepúsculo estrellado' : 'Horizonte planetario bajo una nebulosa amatista'"
+          class="hero-artwork"
+        />
+        <div class="hero-visual-overlay" aria-hidden="true"></div>
+        <div class="hero-visual-meta">
+          <span>RA 21h 42m · DEC +44° 18'</span>
+          <span>Tiempo Real · WebRTC SFU</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="features-section" aria-labelledby="features-heading">
+      <div class="section-header">
+        <span class="section-eyebrow">Capacidades</span>
+        <h2 id="features-heading">Todo lo esencial para conectar sin ruido</h2>
+      </div>
+
+      <div class="features-grid">
+        @for (feature of features; track feature.title) {
+          <article class="feature-card glass-card">
+            <div class="feature-icon">
+              <mat-icon aria-hidden="true">{{ feature.icon }}</mat-icon>
+            </div>
+            <h3>{{ feature.title }}</h3>
+            <p>{{ feature.description }}</p>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="story-section glass-card" aria-labelledby="story-heading">
+      <div class="story-content">
+        <span class="section-eyebrow">Sobre Orbit</span>
+        <h2 id="story-heading">Diseñado como un observatorio digital</h2>
+        <p>
+          Orbit nace con la idea de que las herramientas de comunicación diarias no tienen que ser abrumadoras. Combinamos mensajería instantánea, gestión de amistades, comunidades organizadas y videollamadas WebRTC en una experiencia cuidada al detalle.
+        </p>
+      </div>
+
+      <div class="stack-list" aria-label="Tecnologías de Orbit">
+        <span class="stack-label">Arquitectura</span>
+        <div class="stack-chips">
+          @for (tech of stack; track tech) {
+            <span class="stack-chip">{{ tech }}</span>
+          }
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="about-footer">
+    <span>Orbit · Comunicación en tiempo real</span>
+    <div class="footer-links">
+      @if (isAuthenticated) {
+        <a routerLink="/home">Workspace</a>
+      } @else {
+        <a routerLink="/login">Iniciar Sesión</a>
+        <a routerLink="/register">Registro</a>
+      }
+    </div>
+  </footer>
+</div>

@@ -1,77 +1,227 @@
 <div class="video-call-container">
-    <!-- Botón para unirse si no estás en llamada -->
-    <div class="join-section" *ngIf="!isInCall">
-        <h2>Videollamada</h2>
-        <p>Room ID: {{ roomId }}</p>
-        <button class="btn-join" (click)="joinCall()">
-            Unirse a la llamada
-        </button>
+    <!-- Pantalla previa para unirse -->
+    <div class="join-section" *ngIf="!isInCall && !isConnecting">
+        <div class="join-card">
+            <div class="join-icon-badge" aria-hidden="true">
+                <mat-icon>videocam</mat-icon>
+            </div>
+            <h2>{{ group.topic || 'Videollamada' }}</h2>
+            <p class="room-subtitle" *ngIf="roomId">Sala: {{ roomId }}</p>
+            <button type="button" class="btn-join" (click)="joinCall()">
+                <mat-icon>call</mat-icon>
+                <span>Unirse a la llamada</span>
+            </button>
+        </div>
     </div>
 
-    <!-- Interfaz de la llamada activa -->
+    <!-- Animación de conexión al iniciar la llamada -->
+    <div class="connecting-state" *ngIf="!isInCall && isConnecting" role="status" aria-live="polite">
+        <div class="orbit-loader" aria-hidden="true">
+            <span class="orbit-ring orbit-ring-outer"></span>
+            <span class="orbit-ring orbit-ring-inner"></span>
+            <span class="orbit-core">
+                <mat-icon>videocam</mat-icon>
+            </span>
+        </div>
+        <h3>Conectando a la llamada...</h3>
+        <p>Preparando audio, video y conexión segura</p>
+    </div>
+
+    <!-- Interfaz de llamada activa -->
     <div class="call-active" *ngIf="isInCall">
-        <!-- Video local -->
-        <div class="local-video-container">
-            <video
-                #localVideo
-                autoplay
-                playsinline
-                muted
-                class="local-video"
-            ></video>
-            <div class="video-label">Tú</div>
-        </div>
+        <div class="call-topbar">
+            <span class="participants-pill">
+                <mat-icon>group</mat-icon>
+                <span>{{ totalParticipants }} {{ totalParticipants === 1 ? 'participante' : 'participantes' }}</span>
+            </span>
 
-        <!-- Videos remotos -->
-        <div class="remote-videos-grid">
-            <div
-                class="remote-video-container"
-                *ngFor="let peer of remotePeers"
+            <button
+                type="button"
+                class="view-toggle-btn"
+                (click)="toggleViewMode()"
+                [title]="viewMode === 'grid' ? 'Cambiar a vista enfoque' : 'Cambiar a vista cuadrícula'"
             >
-                <video
-                    #remoteVideo
-                    autoplay
-                    playsinline
-                    class="remote-video"
-                    [attr.data-peer-id]="peer.id"
-                ></video>
-                <div class="video-label">{{ peer.id }}</div>
+                <mat-icon>{{ viewMode === 'grid' ? 'center_focus_strong' : 'grid_view' }}</mat-icon>
+                <span>{{ viewMode === 'grid' ? 'Enfoque' : 'Cuadrícula' }}</span>
+            </button>
+        </div>
+
+        <div class="video-stage">
+            <!-- Vista Cuadrícula (Grid) -->
+            <div class="participants-grid" *ngIf="viewMode === 'grid'">
+                <div
+                    class="video-tile local-tile"
+                    (click)="focusParticipant('local')"
+                    title="Clic para enfocar tu video"
+                >
+                    <video
+                        #localVideo
+                        autoplay
+                        playsinline
+                        muted
+                        class="tile-video local-video"
+                    ></video>
+                    <div class="tile-overlay">
+                        <span class="video-label">Tú</span>
+                        <span class="tile-actions">
+                            <mat-icon class="status-icon" *ngIf="!isAudioEnabled">mic_off</mat-icon>
+                            <mat-icon class="focus-hint-icon">open_in_full</mat-icon>
+                        </span>
+                    </div>
+                </div>
+
+                <div
+                    class="video-tile remote-tile"
+                    *ngFor="let peer of remotePeers"
+                    (click)="focusParticipant(peer.id)"
+                    [title]="'Clic para enfocar a ' + peer.id"
+                >
+                    <video
+                        #remoteVideo
+                        autoplay
+                        playsinline
+                        class="tile-video remote-video"
+                        [attr.data-peer-id]="peer.id"
+                    ></video>
+                    <div class="tile-overlay">
+                        <span class="video-label">{{ peer.id }}</span>
+                        <span class="tile-actions">
+                            <mat-icon class="focus-hint-icon">open_in_full</mat-icon>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="waiting-banner" *ngIf="remotePeers.length === 0">
+                    <span class="waiting-dot" aria-hidden="true"></span>
+                    <span>Esperando a otros participantes...</span>
+                </div>
             </div>
 
-            <!-- Mensaje si no hay otros participantes -->
-            <div class="no-peers" *ngIf="remotePeers.length === 0">
-                <p>Esperando a otros participantes...</p>
+            <!-- Vista Enfoque (Spotlight / Focus) -->
+            <div class="focus-layout" *ngIf="viewMode === 'focus'">
+                <div class="focus-stage">
+                    <div class="video-tile focused-tile" *ngIf="focusedParticipantId === 'local'">
+                        <video
+                            #localVideo
+                            autoplay
+                            playsinline
+                            muted
+                            class="tile-video local-video"
+                        ></video>
+                        <div class="tile-overlay">
+                            <span class="video-label">Tú (Enfoque)</span>
+                            <button
+                                type="button"
+                                class="unfocus-btn"
+                                (click)="toggleViewMode()"
+                                title="Volver a cuadrícula"
+                            >
+                                <mat-icon>grid_view</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="video-tile focused-tile" *ngIf="focusedParticipantId !== 'local' && focusedRemotePeer as peer">
+                        <video
+                            #remoteVideo
+                            autoplay
+                            playsinline
+                            class="tile-video remote-video"
+                            [attr.data-peer-id]="peer.id"
+                        ></video>
+                        <div class="tile-overlay">
+                            <span class="video-label">{{ peer.id }} (Enfoque)</span>
+                            <button
+                                type="button"
+                                class="unfocus-btn"
+                                (click)="toggleViewMode()"
+                                title="Volver a cuadrícula"
+                            >
+                                <mat-icon>grid_view</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="focus-filmstrip" *ngIf="totalParticipants > 1">
+                    <div
+                        class="video-tile filmstrip-tile"
+                        *ngIf="focusedParticipantId !== 'local'"
+                        (click)="focusParticipant('local')"
+                        title="Enfocar tu video"
+                    >
+                        <video
+                            #localVideo
+                            autoplay
+                            playsinline
+                            muted
+                            class="tile-video local-video"
+                        ></video>
+                        <div class="tile-overlay">
+                            <span class="video-label">Tú</span>
+                        </div>
+                    </div>
+
+                    <div
+                        class="video-tile filmstrip-tile"
+                        *ngFor="let peer of filmstripRemotePeers"
+                        (click)="focusParticipant(peer.id)"
+                        [title]="'Enfocar a ' + peer.id"
+                    >
+                        <video
+                            #remoteVideo
+                            autoplay
+                            playsinline
+                            class="tile-video remote-video"
+                            [attr.data-peer-id]="peer.id"
+                        ></video>
+                        <div class="tile-overlay">
+                            <span class="video-label">{{ peer.id }}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Controles -->
+        <!-- Barra de controles flotante -->
         <div class="controls">
             <button
+                type="button"
                 class="control-btn"
                 [class.disabled]="!isAudioEnabled"
                 (click)="toggleAudio()"
-                title="Micrófono"
+                [title]="isAudioEnabled ? 'Silenciar micrófono' : 'Activar micrófono'"
             >
-                <mat-icon *ngIf="isAudioEnabled">mic</mat-icon>
-                <mat-icon *ngIf="!isAudioEnabled">mic_off</mat-icon>
+                <mat-icon>{{ isAudioEnabled ? 'mic' : 'mic_off' }}</mat-icon>
             </button>
 
             <button
+                type="button"
                 class="control-btn"
                 [class.disabled]="!isVideoEnabled"
                 (click)="toggleVideo()"
-                title="Cámara"
+                [title]="isVideoEnabled ? 'Apagar cámara' : 'Encender cámara'"
             >
-                <mat-icon *ngIf="isVideoEnabled">videocam</mat-icon>
-                <mat-icon *ngIf="!isVideoEnabled">videocam_off</mat-icon>
+                <mat-icon>{{ isVideoEnabled ? 'videocam' : 'videocam_off' }}</mat-icon>
             </button>
 
             <button
+                type="button"
+                class="control-btn"
+                [class.active-mode]="viewMode === 'focus'"
+                (click)="toggleViewMode()"
+                [title]="viewMode === 'grid' ? 'Vista enfoque' : 'Vista cuadrícula'"
+            >
+                <mat-icon>{{ viewMode === 'grid' ? 'center_focus_strong' : 'grid_view' }}</mat-icon>
+            </button>
+
+            <button
+                type="button"
                 class="control-btn leave-btn"
                 (click)="leaveCall()"
-                title="Salir"
+                title="Colgar llamada"
             >
-                📞
+                <mat-icon>call_end</mat-icon>
             </button>
         </div>
     </div>

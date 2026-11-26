@@ -1,40 +1,60 @@
 <section class="friends-container">
-    @for(item of friends; track item._id){
-    <div class="friend-card">
-        <!-- Avatar con inicial (o imagen) -->
-        <div class="avatar-container">
-            @if(item.friendId.profileImgUrl) {
-                <img [src]="item.friendId.profileImgUrl" alt="avatar" class="avatar-img">
-            } @else {
-                <div class="avatar-placeholder">
-                    {{ item.friendId.username.charAt(0).toUpperCase() }}
+    @if (isLoading) {
+        <app-orbit-loader
+            variant="constellation"
+            size="md"
+            [fullArea]="true"
+            label="Trazando constelación..."
+        />
+    } @else {
+        @for (item of friends; track item._id) {
+            <div
+                class="friend-card"
+                [style.animation-delay]="($index < 10 ? $index * 42 : 0) + 'ms'"
+            >
+                <div class="avatar-container">
+                    <img
+                        [src]="item.friendId.profileImgUrl | orbitAvatar:(item.friendId._id || item.friendId.username)"
+                        [alt]="item.friendId.username"
+                        class="avatar-img"
+                    />
                 </div>
-            }
-        </div>
 
-        <!-- Info del Usuario -->
-        <div class="info-container">
-            <h3 class="username">{{ item.friendId.username }}</h3>
-            <!-- Usamos ngClass para colorear el status -->
-            <span class="status" [ngClass]="item.friendId.status || 'offline'">
-                {{ item.friendId.status || 'Offline' }}
-            </span>
-        </div>
+                <div class="info-container">
+                    <h3 class="username">{{ item.friendId.username }}</h3>
+                    <span class="status" [ngClass]="item.friendId.status || 'offline'">
+                        {{ item.friendId.status || 'Offline' }}
+                    </span>
+                </div>
 
-        <!-- Acciones -->
-        <div class="actions-container">
-            <button mat-icon-button class="action-btn chat-btn" (click)="startChat(item)" matTooltip="Enviar mensaje">
-                <mat-icon>chat_bubble_outline</mat-icon>
-            </button>
-            <button mat-icon-button class="action-btn delete-btn" (click)="deleteFriend(item._id!, $event)" matTooltip="Eliminar amigo">
-                <mat-icon>person_remove</mat-icon>
-            </button>
-        </div>
-    </div>
-    } @empty {
-        <div class="empty-state">
-            <mat-icon class="empty-icon">sentiment_dissatisfied</mat-icon>
-            <p>Aún no tienes amigos agregados.</p>
-        </div>
+                <div class="actions-container">
+                    <button
+                        type="button"
+                        mat-icon-button
+                        class="action-btn chat-btn"
+                        (click)="startChat(item)"
+                        matTooltip="Enviar mensaje"
+                        aria-label="Enviar mensaje"
+                    >
+                        <mat-icon aria-hidden="true">chat_bubble_outline</mat-icon>
+                    </button>
+                    <button
+                        type="button"
+                        mat-icon-button
+                        class="action-btn delete-btn"
+                        (click)="deleteFriend(item._id!, $event)"
+                        matTooltip="Eliminar amigo"
+                        aria-label="Eliminar amigo"
+                    >
+                        <mat-icon aria-hidden="true">person_remove</mat-icon>
+                    </button>
+                </div>
+            </div>
+        } @empty {
+            <div class="empty-state">
+                <mat-icon class="empty-icon" aria-hidden="true">group_add</mat-icon>
+                <p>Aún no tienes amigos agregados.</p>
+            </div>
+        }
     }
 </section>

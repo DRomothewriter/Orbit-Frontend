@@ -6,12 +6,17 @@ import { TokenService } from './token.service';
 import { GroupService } from './group.service';
 import { UserService } from './user.service';
 import { User } from '../types/user';
-import { UserStatus } from '../types/user-status'; // Importar enum
+import { UserStatus } from '../types/user-status';
 
 import { io, Socket } from 'socket.io-client';
-import { Observable } from 'rxjs';
+import { Observable, take } from 'rxjs';
 import { Group } from '../types/group';
 import { Notification } from '../types/notification';
+
+interface ActiveListener {
+  eventName: string;
+  handler: (data: any) => void;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -20,6 +25,7 @@ export class SocketService {
   private socket!: Socket;
   private user: User;
   private socketReady = false;
+  private activeListeners = new Set<ActiveListener>();
 
   constructor(
     private tokenService: TokenService,
@@ -30,31 +36,47 @@ export class SocketService {
   }
 
   connectWithGroups() {
-    this.userService.getMyUser().subscribe({
-      next: (user) => {
-        this.user = user;
-        this.groupService.getAllMyGroups().subscribe({
-          next: (allMyGroups: Group[]) => {
-            const groupIds = allMyGroups.map((g) => g._id);
-            this.socket = io(environment.apiUrl, {
-              auth: {
-                token: this.tokenService.getToken(),
-              },
-              query: {
-                groupIds: JSON.stringify(groupIds),
-                user: JSON.stringify(this.user),
+    this.userService
+      .getMyUser()
+      .pipe(take(1))
+      .subscribe({
+        next: (user) => {
+          this.user = user;
+          this.groupService
+            .getAllMyGroups()
+            .pipe(take(1))
+            .subscribe({
+              next: (allMyGroups: Group[]) => {
+                this.disconnect();
+                const groupIds = allMyGroups.map((g) => g._id);
+                this.socket = io(environment.apiUrl, {
+                  auth: {
+                    token: this.tokenService.getToken(),
+                  },
+                  query: {
+                    groupIds: JSON.stringify(groupIds),
+                    user: JSON.stringify(this.user),
+                  },
+                });
+                this.socket.on('connect', () => {
+                  this.socketReady = true;
+                  this.activeListeners.forEach(({ eventName, handler }) => {
+                    this.socket.off(eventName, handler);
+                    this.socket.on(eventName, handler);
+                  });
+                  console.log('Socket connected');
+                });
+                this.socket.on('disconnect', () => {
+                  this.socketReady = false;
+                });
               },
             });
-            this.socket.on('connect', () => {
-              this.socketReady = true;
-              console.log('Socket connected');
-            });
-          },
-        });
-      },
-    });
+        },
+      });
   }
+
   disconnect() {
+    this.socketReady = false;
     if (this.socket) {
       this.socket.disconnect();
     }
@@ -72,15 +94,21 @@ export class SocketService {
     return new Observable<R>((observer) => {
       let isSubscribed = true;
       let timeoutId: any;
+      let attachedSocket: Socket | undefined;
 
       const handler = (data: T) => {
         const result = transform ? transform(data) : (data as unknown as R);
         observer.next(result);
       };
 
+      const listenerEntry: ActiveListener = { eventName, handler };
+      this.activeListeners.add(listenerEntry);
+
       const checkSocket = () => {
         if (!isSubscribed) return;
         if (this.socket && this.socketReady) {
+          attachedSocket = this.socket;
+          this.socket.off(eventName, handler);
           this.socket.on(eventName, handler);
         } else {
           timeoutId = setTimeout(checkSocket, pollInterval);
@@ -91,17 +119,18 @@ export class SocketService {
 
       return () => {
         isSubscribed = false;
+        this.activeListeners.delete(listenerEntry);
         if (timeoutId) {
           clearTimeout(timeoutId);
         }
-        if (this.socket) {
-          this.socket.off(eventName, handler);
+        const targetSocket = attachedSocket || this.socket;
+        if (targetSocket) {
+          targetSocket.off(eventName, handler);
         }
       };
     });
   }
 
-  // === NUEVO: Manejo de Estado === No se si sea necesario
   emitStatusChange(status: UserStatus) {
     if (this.socket && this.socketReady) {
       this.socket.emit('status-change', { status });
@@ -115,7 +144,6 @@ export class SocketService {
       500
     );
   }
-  // ==============================
 
   onMessage(): Observable<Message> {
     return this.createSocketListener<Message>('message');

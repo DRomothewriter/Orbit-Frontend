@@ -1,25 +1,36 @@
 // src/_colors.scss
+// Puente SCSS alineado al sistema Nocturnal Observatory (Morado Orbit Amethyst + 70/20/10)
 
-$color-bg-main: #171e30; // Deep space black/blue
-$color-bg-card: #161b27; // Slightly lighter for panels
-$color-bg-hover: #1f2536; // Hover state
+// 70% Superficies Base Nocturnas
+$color-bg-canvas: #08070d;
+$color-bg-sidebar: #0e0c17;
+$color-bg-main: #13101f;
+$color-bg-card: #1a162b;
+$color-bg-hover: #231e38;
 
-$color-primary: #6d28d9; // Violet
-$color-primary-light: #8b5cf6; // Lighter Violet
-$color-primary-dark: #5b21b6; 
+// 10% Acento Principal — Morado Orbit Amethyst (fiel al original #6d28d9 / #8b5cf6)
+$color-primary: #6d28d9;
+$color-primary-light: #a78bfa;
+$color-primary-dark: #5b21b6;
 
-$color-secondary: #0ea5e9; // Sky Blue
-$color-secondary-light: #38bdf8;
+// Acento secundario celestial (uso informativo puntual)
+$color-secondary: #38bdf8;
+$color-secondary-light: #7dd3fc;
 $color-secondary-dark: #0284c7;
 
-$color-success: #10b981;
+// Semántica Astronómica
+$color-success: #34d399;
 $color-warning: #f59e0b;
-$color-error: #ef4444;
+$color-error: #f43f5e;
 
-$color-text-main: #f8fafc;
-$color-text-secondary: #94a3b8;
-$color-text-muted: #64748b;
+// 20% Marfil Estelar y Retículas Hairline
+$color-text-main: #f4f0e8;
+$color-text-secondary: #b8b0c9;
+$color-text-muted: #827a99;
 
-$color-border: rgba(148, 163, 184, 0.1);
-$glass-bg: rgba(30, 41, 59, 0.7);
-$glass-border: rgba(255, 255, 255, 0.08);
+$color-border: rgba(216, 205, 255, 0.12);
+$color-border-subtle: rgba(216, 205, 255, 0.07);
+$color-border-strong: rgba(216, 205, 255, 0.22);
+
+$glass-bg: rgba(26, 22, 43, 0.90);
+$glass-border: rgba(216, 205, 255, 0.12);

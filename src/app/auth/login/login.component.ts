@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Subscription, finalize } from 'rxjs';
 
 // Importaciones de Angular Material
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -19,8 +20,11 @@ import {
   GoogleSigninButtonModule,
 } from '@abacritt/angularx-social-login';
 import { environment } from '../../../environments/environment';
+import { ThemeService } from '../../shared/services/theme.service';
+import { OrbitLoaderComponent } from '../../shared/components/orbit-loader/orbit-loader.component';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-login',
   standalone: true,
   imports: [
@@ -33,39 +37,60 @@ import { environment } from '../../../environments/environment';
     FormsModule,
     CommonModule,
     GoogleSigninButtonModule,
+    OrbitLoaderComponent,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
   email: string = '';
   password: string = '';
   errorMessage: string | null = null;
+  isLoading = false;
+  private authSub?: Subscription;
+  private querySub?: Subscription;
 
   constructor(
     private authService: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     private userService: UserService,
     private tokenService: TokenService,
     private httpClient: HttpClient,
-    private googleAuthService: SocialAuthService
+    private googleAuthService: SocialAuthService,
+    public themeService: ThemeService
   ) {}
 
   ngOnInit(): void {
-    this.googleAuthService.authState.subscribe((user: SocialUser) => {
+    this.querySub = this.route.queryParams.subscribe((params) => {
+      if (params['error'] === 'verification_failed') {
+        this.errorMessage = 'No se pudo verificar el correo. Intenta de nuevo.';
+      }
+    });
+
+    this.authSub = this.googleAuthService.authState.subscribe((user: SocialUser) => {
       if (user) {
         this.onGoogleSignIn(user);
       }
     });
   }
 
+  ngOnDestroy(): void {
+    this.authSub?.unsubscribe();
+    this.querySub?.unsubscribe();
+  }
+
   onLogin() {
     this.errorMessage = null;
-    this.authService.login(this.email, this.password).subscribe({
+    this.isLoading = true;
+    this.authService
+      .login(this.email, this.password)
+      .pipe(finalize(() => (this.isLoading = false)))
+      .subscribe({
       next: (res: AuthResponse) => {
-        this.router.navigateByUrl('/home');
-        this.userService.setUser(res.user);
         this.tokenService.setToken(res.token);
+        this.userService.setUser(res.user);
+        this.router.navigateByUrl('/home');
       },
       error: (err) => {
         console.error('Error en login', err);
@@ -89,8 +114,11 @@ export class LoginComponent implements OnInit {
       })
       .subscribe({
         next: (res: AuthResponse) => {
-          this.router.navigateByUrl('/home');
           this.tokenService.setToken(res.token);
+          if (res.user) {
+            this.userService.setUser(res.user);
+          }
+          this.router.navigateByUrl('/home');
         },
         error: (e) => {
           console.error(e);

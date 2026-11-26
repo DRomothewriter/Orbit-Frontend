@@ -8,5 +8,8 @@ export interface Group {
     description?: string,
     lastMessage?: Message,
     listIds?: List,
-    groupImgUrl?: string
+    groupImgUrl?: string,
+    unreadCount?: number,
+    isDirect?: boolean,
+    updatedAt?: string
 }

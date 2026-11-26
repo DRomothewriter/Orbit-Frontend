@@ -3,14 +3,11 @@
     <div class="home-content">
         <app-communities-nav></app-communities-nav>
         <div class="side-nav">
-
-
-                <div class="nav-section friends-section">
-                    <div class="section-header" (click)="navToFriends()">
-                        <h3>Friends</h3>
-                    </div>
-                </div>
-
+            <div class="nav-section friends-section">
+                <button type="button" class="section-header" (click)="navToFriends()">
+                    <span>Amigos</span>
+                </button>
+            </div>
 
             <div class="nav-section groups-section">
                 <app-group-nav></app-group-nav>
@@ -24,65 +21,82 @@
     </div>
 </div>
 
-@if(isCreateGroupOpen){
-<app-create-group-modal></app-create-group-modal>
-} @if(isCalendarOpen){
-<app-calendar-modal></app-calendar-modal>
-} @if(isMyUserOpen){
-<app-myuser-modal></app-myuser-modal>
-} @if(isCallOpen){
-<div
-    class="video-call-modal"
-    [ngStyle]="{
-        top: modalTop + 'px',
-        left: modalLeft + 'px',
-        width: modalWidth + 'px',
-        height: modalHeight + 'px'
-    }"
-    (mousedown)="bringToFront()"
-    [style.zIndex]="modalZIndex"
->
+@if (isCreateGroupOpen) {
+    <app-create-group-modal></app-create-group-modal>
+}
+@if (isCreateCommunityOpen) {
+    <app-create-community-modal></app-create-community-modal>
+}
+@if (isCalendarOpen) {
+    <app-calendar-modal></app-calendar-modal>
+}
+@if (isMyUserRendered) {
+    <app-myuser-modal
+        [anchor]="myUserAnchor"
+        [isClosing]="isMyUserClosing"
+    ></app-myuser-modal>
+}
+@if (avatarPreview) {
     <div
-        class="resize-handle resize-handle-corner resize-handle-tl"
-        (mousedown)="startResize($event, 'top-left')"
-    ></div>
-    <div
-        class="resize-handle resize-handle-corner resize-handle-tr"
-        (mousedown)="startResize($event, 'top-right')"
-    ></div>
-    <div
-        class="resize-handle resize-handle-corner resize-handle-bl"
-        (mousedown)="startResize($event, 'bottom-left')"
-    ></div>
-    <div
-        class="resize-handle resize-handle-corner resize-handle-br"
-        (mousedown)="startResize($event, 'bottom-right')"
-    ></div>
-    <div
-        class="resize-handle resize-handle-top"
-        (mousedown)="startResize($event, 'top')"
-    ></div>
-    <div
-        class="resize-handle resize-handle-bottom"
-        (mousedown)="startResize($event, 'bottom')"
-    ></div>
-    <div
-        class="resize-handle resize-handle-left"
-        (mousedown)="startResize($event, 'left')"
-    ></div>
-    <div
-        class="resize-handle resize-handle-right"
-        (mousedown)="startResize($event, 'right')"
-    ></div>
-
-    <div class="modal-header" (mousedown)="startDrag($event)">
-        <span>Videollamada. Group: {{group.topic}}</span>
-        <button (click)="closeCall()">cancel</button>
+        class="avatar-modal-backdrop"
+        role="dialog"
+        aria-modal="true"
+        [attr.aria-label]="avatarPreview.title"
+        (click)="closeAvatarPreview()"
+    >
+        <div class="avatar-modal-card" (click)="$event.stopPropagation()">
+            <button
+                type="button"
+                class="avatar-modal-close"
+                aria-label="Cerrar imagen ampliada"
+                (click)="closeAvatarPreview()"
+            >
+                ✕
+            </button>
+            <img [src]="avatarPreview.url" [alt]="avatarPreview.title" />
+            @if (avatarPreview.title) {
+                <span class="avatar-modal-title">{{ avatarPreview.title }}</span>
+            }
+        </div>
     </div>
+}
+@if (isCallOpen) {
+    <div
+        class="video-call-modal"
+        [class.is-interacting]="isDragging || isResizing"
+        role="dialog"
+        aria-label="Ventana de videollamada"
+        [ngStyle]="{
+            top: modalTop + 'px',
+            left: modalLeft + 'px',
+            width: modalWidth + 'px',
+            height: modalHeight + 'px'
+        }"
+        (mousedown)="bringToFront()"
+        [style.zIndex]="modalZIndex"
+    >
+        <div class="resize-handle resize-handle-corner resize-handle-tl" (mousedown)="startResize($event, 'top-left')"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-tr" (mousedown)="startResize($event, 'top-right')"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-bl" (mousedown)="startResize($event, 'bottom-left')"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-br" (mousedown)="startResize($event, 'bottom-right')"></div>
+        <div class="resize-handle resize-handle-top" (mousedown)="startResize($event, 'top')"></div>
+        <div class="resize-handle resize-handle-bottom" (mousedown)="startResize($event, 'bottom')"></div>
+        <div class="resize-handle resize-handle-left" (mousedown)="startResize($event, 'left')"></div>
+        <div class="resize-handle resize-handle-right" (mousedown)="startResize($event, 'right')"></div>
 
-    <app-video-call
-    [group]="group"
-    [roomId]="group._id || ''"
-    ></app-video-call>
-</div>
+        <div class="modal-header" (mousedown)="startDrag($event)">
+            <span class="call-header-title">
+                <span class="call-live-dot" aria-hidden="true"></span>
+                {{ group.topic || 'Videollamada' }}
+            </span>
+            <button type="button" class="call-close-btn" (click)="closeCall()" aria-label="Cerrar ventana de videollamada">
+                Cerrar
+            </button>
+        </div>
+
+        <app-video-call
+            [group]="group"
+            [roomId]="group._id || ''"
+        ></app-video-call>
+    </div>
 }

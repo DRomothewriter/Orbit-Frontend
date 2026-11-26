@@ -1,20 +1,25 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { GroupService } from '../../../shared/services/group.service';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ModalsService } from '../../../shared/services/modals.service';
 import { Group } from '../../../shared/types/group';
 import { GroupMember } from '../../../shared/types/group-member';
+import { Subscription, switchMap, EMPTY } from 'rxjs';
+import { OrbitLoaderComponent } from '../../../shared/components/orbit-loader/orbit-loader.component';
+import { OrbitAvatarPipe } from '../../../shared/pipes/orbit-avatar.pipe';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-header',
-  imports: [MatIconButton, MatIcon, FormsModule],
+  imports: [MatIconButton, MatIcon, MatTooltipModule, FormsModule, OrbitLoaderComponent, OrbitAvatarPipe],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
   group: Group = { topic: '' };
   imageFile: File | null = null;
 
@@ -26,6 +31,8 @@ export class HeaderComponent implements OnInit {
   isTopicSuccess = false;
 
   myGroupMember: GroupMember = {} as GroupMember;
+  private subscriptions = new Subscription();
+
   constructor(
     private groupService: GroupService,
     private route: ActivatedRoute,
@@ -34,17 +41,30 @@ export class HeaderComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const groupId = this.route.snapshot.paramMap.get('id');
-    this.groupService.getGroupSummary(groupId!).subscribe((group) => {
-      this.group = group;
-      if (group._id) {
-        this.groupService.getMyGroupMember(group._id).subscribe({
-          next: (response: GroupMember) => {
-            this.myGroupMember = response;
-          },
-        });
-      }
-    });
+    this.subscriptions.add(
+      this.route.paramMap
+        .pipe(
+          switchMap((params) => {
+            const groupId = params.get('id');
+            if (!groupId) return EMPTY;
+            return this.groupService.getGroupSummary(groupId);
+          })
+        )
+        .subscribe((group) => {
+          this.group = group;
+          if (group._id) {
+            this.groupService.getMyGroupMember(group._id).subscribe({
+              next: (response: GroupMember) => {
+                this.myGroupMember = response;
+              },
+            });
+          }
+        })
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
   deleteChat() {

@@ -406,10 +406,15 @@ export class CallService {
         // Cerrar producers
         this.audioProducer?.close();
         this.videoProducer?.close();
+        this.audioProducer = undefined;
+        this.videoProducer = undefined;
 
         // Cerrar transports
         this.sendTransport?.close();
         this.recvTransport?.close();
+        this.sendTransport = undefined;
+        this.recvTransport = undefined;
+        this.device = undefined;
 
         // Limpiar peers
         const peers = this.peers$.value;

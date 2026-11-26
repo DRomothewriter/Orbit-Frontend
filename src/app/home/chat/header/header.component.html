@@ -1,11 +1,8 @@
 <header>
     <div class="group-image-container">
         <img
-            [src]="
-                group.groupImgUrl ||
-                'https://placehold.co/40x40/533483/ffffff?text=U'
-            "
-            alt="group-image"
+            [src]="group.groupImgUrl | orbitAvatar:(group._id || group.topic)"
+            [alt]="group.topic || 'Imagen del grupo'"
             class="group-image"
         />
         <!-- Esto de los permisos podríamos hacerlo en una directiva -->
@@ -34,7 +31,7 @@
             @if(myGroupMember.role === 'admin' && hoverTopic){
             <mat-icon class="edit-icon">edit</mat-icon>
             } @if(isTopicLoading){
-            <img src="assets/loading.gif" class="topic-loader" alt="Loading" />
+            <app-orbit-loader variant="comet" size="xs" />
             } @if(isTopicSuccess){
             <mat-icon class="topic-succes">check_circle</mat-icon>
             }
@@ -62,8 +59,10 @@
             <mat-icon>info</mat-icon>
         </button>
 
+        @if(myGroupMember.role === 'admin'){
         <button mat-icon-button aria-label="Eliminar chat" color="warn" (click)="deleteChat()" matTooltip="Eliminar chat">
             <mat-icon>delete</mat-icon>
         </button>
+        }
     </nav>
 </header>

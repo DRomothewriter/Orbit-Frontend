@@ -3,37 +3,43 @@
         type="text"
         [(ngModel)]="searchQuery"
         placeholder="Buscar usuario..."
+        aria-label="Buscar usuario por nombre o correo"
         (keyup.enter)="onSearch()"
     />
-    <button (click)="onSearch()">Buscar</button>
+    <button type="button" (click)="onSearch()">Buscar</button>
 </div>
 
-<ul class="users-list">
-    @for(user of users; track user._id){
-    <li class="user-card">
-        <div class="avatar-container">
-            @if(user.profileImgUrl) {
-            <img [src]="user.profileImgUrl" alt="avatar" class="avatar-img" />
-            } @else {
-            <img
-                [src]="
-                    'https://placehold.co/48x48/533483/ffffff?text=' +
-                    user.username.charAt(0).toUpperCase()
-                "
-                alt="avatar"
-                class="avatar-img"
-            />
-            }
-        </div>
-        <div class="user-info">
-            <span class="user-name">{{ user.username }}</span>
-            <span class="user-email">{{ user.email }}</span>
-        </div>
-        <button class="add-button" (click)="sendFriendRequest(user._id!)">
-            Agregar
-        </button>
-    </li>
-    } @empty {
-    <li class="no-users">No users found</li>
-    }
-</ul>
+@if (isLoading) {
+    <app-orbit-loader
+        variant="astrolabe"
+        size="md"
+        [fullArea]="true"
+        label="Buscando en el cuadrante..."
+    />
+} @else {
+    <ul class="users-list">
+        @for (user of users; track user._id) {
+            <li
+                class="user-card"
+                [style.animation-delay]="($index < 10 ? $index * 38 : 0) + 'ms'"
+            >
+                <div class="avatar-container">
+                    <img
+                        [src]="user.profileImgUrl | orbitAvatar:(user._id || user.username)"
+                        [alt]="user.username"
+                        class="avatar-img"
+                    />
+                </div>
+                <div class="user-info">
+                    <span class="user-name">{{ user.username }}</span>
+                    <span class="user-email">{{ user.email }}</span>
+                </div>
+                <button type="button" class="add-button" (click)="sendFriendRequest(user._id!)">
+                    Agregar
+                </button>
+            </li>
+        } @empty {
+            <li class="no-users">No se encontraron usuarios</li>
+        }
+    </ul>
+}

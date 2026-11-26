@@ -1,17 +1,120 @@
 <app-header></app-header>
 
-<aside class="sidebar-left">
+<aside class="sidebar-left" #sidebarScroll aria-label="Lista de grupos y conversaciones">
+    <div class="groups-filter-bar" role="search" aria-label="Buscar y filtrar conversaciones">
+        <div class="filter-search-wrap">
+            <input
+                type="search"
+                class="filter-search-input"
+                placeholder="Buscar grupo o contacto..."
+                aria-label="Buscar grupo o contacto"
+                [value]="searchQuery"
+                (input)="onSearchInput($event)"
+            />
+            @if (searchQuery) {
+                <button
+                    type="button"
+                    class="filter-search-clear"
+                    aria-label="Limpiar búsqueda"
+                    (click)="clearSearch()"
+                >
+                    ×
+                </button>
+            }
+        </div>
+        <div class="filter-chips-row" role="group" aria-label="Filtrar conversaciones">
+            <button
+                type="button"
+                class="filter-chip"
+                [class.active]="isAllFilterActive"
+                [attr.aria-pressed]="isAllFilterActive"
+                (click)="clearFilters()"
+            >
+                Todos
+            </button>
+            <button
+                type="button"
+                class="filter-chip"
+                [class.active]="filterGroups"
+                [attr.aria-pressed]="filterGroups"
+                (click)="toggleFilter('groups')"
+            >
+                Grupos
+            </button>
+            <button
+                type="button"
+                class="filter-chip"
+                [class.active]="filterUnread"
+                [attr.aria-pressed]="filterUnread"
+                (click)="toggleFilter('unread')"
+            >
+                No leídos
+            </button>
+        </div>
+    </div>
 
     <div class="groups-list">
-        @for(group of groups; track group._id){
-        <div class="group-item" (click)="selectGroup(group)">
-            <div class="group-avatar">
-                <img [src]="group.groupImgUrl || 'https://placehold.co/40x40/533483/ffffff?text=ED'" alt="group avatar" />
-            </div>
-            <span class="group-name">{{ group.topic }}</span>
-        </div>
-        }@empty{
-        <div>No groups</div>
+        @if (isLoading) {
+            <app-orbit-loader
+                variant="eclipse"
+                size="md"
+                [fullArea]="true"
+                label="Cargando órbitas..."
+            />
+        } @else {
+            @for (group of filteredGroups; track group._id) {
+                <button
+                    type="button"
+                    class="group-item"
+                    [class.active]="group._id === selectedGroupId"
+                    [attr.aria-current]="group._id === selectedGroupId ? 'page' : null"
+                    [style.animation-delay]="($index < 10 ? $index * 35 : 0) + 'ms'"
+                    (click)="selectGroup(group)"
+                >
+                    <div
+                        class="group-avatar"
+                        role="button"
+                        tabindex="0"
+                        [attr.aria-label]="'Ampliar imagen de ' + (group.topic || 'Grupo')"
+                        (click)="openAvatarPreview(group, $event)"
+                        (keydown.enter)="openAvatarPreview(group, $event)"
+                        (keydown.space)="openAvatarPreview(group, $event)"
+                    >
+                        <img
+                            [src]="group.groupImgUrl | orbitAvatar:(group._id || group.topic)"
+                            [alt]="group.topic || 'Grupo'"
+                        />
+                    </div>
+                    <div class="group-content">
+                        <div class="group-top-row">
+                            <span class="group-name">{{ group.topic }}</span>
+                            @if (group.lastMessage?.createdAt) {
+                                <span class="group-time">
+                                    {{ group.lastMessage?.createdAt | orbitChatTime }}
+                                </span>
+                            }
+                        </div>
+                        <div class="group-bottom-row">
+                            <span class="group-last-message">
+                                {{ getLastMessagePreview(group) }}
+                            </span>
+                            @if ((group.unreadCount ?? 0) > 0) {
+                                <span
+                                    class="unread-badge"
+                                    [attr.aria-label]="group.unreadCount + ' mensajes sin leer'"
+                                >
+                                    {{ formatUnreadCount(group.unreadCount) }}
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </button>
+            } @empty {
+                <div class="groups-empty">
+                    <span class="empty-dot" aria-hidden="true"></span>
+                    <p>{{ emptyStateMessage }}</p>
+                </div>
+            }
         }
     </div>
 </aside>

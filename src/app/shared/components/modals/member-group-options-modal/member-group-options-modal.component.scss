@@ -1,40 +1,56 @@
-@use'../../../../../colors' as *;
+@use '../../../../../colors' as *;
 
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 1000;
+  position: fixed;
+  inset: 0;
+  z-index: 1005;
 }
 
 .modal-content {
-    background: linear-gradient(120deg, $color-bg-main 70%, $color-primary-light 100%);
-    border-radius: 1rem;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
-    padding: 1.5rem 1.2rem;
-    min-width: 220px;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    align-items: stretch;
-    border: 1px solid $color-border;
+  background: var(--modal-bg);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 6px;
+  min-width: 196px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid var(--modal-border);
+  animation: orbitDropdownIn var(--dur-fast) var(--ease-out-expo);
 }
 
-button {
-    background: $color-primary;
-    color: #fff;
-    border: none;
-    border-radius: 0.5rem;
-    padding: 0.7rem 1.2rem;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+.menu-divider {
+  height: 1px;
+  background: var(--orbit-border-subtle);
+  margin: 4px 6px;
+}
+
+.menu-option {
+  width: 100%;
+  background: transparent;
+  color: var(--orbit-text-primary);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: var(--text-ui);
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-standard),
+    color var(--dur-fast) var(--ease-standard);
+
+  &:hover {
+    background: var(--orbit-bg-hover);
+  }
+
+  &.danger {
+    color: #fda4af;
 
     &:hover {
-        background: $color-secondary;
+      background: var(--orbit-danger-soft);
+      color: #ffffff;
     }
+  }
 }

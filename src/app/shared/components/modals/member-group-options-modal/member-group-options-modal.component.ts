@@ -1,9 +1,10 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { GroupService } from '../../../services/group.service';
 import { CommonModule } from '@angular/common';
 import { GetGroupMembersResponse } from '../../../types/get-group-members-response';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-member-group-options-modal',
   standalone: true,
   imports: [CommonModule],

@@ -160,7 +160,7 @@ export class UserService {
         const headers = this.getHeaders();
 
         return this.httpClient.get<User[]>(
-            `${environment.apiUrl}${this.endpnt}search?username=${searchQuery}`,
+            `${environment.apiUrl}${this.endpnt}search?username=${encodeURIComponent(searchQuery)}`,
             { headers }
         );
     }

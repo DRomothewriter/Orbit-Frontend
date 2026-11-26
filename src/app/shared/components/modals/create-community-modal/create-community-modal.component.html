@@ -1,74 +1,318 @@
 <div class="modal-overlay" (click)="closeModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h3>Crear Nuevo Grupo</h3>
-            <button mat-icon-button class="close-button" (click)="closeModal()">
-                <mat-icon>close</mat-icon>
-            </button>
-        </div>
-
-        <div class="modal-body">
-            <div class="form-section">
-                <mat-form-field class="full-width">
-                    <mat-label>Nombre del grupo</mat-label>
-                    <input
-                        matInput
-                        [(ngModel)]="communityName"
-                        placeholder="Ingresa el nombre de la communidad..."
-                    />
-                </mat-form-field>
-
-                <mat-form-field class="full-width">
-                    <mat-label>Descripción</mat-label>
-                    <textarea
-                        matInput
-                        placeholder="Describe el propósito de la communidad..."
-                        rows="3"
-                    ></textarea>
-                </mat-form-field>
-
-                <div class="members-section">
-                    <h4>Agregar miembros</h4>
-                    <mat-form-field class="full-width">
-                        <mat-label>Buscar contactos</mat-label>
-                        <input matInput placeholder="Escribe para buscar..." />
-                        <mat-icon matSuffix>search</mat-icon>
-                    </mat-form-field>
-
-                    <div class="contacts-list">
-                        @for(friendship of friends; track friendship._id){
-                        <div class="contact-item">
-                            <div class="contact-checkbox">
-                                <mat-checkbox
-                                [(ngModel)]="friendship.selected"
-                                (change)="onFriendSelected(friendship.friendId._id!)"
-                                ></mat-checkbox>
-                            </div>
-                            <div class="contact-avatar">
-                                <img
-                                    [src]="friendAvatarImg"
-                                    alt="friendship.friendId"
-                                />
-                            </div>
-                            <span class="contact-name">{{ friendship.friendId.username }}</span>
-                        </div>
-                        }
+    <div
+        class="modal-shell"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="create-community-title"
+        aria-describedby="create-community-desc"
+        (click)="$event.stopPropagation()"
+    >
+        <!-- Header con indicador de pasos -->
+        <header class="modal-header">
+            <div class="header-left">
+                @if (currentStep === 2) {
+                    <button
+                        type="button"
+                        class="icon-nav-btn"
+                        (click)="goToStep1()"
+                        [disabled]="isSubmitting"
+                        aria-label="Volver a selección de miembros"
+                    >
+                        <mat-icon aria-hidden="true">arrow_back</mat-icon>
+                    </button>
+                }
+                <div class="header-copy">
+                    <div class="title-row">
+                        <h2 id="create-community-title">
+                            {{ currentStep === 1 ? 'Añadir miembros' : 'Detalles de la comunidad' }}
+                        </h2>
+                        <span class="step-badge">Paso {{ currentStep }} de 2</span>
                     </div>
+                    <p id="create-community-desc">
+                        @if (currentStep === 1) {
+                            Selecciona a los contactos que invitarás inicialmente a tu comunidad.
+                        } @else {
+                            Define el nombre obligatorio y una descripción opcional para tu espacio.
+                        }
+                    </p>
                 </div>
             </div>
 
-            <div class="modal-actions">
-                <button mat-button class="cancel-button" (click)="closeModal()">
-                    Cancelar
-                </button>
-                <button
-                    mat-raised-button
-                    class="create-button"
-                    (click)="createCommunity()"
-                >
-                    Crear Grupo
-                </button>
+            <button
+                type="button"
+                class="icon-close-btn"
+                (click)="closeModal()"
+                [disabled]="isSubmitting"
+                aria-label="Cerrar ventana"
+            >
+                <mat-icon aria-hidden="true">close</mat-icon>
+            </button>
+
+            <!-- Barra de progreso orbital -->
+            <div class="step-progress-track" aria-hidden="true">
+                <div
+                    class="step-progress-fill"
+                    [style.width.%]="currentStep === 1 ? 50 : 100"
+                ></div>
             </div>
-        </div>
+        </header>
+
+        <!-- ==================== PASO 1: SELECCIÓN DE USUARIOS ==================== -->
+        @if (currentStep === 1) {
+            <div class="modal-body step-panel">
+                <div class="section-bar">
+                    <h3>Contactos disponibles</h3>
+                    <span class="selected-pill-count">
+                        {{ selectedFriends.size }} {{ selectedFriends.size === 1 ? 'seleccionado' : 'seleccionados' }}
+                    </span>
+                </div>
+
+                @if (selectedList.length > 0) {
+                    <div class="selected-chips" aria-label="Miembros seleccionados">
+                        @for (item of selectedList; track item._id) {
+                            <span class="member-chip">
+                                <span class="chip-avatar" aria-hidden="true">
+                                    <img [src]="item.friendId.profileImgUrl | orbitAvatar:(item.friendId._id || item.friendId.username)" alt="" />
+                                </span>
+                                <span class="chip-name">{{ item.friendId.username }}</span>
+                                <button
+                                    type="button"
+                                    class="chip-remove"
+                                    (click)="toggleFriend(item)"
+                                    [attr.aria-label]="'Quitar a ' + item.friendId.username"
+                                >
+                                    <mat-icon aria-hidden="true">close</mat-icon>
+                                </button>
+                            </span>
+                        }
+                    </div>
+                }
+
+                <div class="search-box">
+                    <mat-icon class="search-icon" aria-hidden="true">search</mat-icon>
+                    <input
+                        type="text"
+                        name="communityContactSearch"
+                        [(ngModel)]="searchQuery"
+                        placeholder="Buscar por nombre o correo..."
+                        aria-label="Buscar amigos"
+                        autocomplete="off"
+                        autofocus
+                    />
+                    @if (searchQuery) {
+                        <button
+                            type="button"
+                            class="clear-search-btn"
+                            (click)="clearSearch()"
+                            aria-label="Limpiar búsqueda"
+                        >
+                            <mat-icon aria-hidden="true">close</mat-icon>
+                        </button>
+                    }
+                </div>
+
+                <div class="people-list">
+                    @if (isLoadingContacts) {
+                        <app-orbit-loader variant="eclipse" size="sm" [fullArea]="true" />
+                    } @else {
+                        @for (friendship of filteredFriends; track friendship._id) {
+                            <button
+                                type="button"
+                                class="person-row"
+                                [class.is-selected]="selectedFriends.has(friendship.friendId._id!)"
+                                [attr.aria-pressed]="selectedFriends.has(friendship.friendId._id!)"
+                                (click)="toggleFriend(friendship)"
+                            >
+                                <span class="person-avatar">
+                                    @if (friendship.friendId.profileImgUrl) {
+                                        <img
+                                            [src]="friendship.friendId.profileImgUrl"
+                                            [alt]="friendship.friendId.username"
+                                        />
+                                    } @else {
+                                        <span class="avatar-initial" aria-hidden="true">
+                                            {{ (friendship.friendId.username || 'U')[0] | uppercase }}
+                                        </span>
+                                    }
+                                    <span
+                                        class="presence-dot"
+                                        [ngClass]="friendship.friendId.status || 'offline'"
+                                        aria-hidden="true"
+                                    ></span>
+                                </span>
+
+                                <span class="person-meta">
+                                    <span class="person-name">{{ friendship.friendId.username }}</span>
+                                    @if (friendship.friendId.email) {
+                                        <span class="person-sub">{{ friendship.friendId.email }}</span>
+                                    }
+                                </span>
+
+                                <span class="check-indicator" aria-hidden="true">
+                                    @if (selectedFriends.has(friendship.friendId._id!)) {
+                                        <mat-icon>check</mat-icon>
+                                    }
+                                </span>
+                            </button>
+                        } @empty {
+                            <div class="people-empty">
+                                @if (searchQuery.trim()) {
+                                    <p>Sin resultados para «{{ searchQuery }}»</p>
+                                } @else {
+                                    <p>No tienes contactos disponibles todavía.</p>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <footer class="modal-footer">
+                <span class="footer-hint" aria-hidden="true">
+                    <kbd>Esc</kbd> para cerrar
+                </span>
+
+                <div class="footer-actions">
+                    <button type="button" class="btn-ghost" (click)="closeModal()">
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn-primary" (click)="goToStep2()">
+                        <span>Siguiente</span>
+                        <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+                    </button>
+                </div>
+            </footer>
+        }
+
+        <!-- ==================== PASO 2: NOMBRE, DESCRIPCIÓN Y RESUMEN ==================== -->
+        @if (currentStep === 2) {
+            <form class="modal-form" (ngSubmit)="createCommunity()">
+                <div class="modal-body step-panel">
+                    @if (errorMessage) {
+                        <div class="inline-alert" role="alert" aria-live="polite">
+                            <mat-icon aria-hidden="true">error_outline</mat-icon>
+                            <span>{{ errorMessage }}</span>
+                        </div>
+                    }
+
+                    <!-- Identidad: Emblema en vivo + Nombre obligatorio -->
+                    <div class="identity-row">
+                        <div
+                            class="identity-avatar community-shape"
+                            [class.has-initials]="previewInitials"
+                            aria-hidden="true"
+                        >
+                            @if (previewInitials) {
+                                <span>{{ previewInitials }}</span>
+                            } @else {
+                                <mat-icon>public</mat-icon>
+                            }
+                        </div>
+
+                        <div class="identity-fields">
+                            <div class="field-label-row">
+                                <label for="community-name-input">
+                                    Nombre de la comunidad <span class="required-mark" aria-hidden="true">*</span>
+                                </label>
+                                <span class="char-count">{{ communityName.length }}/48</span>
+                            </div>
+                            <input
+                                id="community-name-input"
+                                name="communityName"
+                                type="text"
+                                maxlength="48"
+                                [(ngModel)]="communityName"
+                                (blur)="nameTouched = true"
+                                [class.is-invalid]="nameTouched && !communityName.trim()"
+                                placeholder="ej. Observatorio Orbit, Estudio..."
+                                autocomplete="off"
+                                required
+                                autofocus
+                            />
+                            @if (nameTouched && !communityName.trim()) {
+                                <span class="field-error" role="alert">El nombre de la comunidad es obligatorio.</span>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Descripción opcional -->
+                    <div class="field-group">
+                        <div class="field-label-row">
+                            <label for="community-desc-input">
+                                Descripción <span class="optional-tag">opcional</span>
+                            </label>
+                            <span class="char-count">{{ description.length }}/140</span>
+                        </div>
+                        <textarea
+                            id="community-desc-input"
+                            name="description"
+                            rows="2"
+                            maxlength="140"
+                            [(ngModel)]="description"
+                            placeholder="Propósito o tema principal de esta comunidad"
+                        ></textarea>
+                    </div>
+
+                    <!-- Resumen compacto de miembros elegidos en el Paso 1 -->
+                    <div class="members-summary-bar">
+                        <div class="summary-left">
+                            @if (selectedList.length > 0) {
+                                <div class="avatar-stack" aria-hidden="true">
+                                    @for (m of selectedList.slice(0, 4); track m._id) {
+                                        <span class="stack-item">
+                                            @if (m.friendId.profileImgUrl) {
+                                                <img [src]="m.friendId.profileImgUrl" alt="" />
+                                            } @else {
+                                                {{ (m.friendId.username || 'U')[0] | uppercase }}
+                                            }
+                                        </span>
+                                    }
+                                </div>
+                            }
+                            <span class="summary-text">
+                                {{ selectedFriends.size === 0 ? 'Solo tú por ahora' : (selectedFriends.size + (selectedFriends.size === 1 ? ' miembro invitado' : ' miembros invitados')) }}
+                            </span>
+                        </div>
+                        <button type="button" class="edit-members-link" (click)="goToStep1()" [disabled]="isSubmitting">
+                            Editar
+                        </button>
+                    </div>
+                </div>
+
+                <footer class="modal-footer">
+                    <button
+                        type="button"
+                        class="btn-ghost"
+                        [disabled]="isSubmitting"
+                        (click)="goToStep1()"
+                    >
+                        Atrás
+                    </button>
+
+                    <div class="footer-actions">
+                        <button
+                            type="button"
+                            class="btn-ghost"
+                            [disabled]="isSubmitting"
+                            (click)="closeModal()"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            class="btn-primary"
+                            [disabled]="!communityName.trim() || isSubmitting"
+                        >
+                            @if (isSubmitting) {
+                                <app-orbit-loader variant="comet" size="xs" />
+                                <span>Creando...</span>
+                            } @else {
+                                <span>Crear comunidad</span>
+                            }
+                        </button>
+                    </div>
+                </footer>
+            </form>
+        }
     </div>
 </div>

@@ -1,5 +1,4 @@
-import {
-    Component,
+import { Component,
     OnInit,
     OnDestroy,
     ElementRef,
@@ -7,8 +6,7 @@ import {
     ViewChildren,
     QueryList,
     AfterViewChecked,
-    Input,
-} from '@angular/core';
+    Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CallService } from '../../services/call.service';
 import { SocketService } from '../../services/socket.service';
@@ -21,6 +19,7 @@ import { GroupService } from '../../services/group.service';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: 'app-video-call',
     standalone: true,
     imports: [CommonModule, MatIconModule],
@@ -40,11 +39,16 @@ export class VideoCallComponent implements OnInit, OnDestroy, AfterViewChecked {
     isAudioEnabled = true;
     isVideoEnabled = true;
     isInCall = false;
+    isConnecting = false;
+    viewMode: 'grid' | 'focus' = 'grid';
+    focusedParticipantId = 'local';
 
     @Input() roomId: string = '';
     peerId = `peer-${Math.random().toString(36).substr(2, 9)}`;
     @Input() group: Group = { topic: '' };
     private subscriptions: Subscription[] = [];
+    private checkSocketTimeout?: ReturnType<typeof setTimeout>;
+    private registeredSocketHandlers: Array<{ event: string; handler: (...args: any[]) => void }> = [];
 
     constructor(
         private callService: CallService,
@@ -69,6 +73,7 @@ export class VideoCallComponent implements OnInit, OnDestroy, AfterViewChecked {
         this.subscriptions.push(
             this.callService.peers.subscribe((peers) => {
                 this.remotePeers = Array.from(peers.values());
+                this.syncFocusAfterPeersChange();
             })
         );
 
@@ -76,23 +81,39 @@ export class VideoCallComponent implements OnInit, OnDestroy, AfterViewChecked {
         this.subscriptions.push(
             this.callService.isInCall.subscribe((inCall) => {
                 this.isInCall = inCall;
+                if (inCall) {
+                    this.isConnecting = false;
+                }
             })
         );
 
         // Escuchar eventos de socket
         this.setupSocketListeners();
         if(!this.group._id || this.group._id === ''){
-            this.groupService.getGroupSummary().subscribe((group:Group)=> {
-                this.group = group
-                this.roomId = group._id!;
-                console.log(group)
-                this.joinCall();
-            })
+            this.subscriptions.push(
+                this.groupService.getGroupSummary().subscribe((group:Group)=> {
+                    if (group._id && group._id !== this.roomId) {
+                        this.group = group;
+                        this.roomId = group._id;
+                        this.joinCall();
+                    }
+                })
+            );
         }
 
     }
 
     ngOnDestroy(): void {
+        if (this.checkSocketTimeout) {
+            clearTimeout(this.checkSocketTimeout);
+        }
+        const socket = this.socketService.getSocket();
+        if (socket) {
+            for (const { event, handler } of this.registeredSocketHandlers) {
+                socket.off(event, handler);
+            }
+        }
+        this.registeredSocketHandlers = [];
         this.subscriptions.forEach((sub) => sub.unsubscribe());
         this.leaveCall();
     }
@@ -186,14 +207,18 @@ export class VideoCallComponent implements OnInit, OnDestroy, AfterViewChecked {
 
             if (!socket) {
                 console.log('[VideoCall] Esperando conexión de socket...');
-                setTimeout(checkSocket, 500);
+                this.checkSocketTimeout = setTimeout(checkSocket, 500);
                 return;
             }
 
             console.log('[VideoCall] Socket listo, configurando listeners');
+            const register = (event: string, handler: (...args: any[]) => void) => {
+                socket.on(event, handler);
+                this.registeredSocketHandlers.push({ event, handler });
+            };
 
             // Cuando te unes a la sala exitosamente
-            socket.on('callRoomJoined', async (data: any) => {
+            register('callRoomJoined', async (data: any) => {
                 console.log('[VideoCall] Unido a sala:', data);
 
                 try {
@@ -257,6 +282,7 @@ export class VideoCallComponent implements OnInit, OnDestroy, AfterViewChecked {
 
                     this.callService.setInCall(true);
                 } catch (error) {
+                    this.isConnecting = false;
                     console.error(
                         '[VideoCall] Error configurando llamada:',
                         error
@@ -265,13 +291,13 @@ export class VideoCallComponent implements OnInit, OnDestroy, AfterViewChecked {
             });
 
             // Cuando un nuevo peer se une
-            socket.on('newPeerInCall', (data: { peerId: string }) => {
+            register('newPeerInCall', (data: { peerId: string }) => {
                 console.log('[VideoCall] Nuevo peer:', data.peerId);
                 this.callService.addPeer(data.peerId);
             });
 
             // Cuando un peer empieza a producir audio/video
-            socket.on('newProducer', async (data: any) => {
+            register('newProducer', async (data: any) => {
                 console.log('[VideoCall] Nuevo producer recibido:', {
                     peerId: data.peerId,
                     producerId: data.producerId,
@@ -304,13 +330,15 @@ export class VideoCallComponent implements OnInit, OnDestroy, AfterViewChecked {
             });
 
             // Cuando un peer se va
-            socket.on('peerLeftCall', (data: { peerId: string }) => {
+            register('peerLeftCall', (data: { peerId: string }) => {
                 console.log('[VideoCall] Peer se fue:', data.peerId);
                 this.callService.removePeer(data.peerId);
+                this.syncFocusAfterPeersChange();
             });
 
             // Errores
-            socket.on('callError', (data: any) => {
+            register('callError', (data: any) => {
+                this.isConnecting = false;
                 console.error('[VideoCall] Error:', data);
                 alert('Error en la llamada: ' + data.message);
             });
@@ -335,6 +363,7 @@ export class VideoCallComponent implements OnInit, OnDestroy, AfterViewChecked {
                 );
                 return;
             }
+            this.isConnecting = true;
             console.log(this.roomId, this.group)
             socket.emit('joinCallRoom', {
                 roomId: this.roomId,
@@ -342,6 +371,7 @@ export class VideoCallComponent implements OnInit, OnDestroy, AfterViewChecked {
                 group: this.group
             });
         } catch (error) {
+            this.isConnecting = false;
             console.error('[VideoCall] Error uniéndose a llamada:', error);
         }
     }
@@ -350,10 +380,13 @@ export class VideoCallComponent implements OnInit, OnDestroy, AfterViewChecked {
      * Salir de la llamada
      */
     leaveCall(): void {
-        if (this.isInCall) {
+        this.isConnecting = false;
+        this.viewMode = 'grid';
+        this.focusedParticipantId = 'local';
+        if (this.isInCall || this.roomId) {
             const socket = this.socketService.getSocket();
 
-            if (socket) {
+            if (socket && this.roomId) {
                 socket.emit('leaveCallRoom', {
                     roomId: this.roomId,
                     peerId: this.peerId,
@@ -363,6 +396,53 @@ export class VideoCallComponent implements OnInit, OnDestroy, AfterViewChecked {
             this.callService.cleanup();
             this.modalsService.closeCall();
         }
+    }
+
+    /**
+     * Alterna entre vista cuadrícula y vista enfoque
+     */
+    toggleViewMode(): void {
+        if (this.viewMode === 'grid') {
+            this.viewMode = 'focus';
+            this.syncFocusAfterPeersChange();
+            if (this.focusedParticipantId === 'local' && this.remotePeers.length > 0) {
+                this.focusedParticipantId = this.remotePeers[0].id;
+            }
+        } else {
+            this.viewMode = 'grid';
+        }
+    }
+
+    /**
+     * Enfoca a un participante específico ('local' o peer.id)
+     */
+    focusParticipant(participantId: string): void {
+        this.focusedParticipantId = participantId;
+        this.viewMode = 'focus';
+    }
+
+    /**
+     * Mantiene válido el participante enfocado cuando cambia la lista de peers
+     */
+    syncFocusAfterPeersChange(): void {
+        if (
+            this.focusedParticipantId !== 'local' &&
+            !this.remotePeers.some((p) => p.id === this.focusedParticipantId)
+        ) {
+            this.focusedParticipantId = this.remotePeers[0]?.id ?? 'local';
+        }
+    }
+
+    get focusedRemotePeer(): Peer | undefined {
+        return this.remotePeers.find((p) => p.id === this.focusedParticipantId);
+    }
+
+    get filmstripRemotePeers(): Peer[] {
+        return this.remotePeers.filter((p) => p.id !== this.focusedParticipantId);
+    }
+
+    get totalParticipants(): number {
+        return 1 + this.remotePeers.length;
     }
 
     /**

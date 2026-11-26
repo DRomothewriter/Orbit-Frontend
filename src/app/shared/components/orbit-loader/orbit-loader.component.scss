@@ -1,0 +1,601 @@
+.orbit-loader-wrapper {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  --loader-size: 64px;
+  transition: opacity 280ms var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1));
+
+  &[data-size='xs'] {
+    --loader-size: 22px;
+    gap: 6px;
+    .star,
+    .ring-outer {
+      display: none;
+    }
+  }
+
+  &[data-size='sm'] {
+    --loader-size: 34px;
+    gap: 8px;
+  }
+
+  &[data-size='md'] {
+    --loader-size: 64px;
+  }
+
+  &[data-size='lg'] {
+    --loader-size: 98px;
+    gap: 18px;
+  }
+
+  &.full-area {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    min-height: 160px;
+    padding: var(--space-6, 24px);
+  }
+
+  &[data-variant='eclipse'].full-area {
+    justify-content: flex-start;
+    padding: var(--space-2, 8px) 2px;
+  }
+}
+
+.loader-label {
+  font-family: var(--orbit-font-mono, monospace);
+  font-size: var(--text-micro, 0.6875rem);
+  letter-spacing: 0.08em;
+  color: var(--orbit-text-secondary, #bfb6d4);
+  text-transform: uppercase;
+  animation: labelPulse 2.4s ease-in-out infinite;
+  transition: opacity 220ms ease, transform 260ms var(--ease-out-expo, ease-out);
+}
+
+/* ==========================================================================
+   1. SINGULARITY (Hoyo Negro Gargantua — con fase de liberación hacia mensajes)
+   ========================================================================== */
+.gargantua-system {
+  position: relative;
+  width: var(--loader-size);
+  height: var(--loader-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 260px;
+}
+
+.release-wave {
+  position: absolute;
+  width: 48%;
+  height: 48%;
+  border-radius: 50%;
+  border: 1.5px solid rgba(196, 181, 253, 0.7);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.accretion-disk {
+  position: absolute;
+  width: 84%;
+  height: 84%;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(109, 40, 217, 0.06) 0deg,
+    rgba(167, 139, 250, 0.88) 70deg,
+    rgba(244, 240, 232, 0.96) 118deg,
+    rgba(245, 158, 11, 0.72) 168deg,
+    rgba(109, 40, 217, 0.12) 235deg,
+    rgba(139, 92, 246, 0.78) 310deg,
+    rgba(109, 40, 217, 0.06) 360deg
+  );
+  filter: blur(1.4px);
+  box-shadow:
+    0 0 22px rgba(124, 58, 237, 0.36),
+    0 0 36px rgba(244, 240, 232, 0.12);
+  animation: diskSpin 3s linear infinite;
+}
+
+.event-horizon {
+  position: relative;
+  width: 42%;
+  height: 42%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 36%, #18132b 0%, #07060c 68%, #020204 100%);
+  box-shadow:
+    0 0 0 1.5px rgba(244, 240, 232, 0.72),
+    0 0 12px rgba(167, 139, 250, 0.5),
+    inset 0 0 10px rgba(124, 58, 237, 0.45);
+  z-index: 2;
+  animation: horizonPulse 3.2s ease-in-out infinite;
+}
+
+.orbit-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(226, 218, 240, 0.18);
+  pointer-events: none;
+
+  &.ring-outer {
+    width: 100%;
+    height: 100%;
+    border-color: rgba(167, 139, 250, 0.30);
+    transform: rotateX(64deg) rotateY(-18deg);
+    animation: orbitSpinOuter 3.8s linear infinite;
+  }
+
+  &.ring-mid {
+    width: 88%;
+    height: 88%;
+    border-style: dashed;
+    border-color: rgba(244, 240, 232, 0.24);
+    transform: rotateX(68deg) rotateY(22deg);
+    animation: orbitSpinMid 2.6s linear infinite reverse;
+  }
+
+  &.ring-inner {
+    width: 66%;
+    height: 66%;
+    border-color: rgba(196, 181, 253, 0.34);
+    animation: orbitSpinFlat 2s linear infinite;
+  }
+}
+
+.planet {
+  position: absolute;
+  top: -2.5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+
+  &.p-amber {
+    background: var(--p-solar-500, #f59e0b);
+    box-shadow: 0 0 7px rgba(245, 158, 11, 0.7);
+  }
+
+  &.p-ivory {
+    width: 4px;
+    height: 4px;
+    background: var(--p-star-50, #faf7f2);
+    box-shadow: 0 0 7px rgba(250, 247, 242, 0.8);
+  }
+
+  &.p-violet {
+    width: 4.5px;
+    height: 4.5px;
+    background: var(--p-amethyst-300, #c4b5fd);
+    box-shadow: 0 0 8px rgba(167, 139, 250, 0.8);
+  }
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: var(--p-star-50, #faf7f2);
+  box-shadow: 0 0 4px rgba(250, 247, 242, 0.9);
+  animation: starTwinkle 2.2s ease-in-out infinite;
+
+  &.s1 { top: 4%; left: 10%; animation-delay: 0s; }
+  &.s2 { top: 12%; right: 6%; animation-delay: 0.6s; }
+  &.s3 { bottom: 8%; left: 14%; animation-delay: 1.1s; }
+  &.s4 { bottom: 6%; right: 12%; animation-delay: 1.6s; }
+}
+
+/* Fase de liberación: el hoyo negro se expande en onda gravitacional y libera los mensajes */
+.orbit-loader-wrapper.is-exiting[data-variant='singularity'] {
+  pointer-events: none;
+
+  .release-wave {
+    animation: singularityWaveRelease 440ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .accretion-disk {
+    animation: accretionBloomOut 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .event-horizon {
+    animation: horizonCollapseOut 360ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .orbit-ring,
+  .star {
+    opacity: 0;
+    transform: scale(1.6);
+    transition: opacity 260ms ease-out, transform 340ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .loader-label {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* ==========================================================================
+   2. ECLIPSE (Skeletons de Órbita con barrido de luz estelar — Sidebar)
+   ========================================================================== */
+.eclipse-skeletons {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md, 8px);
+  background: rgba(216, 205, 255, 0.03);
+  border: 1px solid var(--orbit-border-subtle, rgba(216, 205, 255, 0.07));
+  overflow: hidden;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 20%,
+      rgba(167, 139, 250, 0.14) 50%,
+      transparent 80%
+    );
+    transform: translateX(-100%);
+    animation: starlightSweep 1.65s ease-in-out infinite;
+    animation-delay: calc(var(--row-index, 0) * 110ms);
+  }
+
+  .skeleton-orb {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(167, 139, 250, 0.14);
+    flex-shrink: 0;
+  }
+
+  .skeleton-lines {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .skeleton-line {
+    height: 9px;
+    border-radius: 9999px;
+    background: rgba(226, 218, 240, 0.10);
+
+    &.primary {
+      width: 68%;
+    }
+
+    &.secondary {
+      width: 42%;
+      height: 7px;
+      background: rgba(226, 218, 240, 0.06);
+    }
+  }
+}
+
+/* ==========================================================================
+   3. CONSTELLATION (Trazado de Constelación — Lista de Amigos)
+   ========================================================================== */
+.constellation-system {
+  width: 120px;
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.constellation-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+
+  .constellation-path {
+    stroke: var(--orbit-accent-text, #a78bfa);
+    stroke-width: 1.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 180;
+    stroke-dashoffset: 180;
+    opacity: 0.78;
+    animation: constellationTrace 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  .c-star {
+    fill: var(--p-star-50, #faf7f2);
+    filter: drop-shadow(0 0 5px rgba(167, 139, 250, 0.85));
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: constellationStarPulse 2.4s ease-in-out infinite;
+
+    &.cs1 { animation-delay: 0s; }
+    &.cs2 { animation-delay: 0.25s; }
+    &.cs3 { animation-delay: 0.5s; }
+    &.cs4 { animation-delay: 0.75s; }
+    &.cs5 { animation-delay: 0.95s; }
+  }
+}
+
+/* ==========================================================================
+   4. PULSAR (Ondas de Radioastronomía — Solicitudes Pendientes)
+   ========================================================================== */
+.pulsar-system {
+  position: relative;
+  width: var(--loader-size);
+  height: var(--loader-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pulsar-core {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--p-star-50, #faf7f2);
+  box-shadow:
+    0 0 0 3px rgba(167, 139, 250, 0.28),
+    0 0 14px rgba(167, 139, 250, 0.8);
+  z-index: 2;
+}
+
+.pulsar-wave {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.25px solid var(--orbit-accent-text, #a78bfa);
+  opacity: 0;
+  animation: pulsarRipple 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+
+  &.w1 { animation-delay: 0s; }
+  &.w2 { animation-delay: 0.8s; }
+  &.w3 { animation-delay: 1.6s; }
+}
+
+/* ==========================================================================
+   5. ASTROLABE (Retícula de Cuadrante — Buscador de Amigos)
+   ========================================================================== */
+.astrolabe-system {
+  position: relative;
+  width: var(--loader-size);
+  height: var(--loader-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.astro-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(226, 218, 240, 0.22);
+
+  &.outer {
+    inset: 0;
+    border-style: dashed;
+    animation: diskSpin 10s linear infinite;
+  }
+
+  &.inner {
+    inset: 12px;
+    border-color: rgba(167, 139, 250, 0.36);
+  }
+}
+
+.astro-axis {
+  position: absolute;
+  background: rgba(226, 218, 240, 0.14);
+
+  &.horizontal {
+    width: 100%;
+    height: 1px;
+  }
+
+  &.vertical {
+    height: 100%;
+    width: 1px;
+  }
+}
+
+.astro-sweep {
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(167, 139, 250, 0.38) 0deg,
+    rgba(167, 139, 250, 0.06) 55deg,
+    transparent 90deg
+  );
+  animation: diskSpin 2.2s linear infinite;
+}
+
+.astro-center {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--p-star-50, #faf7f2);
+  box-shadow: 0 0 8px rgba(244, 240, 232, 0.85);
+  z-index: 2;
+}
+
+/* ==========================================================================
+   6. COMET (Cometa con núcleo brillante y cola de iones/polvo — Inline xs/sm)
+   ========================================================================== */
+.comet-system {
+  position: relative;
+  width: var(--loader-size);
+  height: var(--loader-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.comet-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.comet-track {
+  stroke: rgba(226, 218, 240, 0.14);
+  stroke-width: 1;
+}
+
+.comet-orbit-group {
+  transform-origin: 18px 18px;
+  animation: diskSpin 1.15s linear infinite;
+}
+
+.comet-coma {
+  fill: rgba(167, 139, 250, 0.42);
+  filter: blur(1.2px);
+}
+
+.comet-nucleus {
+  fill: var(--p-star-50, #faf7f2);
+  filter: drop-shadow(0 0 3px rgba(250, 247, 242, 0.95));
+}
+
+.comet-spark {
+  fill: var(--p-amethyst-300, #c4b5fd);
+  opacity: 0.75;
+
+  &.s-dim {
+    opacity: 0.45;
+  }
+}
+
+/* ==========================================================================
+   KEYFRAMES
+   ========================================================================== */
+@keyframes diskSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes orbitSpinFlat {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes orbitSpinOuter {
+  from { transform: rotateX(64deg) rotateY(-18deg) rotateZ(0deg); }
+  to { transform: rotateX(64deg) rotateY(-18deg) rotateZ(360deg); }
+}
+
+@keyframes orbitSpinMid {
+  from { transform: rotateX(68deg) rotateY(22deg) rotateZ(0deg); }
+  to { transform: rotateX(68deg) rotateY(22deg) rotateZ(360deg); }
+}
+
+@keyframes horizonPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.25; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+@keyframes labelPulse {
+  0%, 100% { opacity: 0.62; }
+  50% { opacity: 1; }
+}
+
+@keyframes singularityWaveRelease {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.85;
+    border-width: 2px;
+  }
+  100% {
+    transform: scale(4.2);
+    opacity: 0;
+    border-width: 0.5px;
+  }
+}
+
+@keyframes accretionBloomOut {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+    filter: blur(1.4px);
+  }
+  100% {
+    transform: scale(2.4) rotate(90deg);
+    opacity: 0;
+    filter: blur(10px);
+  }
+}
+
+@keyframes horizonCollapseOut {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  45% {
+    transform: scale(1.18);
+    box-shadow: 0 0 28px rgba(196, 181, 253, 0.9);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(0.08);
+    opacity: 0;
+  }
+}
+
+@keyframes starlightSweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes constellationTrace {
+  0% { stroke-dashoffset: 180; opacity: 0.25; }
+  50% { stroke-dashoffset: 0; opacity: 0.9; }
+  100% { stroke-dashoffset: -180; opacity: 0.25; }
+}
+
+@keyframes constellationStarPulse {
+  0%, 100% { opacity: 0.45; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.25); }
+}
+
+@keyframes pulsarRipple {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(4.6);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .accretion-disk,
+  .orbit-ring,
+  .event-horizon,
+  .star,
+  .loader-label,
+  .release-wave,
+  .skeleton-row::after,
+  .constellation-path,
+  .c-star,
+  .pulsar-wave,
+  .astro-ring,
+  .astro-sweep,
+  .comet-orbit-group {
+    animation: none !important;
+  }
+}

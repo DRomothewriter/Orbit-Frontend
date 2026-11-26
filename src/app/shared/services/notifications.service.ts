@@ -27,6 +27,12 @@ export class NotificationsService {
     clearNotifications(){
         this.currentNotificationsSubject.next([]);
     }
+    addNotification(notification: INotification) {
+        const current = this.currentNotificationsSubject.value;
+        if (!notification._id || !current.some((n) => n._id === notification._id)) {
+            this.currentNotificationsSubject.next([notification, ...current]);
+        }
+    }
     getMyUnseenNotifications(): Observable<INotification[]> {
         const currentValue = this.currentNotificationsSubject.value;
 
@@ -41,7 +47,9 @@ export class NotificationsService {
             )
             .pipe(
                 tap((notifications) => {
-                    this.currentNotificationsSubject.next(notifications);
+                    this.currentNotificationsSubject.next(
+                        Array.isArray(notifications) ? notifications : []
+                    );
                 })
             );
     }

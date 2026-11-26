@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { HeaderComponent } from './header/header.component';
 import { InputComponent } from './input/input.component';
 import { MessagesComponent } from './messages/messages.component';
@@ -6,6 +6,7 @@ import { ModalsService } from '../../shared/services/modals.service';
 import { GroupInfoModalComponent } from '../../shared/components/modals/group-info-modal/group-info-modal.component';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-chat',
   imports: [HeaderComponent, InputComponent, MessagesComponent, GroupInfoModalComponent],
   templateUrl: './chat.component.html',
